@@ -14,31 +14,8 @@ import {
 import AppHeader from "@/components/layout/AppHeader";
 import RoleSelectionDialog from "@/components/onboarding/RoleSelectionDialog";
 import BookingSessionCard from "@/components/booking/BookingSessionCard";
-
+import { mockBookingSessions } from "@/lib/mockBookingSessions";
 type UserRole = "student" | "teacher" | null;
-
-const bookingSessions = [
-  {
-    id: 1,
-    title: "Handledningen i React",
-    description: "Ett tillfälle för frågor kring React, komponenter och state.",
-    date: "2026-05-24",
-    startTime: "10:00",
-    endTime: "11:00",
-    maxParticipants: 6,
-    bookedParticipants: 3,
-  },
-  {
-    id: 2,
-    title: "Muntlig redovisning",
-    description: "Boka en tid för muntlig redovisning av examensprojektet.",
-    date: "2026-05-25",
-    startTime: "13:00",
-    endTime: "14:00",
-    maxParticipants: 4,
-    bookedParticipants: 4,
-  },
-];
 
 export default function HomePage() {
   const [selectedRole, setSelectedRole] = useState<UserRole>(null);
@@ -137,7 +114,7 @@ export default function HomePage() {
           </Typography>
 
           <Stack spacing={2}>
-            {bookingSessions.map((session) => (
+            {mockBookingSessions.map((session) => (
               <BookingSessionCard
                 key={session.id}
                 title={session.title}
