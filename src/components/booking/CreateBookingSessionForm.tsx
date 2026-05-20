@@ -30,16 +30,60 @@ const initialFormValues: FormValues = {
 
 export default function CreateBookingSessionForm() {
   const [formValues, setFormValues] = useState<FormValues>(initialFormValues);
+  const [formErrors, setFormErrors] = useState<FormErrors>({});
+  type FormErrors = Partial<Record<keyof FormValues, string>>;
 
   const handleChange = (field: keyof FormValues, value: string) => {
     setFormValues((currentValues) => ({
       ...currentValues,
       [field]: value,
     }));
+
+    setFormErrors((currentErrors) => ({
+      ...currentErrors,
+      [field]: undefined,
+    }));
   };
 
+  const validateForm = () => {
+    const errors: FormErrors = {};
+
+    if (!formValues.title.trim()) {
+      errors.title = "Titel krävs";
+    }
+
+    if (!formValues.date) {
+      errors.date = "Datum krävs";
+    }
+
+    if (!formValues.startTime) {
+      errors.startTime = "Starttid krävs";
+    }
+
+    if (!formValues.endTime) {
+      errors.endTime = "Sluttid krävs";
+    }
+
+    if (!formValues.maxParticipants) {
+      errors.maxParticipants = "Max antal deltagare krävs";
+    }
+
+    if (formValues.maxParticipants && Number(formValues.maxParticipants) <= 0) {
+      errors.maxParticipants = "Antalet deltagare måste vara minst 1";
+    }
+
+    setFormErrors(errors);
+
+    return Object.keys(errors).length === 0;
+  };
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    const isValid = validateForm();
+
+    if (!isValid) {
+      return;
+    }
 
     console.log("Formulärdata:", formValues);
   };
@@ -56,6 +100,8 @@ export default function CreateBookingSessionForm() {
           fullWidth
           value={formValues.title}
           onChange={(event) => handleChange("title", event.target.value)}
+          error={Boolean(formErrors.title)}
+          helperText={formErrors.title}
         />
 
         <TextField
@@ -65,6 +111,8 @@ export default function CreateBookingSessionForm() {
           minRows={3}
           value={formValues.description}
           onChange={(event) => handleChange("description", event.target.value)}
+          error={Boolean(formErrors.description)}
+          helperText={formErrors.description}
         />
 
         <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
@@ -79,6 +127,8 @@ export default function CreateBookingSessionForm() {
                 shrink: true,
               },
             }}
+            error={Boolean(formErrors.date)}
+            helperText={formErrors.date}
           />
 
           <TextField
@@ -92,6 +142,8 @@ export default function CreateBookingSessionForm() {
                 shrink: true,
               },
             }}
+            error={Boolean(formErrors.startTime)}
+            helperText={formErrors.startTime}
           />
 
           <TextField
@@ -105,6 +157,8 @@ export default function CreateBookingSessionForm() {
                 shrink: true,
               },
             }}
+            error={Boolean(formErrors.endTime)}
+            helperText={formErrors.endTime}
           />
         </Stack>
 
@@ -116,6 +170,8 @@ export default function CreateBookingSessionForm() {
           onChange={(event) =>
             handleChange("maxParticipants", event.target.value)
           }
+          error={Boolean(formErrors.maxParticipants)}
+          helperText={formErrors.maxParticipants}
         />
 
         <Box>
