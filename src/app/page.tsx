@@ -1,5 +1,5 @@
 "use client";
-
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   Box,
@@ -18,9 +18,10 @@ type UserRole = "student" | "teacher" | null;
 
 export default function HomePage() {
   const [selectedRole, setSelectedRole] = useState<UserRole>(null);
-
+  const router = useRouter();
   const handleSelectRole = (role: "student" | "teacher") => {
     setSelectedRole(role);
+    router.push(`/${role}`);
   };
 
   return (
