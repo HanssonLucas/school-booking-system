@@ -13,8 +13,32 @@ import {
 } from "@mui/material";
 import AppHeader from "@/components/layout/AppHeader";
 import RoleSelectionDialog from "@/components/onboarding/RoleSelectionDialog";
+import BookingSessionCard from "@/components/booking/BookingSessionCard";
 
 type UserRole = "student" | "teacher" | null;
+
+const bookingSessions = [
+  {
+    id: 1,
+    title: "Handledningen i React",
+    description: "Ett tillfälle för frågor kring React, komponenter och state.",
+    date: "2026-05-24",
+    startTime: "10:00",
+    endTime: "11:00",
+    maxParticipants: 6,
+    bookedParticipants: 3,
+  },
+  {
+    id: 2,
+    title: "Muntlig redovisning",
+    description: "Boka en tid för muntlig redovisning av examensprojektet.",
+    date: "2026-05-25",
+    startTime: "13:00",
+    endTime: "14:00",
+    maxParticipants: 4,
+    bookedParticipants: 4,
+  },
+];
 
 export default function HomePage() {
   const [selectedRole, setSelectedRole] = useState<UserRole>(null);
@@ -102,6 +126,31 @@ export default function HomePage() {
             </CardActions>
           </Card>
         </Stack>
+        <Box sx={{ mt: 6 }}>
+          <Typography variant="h4" component="h2" gutterBottom>
+            Kommande bokningstillfällen
+          </Typography>
+
+          <Typography color="text.secondary" sx={{ mb: 3 }}>
+            Här visas en översikt över tillgängliga tider. För att boka eller
+            skapa tider behöver du välja student- eller lärarvy.
+          </Typography>
+
+          <Stack spacing={2}>
+            {bookingSessions.map((session) => (
+              <BookingSessionCard
+                key={session.id}
+                title={session.title}
+                description={session.description}
+                date={session.date}
+                startTime={session.startTime}
+                endTime={session.endTime}
+                maxParticipants={session.maxParticipants}
+                bookedParticipants={session.bookedParticipants}
+              />
+            ))}
+          </Stack>
+        </Box>
       </Container>
     </>
   );
