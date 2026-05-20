@@ -5,9 +5,11 @@ import {
   Button,
   Dialog,
   DialogContent,
+  IconButton,
   Stack,
   Typography,
 } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import SchoolIcon from "@mui/icons-material/School";
 import EditCalendarIcon from "@mui/icons-material/EditCalendar";
 
@@ -15,11 +17,13 @@ type UserRole = "student" | "teacher";
 
 type RoleSelectionDialogProps = {
   open: boolean;
+  onClose: () => void;
   onSelectRole: (role: UserRole) => void;
 };
 
 export default function RoleSelectionDialog({
   open,
+  onClose,
   onSelectRole,
 }: RoleSelectionDialogProps) {
   return (
@@ -27,6 +31,7 @@ export default function RoleSelectionDialog({
       open={open}
       maxWidth="sm"
       fullWidth
+      onClose={onClose}
       slotProps={{
         backdrop: {
           sx: {
@@ -38,12 +43,25 @@ export default function RoleSelectionDialog({
           sx: {
             borderRadius: 4,
             p: { xs: 1, sm: 2 },
+            position: "relative",
           },
         },
       }}
     >
+      <IconButton
+        aria-label="Stäng dialog"
+        onClick={onClose}
+        sx={{
+          position: "absolute",
+          top: 12,
+          right: 12,
+        }}
+      >
+        <CloseIcon />
+      </IconButton>
+
       <DialogContent>
-        <Box sx={{ textAlign: "center", mb: 4 }}>
+        <Box sx={{ textAlign: "center", mb: 4, pt: 3 }}>
           <Typography variant="overline" color="primary">
             Välkommen
           </Typography>
@@ -57,8 +75,8 @@ export default function RoleSelectionDialog({
           </Typography>
 
           <Typography color="text.secondary" sx={{ mt: 2 }}>
-            Välj om du vill fortsätta som student eller lärare. I den första
-            versionen används detta för att visa rätt vy i systemet.
+            Välj om du vill fortsätta som student eller lärare. Du kan också
+            stänga detta och bara titta på översikten.
           </Typography>
         </Box>
 
@@ -95,6 +113,12 @@ export default function RoleSelectionDialog({
             Jag är lärare
           </Button>
         </Stack>
+
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
+          <Button onClick={onClose} sx={{ textTransform: "none" }}>
+            Stäng och visa översikt
+          </Button>
+        </Box>
       </DialogContent>
     </Dialog>
   );

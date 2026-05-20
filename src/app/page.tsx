@@ -18,10 +18,15 @@ type UserRole = "student" | "teacher" | null;
 
 export default function HomePage() {
   const [selectedRole, setSelectedRole] = useState<UserRole>(null);
+  const [isRoleDialogOpen, setIsRoleDialogOpen] = useState(true);
   const router = useRouter();
   const handleSelectRole = (role: "student" | "teacher") => {
     setSelectedRole(role);
+    setIsRoleDialogOpen(false);
     router.push(`/${role}`);
+  };
+  const handleCloseRoleDialog = () => {
+    setIsRoleDialogOpen(false);
   };
 
   return (
@@ -29,7 +34,8 @@ export default function HomePage() {
       <AppHeader />
 
       <RoleSelectionDialog
-        open={selectedRole === null}
+        open={isRoleDialogOpen}
+        onClose={handleCloseRoleDialog}
         onSelectRole={handleSelectRole}
       />
 
