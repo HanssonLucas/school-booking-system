@@ -1,5 +1,7 @@
-import { Container, Typography } from "@mui/material";
+import { Box, Container, Typography } from "@mui/material";
 import AppHeader from "@/components/layout/AppHeader";
+import BookingSessionList from "@/components/booking/BookingSessionList";
+import { mockBookingSessions } from "@/lib/mockBookingSessions";
 
 export default function StudentPage() {
   return (
@@ -7,14 +9,18 @@ export default function StudentPage() {
       <AppHeader />
 
       <Container sx={{ py: 6 }}>
-        <Typography variant="h3" component="h1" gutterBottom>
-          Studentvy
-        </Typography>
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="h3" component="h1" gutterBottom>
+            Studentvy
+          </Typography>
 
-        <Typography color="text.secondary">
-          Här kommer studenter kunna se bokningstillfällen, boka platser och
-          avboka sig.
-        </Typography>
+          <Typography color="text.secondary">
+            Här kan du se kommande bokningstillfällen. Snart kommer du också
+            kunna boka en plats och avboka dig.
+          </Typography>
+        </Box>
+
+        <BookingSessionList sessions={mockBookingSessions} />
       </Container>
     </>
   );
