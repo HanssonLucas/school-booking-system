@@ -1,4 +1,13 @@
-import { Button, Container, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  Container,
+  Stack,
+  Typography,
+} from "@mui/material";
 import AppHeader from "@/components/layout/AppHeader";
 
 export default function HomePage() {
@@ -6,17 +15,53 @@ export default function HomePage() {
     <>
       <AppHeader />
 
-      <Container sx={{ py: 4 }}>
-        <Typography variant="h3" component="h1" gutterBottom>
-          Bokningssystem
-        </Typography>
+      <Container sx={{ py: 6 }}>
+        <Box sx={{ mb: 5 }}>
+          <Typography variant="h3" component="h1" gutterBottom>
+            Bokningssystem
+          </Typography>
 
-        <Typography variant="body1" sx={{ mb: 3 }}>
-          Här ska studenter kunna boka tider för handledning och muntliga
-          redovisningar.
-        </Typography>
+          <Typography variant="body1" color="text.secondary">
+            Ett enkelt system där studenter kan boka tider för handledning och
+            muntliga redovisningar.
+          </Typography>
+        </Box>
 
-        <Button variant="contained">Testa MUI-knapp</Button>
+        <Stack direction={{ xs: "column", md: "row" }} spacing={3}>
+          <Card sx={{ flex: 1 }}>
+            <CardContent>
+              <Typography variant="h5" component="h2" gutterBottom>
+                Student
+              </Typography>
+
+              <Typography variant="body2" color="text.secondary">
+                Se tillgängliga bokningstillfällen, boka en plats och avboka vid
+                behov.
+              </Typography>
+            </CardContent>
+
+            <CardActions>
+              <Button variant="contained">Gå till studentvy</Button>
+            </CardActions>
+          </Card>
+
+          <Card sx={{ flex: 1 }}>
+            <CardContent>
+              <Typography variant="h5" component="h2" gutterBottom>
+                Lärare
+              </Typography>
+
+              <Typography variant="body2" color="text.secondary">
+                Skapa nya bokningstillfällen för handledning eller muntliga
+                redovisningar.
+              </Typography>
+            </CardContent>
+
+            <CardActions>
+              <Button variant="outlined">Gå till lärarvy</Button>
+            </CardActions>
+          </Card>
+        </Stack>
       </Container>
     </>
   );
