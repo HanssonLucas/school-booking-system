@@ -15,6 +15,7 @@ import AppHeader from "@/components/layout/AppHeader";
 import RoleSelectionDialog from "@/components/onboarding/RoleSelectionDialog";
 import BookingSessionCard from "@/components/booking/BookingSessionCard";
 import { mockBookingSessions } from "@/lib/mockBookingSessions";
+import BookingSessionList from "@/components/booking/BookingSessionList";
 type UserRole = "student" | "teacher" | null;
 
 export default function HomePage() {
@@ -114,18 +115,7 @@ export default function HomePage() {
           </Typography>
 
           <Stack spacing={2}>
-            {mockBookingSessions.map((session) => (
-              <BookingSessionCard
-                key={session.id}
-                title={session.title}
-                description={session.description}
-                date={session.date}
-                startTime={session.startTime}
-                endTime={session.endTime}
-                maxParticipants={session.maxParticipants}
-                bookedParticipants={session.bookedParticipants}
-              />
-            ))}
+            <BookingSessionList sessions={mockBookingSessions} />
           </Stack>
         </Box>
       </Container>
