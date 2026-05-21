@@ -17,7 +17,9 @@ type CancelBookingDialogProps = {
   open: boolean;
   sessionTitle?: string;
   onClose: () => void;
-  onSubmit: (studentEmail: string) => Promise<boolean>;
+  onSubmit: (
+    studentEmail: string,
+  ) => Promise<{ success: boolean; message?: string }>;
 };
 
 export default function CancelBookingDialog({
@@ -47,12 +49,14 @@ export default function CancelBookingDialog({
     setIsSubmitting(true);
     setErrorMessage("");
 
-    const wasCancelled = await onSubmit(studentEmail);
+    const result = await onSubmit(studentEmail);
 
     setIsSubmitting(false);
 
-    if (!wasCancelled) {
-      setErrorMessage("Ingen bokning hittades för den emailen.");
+    if (!result.success) {
+      setErrorMessage(
+        result.message ?? "Det gick inte att avboka platsen. Försök igen.",
+      );
       return;
     }
 

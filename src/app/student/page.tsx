@@ -101,7 +101,10 @@ export default function StudentPage() {
 
   const handleSubmitCancellation = async (studentEmail: string) => {
     if (!cancelSessionId) {
-      return false;
+      return {
+        success: false,
+        message: "Inget bokningstillfälle är valt.",
+      };
     }
 
     const response = await fetch("/api/bookings", {
@@ -116,8 +119,12 @@ export default function StudentPage() {
     });
 
     if (!response.ok) {
-      console.error("Kunde inte avboka plats");
-      return false;
+      const errorData = await response.json();
+
+      return {
+        success: false,
+        message: errorData.message ?? "Det gick inte att avboka platsen.",
+      };
     }
 
     setSessions((currentSessions) =>
@@ -135,7 +142,9 @@ export default function StudentPage() {
 
     setCancelSessionId(null);
 
-    return true;
+    return {
+      success: true,
+    };
   };
 
   return (
