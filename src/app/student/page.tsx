@@ -6,6 +6,7 @@ import BookingSessionList from "@/components/booking/BookingSessionList";
 import { useState, useEffect } from "react";
 import type { BookingSession } from "@/types/booking";
 import BookSessionDialog from "@/components/booking/BookSessionDialog";
+import CancelBookingDialog from "@/components/booking/CancelBookingDialog";
 
 export default function StudentPage() {
   const [sessions, setSessions] = useState<BookingSession[]>([]);
@@ -14,6 +15,10 @@ export default function StudentPage() {
   );
   const selectedSession = sessions.find(
     (session) => session.id === selectedSessionId,
+  );
+  const [cancelSessionId, setCancelSessionId] = useState<number | null>(null);
+  const cancelSession = sessions.find(
+    (session) => session.id === cancelSessionId,
   );
   useEffect(() => {
     const fetchSessions = async () => {
@@ -75,22 +80,45 @@ export default function StudentPage() {
     setSelectedSessionId(null);
   };
   const handleCancelBooking = (sessionId: number) => {
+    setCancelSessionId(sessionId);
+  };
+  const handleSubmitCancellation = async (studentEmail: string) => {
+    if (!cancelSessionId) {
+      return false;
+    }
+
+    const response = await fetch("/api/bookings", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        sessionId: cancelSessionId,
+        studentEmail,
+      }),
+    });
+
+    if (!response.ok) {
+      console.error("Kunde inte avboka plats");
+      return false;
+    }
+
     setSessions((currentSessions) =>
       currentSessions.map((session) => {
-        if (session.id !== sessionId) {
-          return session;
-        }
-
-        if (session.bookedParticipants <= 0) {
+        if (session.id !== cancelSessionId) {
           return session;
         }
 
         return {
           ...session,
-          bookedParticipants: session.bookedParticipants - 1,
+          bookedParticipants: Math.max(0, session.bookedParticipants - 1),
         };
       }),
     );
+
+    setCancelSessionId(null);
+
+    return true;
   };
   return (
     <>
@@ -120,6 +148,12 @@ export default function StudentPage() {
           sessionTitle={selectedSession?.title}
           onClose={() => setSelectedSessionId(null)}
           onSubmit={handleSubmitBooking}
+        />
+        <CancelBookingDialog
+          open={cancelSessionId !== null}
+          sessionTitle={cancelSession?.title}
+          onClose={() => setCancelSessionId(null)}
+          onSubmit={handleSubmitCancellation}
         />
       </Container>
     </>
