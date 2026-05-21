@@ -75,7 +75,10 @@ export default function TeacherPage() {
             Här visas tillfällen som läraren har skapat.
           </Typography>
 
-          <BookingSessionList sessions={sessions} />
+          <BookingSessionList
+            sessions={sessions}
+            emptyMessage="Du har inte skapat några bokningstillfällen ännu."
+          />
         </Box>
       </Container>
     </>

@@ -1,4 +1,4 @@
-import { Stack } from "@mui/material";
+import { Paper, Stack, Typography } from "@mui/material";
 import BookingSessionCard from "@/components/booking/BookingSessionCard";
 import type { BookingSession } from "@/types/booking";
 
@@ -8,6 +8,7 @@ type BookingSessionListProps = {
   onBookSession?: (sessionId: number) => void;
   showCancelButton?: boolean;
   onCancelSession?: (sessionId: number) => void;
+  emptyMessage?: string;
 };
 
 export default function BookingSessionList({
@@ -16,7 +17,15 @@ export default function BookingSessionList({
   onBookSession,
   showCancelButton = false,
   onCancelSession,
+  emptyMessage = "Det finns inga bokningstillfällen att visa.",
 }: BookingSessionListProps) {
+  if (sessions.length === 0) {
+    return (
+      <Paper sx={{ p: 3, borderRadius: 3 }}>
+        <Typography color="text.secondary">{emptyMessage}</Typography>
+      </Paper>
+    );
+  }
   return (
     <Stack spacing={2}>
       {sessions.map((session) => (

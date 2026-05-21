@@ -183,6 +183,7 @@ export default function StudentPage() {
           showCancelButton
           onBookSession={handleBookSession}
           onCancelSession={handleCancelBooking}
+          emptyMessage="Det finns inga bokningstillfällen att boka just nu."
         />
       </Container>
     </>
