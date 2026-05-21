@@ -1,9 +1,33 @@
+"use client";
+
 import { Box, Container, Typography } from "@mui/material";
 import AppHeader from "@/components/layout/AppHeader";
 import BookingSessionList from "@/components/booking/BookingSessionList";
 import { mockBookingSessions } from "@/lib/mockBookingSessions";
+import { useState } from "react";
+import type { BookingSession } from "@/types/booking";
 
 export default function StudentPage() {
+  const [sessions, setSessions] =
+    useState<BookingSession[]>(mockBookingSessions);
+  const handleBookSession = (sessionId: number) => {
+    setSessions((currentSessions) =>
+      currentSessions.map((session) => {
+        if (session.id !== sessionId) {
+          return session;
+        }
+
+        if (session.bookedParticipants >= session.maxParticipants) {
+          return session;
+        }
+
+        return {
+          ...session,
+          bookedParticipants: session.bookedParticipants + 1,
+        };
+      }),
+    );
+  };
   return (
     <>
       <AppHeader />
@@ -20,7 +44,11 @@ export default function StudentPage() {
           </Typography>
         </Box>
 
-        <BookingSessionList sessions={mockBookingSessions} />
+        <BookingSessionList
+          sessions={sessions}
+          showBookingButton
+          onBookSession={handleBookSession}
+        />
       </Container>
     </>
   );

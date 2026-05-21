@@ -1,4 +1,13 @@
-import { Box, Card, CardContent, Chip, Stack, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  Chip,
+  Stack,
+  Typography,
+} from "@mui/material";
 
 type BookingSessionCardProps = {
   title: string;
@@ -8,6 +17,8 @@ type BookingSessionCardProps = {
   endTime: string;
   maxParticipants: number;
   bookedParticipants: number;
+  showBookingButton?: boolean;
+  onBook?: () => void;
 };
 
 export default function BookingSessionCard({
@@ -18,6 +29,8 @@ export default function BookingSessionCard({
   endTime,
   maxParticipants,
   bookedParticipants,
+  showBookingButton = false,
+  onBook,
 }: BookingSessionCardProps) {
   const spotsLeft = maxParticipants - bookedParticipants;
   const isFull = spotsLeft === 0;
@@ -50,6 +63,13 @@ export default function BookingSessionCard({
           </Stack>
         </Stack>
       </CardContent>
+      {showBookingButton && (
+        <CardActions sx={{ px: 2, pb: 2 }}>
+          <Button variant="contained" disabled={isFull} onClick={onBook}>
+            {isFull ? "Fullbokad" : "Boka plats"}
+          </Button>
+        </CardActions>
+      )}
     </Card>
   );
 }

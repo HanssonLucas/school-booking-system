@@ -4,10 +4,14 @@ import type { BookingSession } from "@/types/booking";
 
 type BookingSessionListProps = {
   sessions: BookingSession[];
+  showBookingButton?: boolean;
+  onBookSession?: (sessionId: number) => void;
 };
 
 export default function BookingSessionList({
   sessions,
+  showBookingButton = false,
+  onBookSession,
 }: BookingSessionListProps) {
   return (
     <Stack spacing={2}>
@@ -21,6 +25,8 @@ export default function BookingSessionList({
           endTime={session.endTime}
           maxParticipants={session.maxParticipants}
           bookedParticipants={session.bookedParticipants}
+          showBookingButton={showBookingButton}
+          onBook={() => onBookSession?.(session.id)}
         />
       ))}
     </Stack>
