@@ -12,18 +12,22 @@ import type {
 
 export default function TeacherPage() {
   const [sessions, setSessions] = useState<BookingSession[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
     const fetchSessions = async () => {
-      const response = await fetch("/api/booking-sessions");
+      try {
+        const response = await fetch("/api/booking-sessions");
 
-      if (!response.ok) {
-        console.error("Kunde inte hämta bokningstillfällen");
-        return;
+        if (!response.ok) {
+          console.error("Kunde inte hämta bokningstillfällen");
+          return;
+        }
+
+        const data: BookingSession[] = await response.json();
+        setSessions(data);
+      } finally {
+        setIsLoading(false);
       }
-
-      const data: BookingSession[] = await response.json();
-
-      setSessions(data);
     };
 
     fetchSessions();
@@ -75,10 +79,16 @@ export default function TeacherPage() {
             Här visas tillfällen som läraren har skapat.
           </Typography>
 
-          <BookingSessionList
-            sessions={sessions}
-            emptyMessage="Du har inte skapat några bokningstillfällen ännu."
-          />
+          {isLoading ? (
+            <Typography color="text.secondary">
+              Hämtar bokningstillfällen...
+            </Typography>
+          ) : (
+            <BookingSessionList
+              sessions={sessions}
+              emptyMessage="Du har inte skapat några bokningstillfällen ännu."
+            />
+          )}
         </Box>
       </Container>
     </>

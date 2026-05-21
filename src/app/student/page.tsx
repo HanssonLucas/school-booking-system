@@ -10,6 +10,7 @@ import type { BookingSession } from "@/types/booking";
 
 export default function StudentPage() {
   const [sessions, setSessions] = useState<BookingSession[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedSessionId, setSelectedSessionId] = useState<number | null>(
     null,
   );
@@ -25,15 +26,19 @@ export default function StudentPage() {
 
   useEffect(() => {
     const fetchSessions = async () => {
-      const response = await fetch("/api/booking-sessions");
+      try {
+        const response = await fetch("/api/booking-sessions");
 
-      if (!response.ok) {
-        console.error("Kunde inte hämta bokningstillfällen");
-        return;
+        if (!response.ok) {
+          console.error("Kunde inte hämta bokningstillfällen");
+          return;
+        }
+
+        const data: BookingSession[] = await response.json();
+        setSessions(data);
+      } finally {
+        setIsLoading(false);
       }
-
-      const data: BookingSession[] = await response.json();
-      setSessions(data);
     };
 
     fetchSessions();
@@ -177,14 +182,20 @@ export default function StudentPage() {
           </Typography>
         </Box>
 
-        <BookingSessionList
-          sessions={sessions}
-          showBookingButton
-          showCancelButton
-          onBookSession={handleBookSession}
-          onCancelSession={handleCancelBooking}
-          emptyMessage="Det finns inga bokningstillfällen att boka just nu."
-        />
+        {isLoading ? (
+          <Typography color="text.secondary">
+            Hämtar bokningstillfällen...
+          </Typography>
+        ) : (
+          <BookingSessionList
+            sessions={sessions}
+            showBookingButton
+            showCancelButton
+            onBookSession={handleBookSession}
+            onCancelSession={handleCancelBooking}
+            emptyMessage="Det finns inga bokningstillfällen att boka just nu."
+          />
+        )}
       </Container>
     </>
   );
