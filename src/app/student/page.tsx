@@ -5,9 +5,16 @@ import AppHeader from "@/components/layout/AppHeader";
 import BookingSessionList from "@/components/booking/BookingSessionList";
 import { useState, useEffect } from "react";
 import type { BookingSession } from "@/types/booking";
+import BookSessionDialog from "@/components/booking/BookSessionDialog";
 
 export default function StudentPage() {
   const [sessions, setSessions] = useState<BookingSession[]>([]);
+  const [selectedSessionId, setSelectedSessionId] = useState<number | null>(
+    null,
+  );
+  const selectedSession = sessions.find(
+    (session) => session.id === selectedSessionId,
+  );
   useEffect(() => {
     const fetchSessions = async () => {
       const response = await fetch("/api/booking-sessions");
@@ -25,13 +32,36 @@ export default function StudentPage() {
     fetchSessions();
   }, []);
   const handleBookSession = (sessionId: number) => {
+    setSelectedSessionId(sessionId);
+  };
+  const handleSubmitBooking = async (
+    studentName: string,
+    studentEmail: string,
+  ) => {
+    if (!selectedSessionId) {
+      return;
+    }
+
+    const response = await fetch("/api/bookings", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        sessionId: selectedSessionId,
+        studentName,
+        studentEmail,
+      }),
+    });
+
+    if (!response.ok) {
+      console.error("Kunde inte boka plats");
+      return;
+    }
+
     setSessions((currentSessions) =>
       currentSessions.map((session) => {
-        if (session.id !== sessionId) {
-          return session;
-        }
-
-        if (session.bookedParticipants >= session.maxParticipants) {
+        if (session.id !== selectedSessionId) {
           return session;
         }
 
@@ -41,6 +71,8 @@ export default function StudentPage() {
         };
       }),
     );
+
+    setSelectedSessionId(null);
   };
   const handleCancelBooking = (sessionId: number) => {
     setSessions((currentSessions) =>
@@ -82,6 +114,12 @@ export default function StudentPage() {
           showCancelButton
           onBookSession={handleBookSession}
           onCancelSession={handleCancelBooking}
+        />
+        <BookSessionDialog
+          open={selectedSessionId !== null}
+          sessionTitle={selectedSession?.title}
+          onClose={() => setSelectedSessionId(null)}
+          onSubmit={handleSubmitBooking}
         />
       </Container>
     </>
