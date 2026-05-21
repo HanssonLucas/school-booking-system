@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Box, Container, Typography } from "@mui/material";
+import { Alert, Box, Container, Snackbar, Typography } from "@mui/material";
 import AppHeader from "@/components/layout/AppHeader";
 import BookingSessionList from "@/components/booking/BookingSessionList";
 import BookSessionDialog from "@/components/booking/BookSessionDialog";
@@ -11,6 +11,7 @@ import type { BookingSession } from "@/types/booking";
 export default function StudentPage() {
   const [sessions, setSessions] = useState<BookingSession[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [successMessage, setSuccessMessage] = useState("");
   const [selectedSessionId, setSelectedSessionId] = useState<number | null>(
     null,
   );
@@ -94,7 +95,7 @@ export default function StudentPage() {
     );
 
     setSelectedSessionId(null);
-
+    setSuccessMessage("Din plats har bokats.");
     return {
       success: true,
     };
@@ -146,7 +147,7 @@ export default function StudentPage() {
     );
 
     setCancelSessionId(null);
-
+    setSuccessMessage("Din bokning har avbokats.");
     return {
       success: true,
     };
@@ -181,6 +182,20 @@ export default function StudentPage() {
             dig vid behov.
           </Typography>
         </Box>
+        <Snackbar
+          open={Boolean(successMessage)}
+          autoHideDuration={4000}
+          onClose={() => setSuccessMessage("")}
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        >
+          <Alert
+            severity="success"
+            variant="filled"
+            onClose={() => setSuccessMessage("")}
+          >
+            {successMessage}
+          </Alert>
+        </Snackbar>
 
         {isLoading ? (
           <Typography color="text.secondary">
