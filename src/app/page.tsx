@@ -1,6 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -14,11 +14,33 @@ import {
 import AppHeader from "@/components/layout/AppHeader";
 import RoleSelectionDialog from "@/components/onboarding/RoleSelectionDialog";
 import BookingSessionCard from "@/components/booking/BookingSessionCard";
-import { mockBookingSessions } from "@/lib/mockBookingSessions";
+
 import BookingSessionList from "@/components/booking/BookingSessionList";
+import type { BookingSession } from "@/types/booking";
 type UserRole = "student" | "teacher" | null;
 
 export default function HomePage() {
+  const [sessions, setSessions] = useState<BookingSession[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  useEffect(() => {
+    const fetchSessions = async () => {
+      try {
+        const response = await fetch("/api/booking-sessions");
+
+        if (!response.ok) {
+          console.error("Kunde inte hämta bokningstillfällen");
+          return;
+        }
+
+        const data: BookingSession[] = await response.json();
+        setSessions(data);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSessions();
+  }, []);
   const [selectedRole, setSelectedRole] = useState<UserRole>(null);
   const [isRoleDialogOpen, setIsRoleDialogOpen] = useState(true);
   const router = useRouter();
@@ -115,7 +137,16 @@ export default function HomePage() {
           </Typography>
 
           <Stack spacing={2}>
-            <BookingSessionList sessions={mockBookingSessions} />
+            {isLoading ? (
+              <Typography color="text.secondary">
+                Hämtar bokningstillfällen...
+              </Typography>
+            ) : (
+              <BookingSessionList
+                sessions={sessions}
+                emptyMessage="Det finns inga bokningstillfällen att visa just nu."
+              />
+            )}
           </Stack>
         </Box>
       </Container>
