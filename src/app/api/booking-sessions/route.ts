@@ -25,3 +25,52 @@ export async function GET() {
 
   return NextResponse.json(sessions);
 }
+export async function POST(request: Request) {
+  const body = await request.json();
+
+  const { title, description, date, startTime, endTime, maxParticipants } =
+    body;
+
+  if (!title || !date || !startTime || !endTime || !maxParticipants) {
+    return NextResponse.json(
+      { message: "Obligatoriska fält saknas" },
+      { status: 400 },
+    );
+  }
+
+  const result = db
+    .prepare(
+      `
+      INSERT INTO booking_sessions (
+        title,
+        description,
+        date,
+        start_time,
+        end_time,
+        max_participants
+      )
+      VALUES (?, ?, ?, ?, ?, ?)
+      `,
+    )
+    .run(title, description ?? "", date, startTime, endTime, maxParticipants);
+
+  const newSession = db
+    .prepare(
+      `
+      SELECT
+        id,
+        title,
+        description,
+        date,
+        start_time AS startTime,
+        end_time AS endTime,
+        max_participants AS maxParticipants,
+        0 AS bookedParticipants
+      FROM booking_sessions
+      WHERE id = ?
+      `,
+    )
+    .get(result.lastInsertRowid);
+
+  return NextResponse.json(newSession, { status: 201 });
+}
