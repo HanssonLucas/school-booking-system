@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import {
+  Alert,
   Button,
   Dialog,
   DialogActions,
@@ -16,7 +17,7 @@ type BookSessionDialogProps = {
   open: boolean;
   sessionTitle?: string;
   onClose: () => void;
-  onSubmit: (studentName: string, studentEmail: string) => Promise<void>;
+  onSubmit: (studentName: string, studentEmail: string) => Promise<boolean>;
 };
 
 export default function BookSessionDialog({
@@ -27,20 +28,31 @@ export default function BookSessionDialog({
 }: BookSessionDialogProps) {
   const [studentName, setStudentName] = useState("");
   const [studentEmail, setStudentEmail] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (!studentName.trim() || !studentEmail.trim()) {
+      setErrorMessage("Namn och email krävs");
       return;
     }
 
     setIsSubmitting(true);
+    setErrorMessage("");
 
-    await onSubmit(studentName, studentEmail);
+    const wasBooked = await onSubmit(studentName, studentEmail);
 
     setIsSubmitting(false);
+
+    if (!wasBooked) {
+      setErrorMessage(
+        "Det gick inte att boka platsen. Tillfället kan vara fullbokat.",
+      );
+      return;
+    }
+
     setStudentName("");
     setStudentEmail("");
   };
@@ -61,7 +73,7 @@ export default function BookSessionDialog({
               Du bokar en plats på: <strong>{sessionTitle}</strong>
             </Typography>
           )}
-
+          {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
           <TextField
             label="Namn"
             fullWidth

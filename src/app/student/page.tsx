@@ -44,7 +44,7 @@ export default function StudentPage() {
     studentEmail: string,
   ) => {
     if (!selectedSessionId) {
-      return;
+      return false;
     }
 
     const response = await fetch("/api/bookings", {
@@ -61,7 +61,7 @@ export default function StudentPage() {
 
     if (!response.ok) {
       console.error("Kunde inte boka plats");
-      return;
+      return false;
     }
 
     setSessions((currentSessions) =>
@@ -78,6 +78,8 @@ export default function StudentPage() {
     );
 
     setSelectedSessionId(null);
+
+    return true;
   };
   const handleCancelBooking = (sessionId: number) => {
     setCancelSessionId(sessionId);
