@@ -3,13 +3,27 @@
 import { Box, Container, Typography } from "@mui/material";
 import AppHeader from "@/components/layout/AppHeader";
 import BookingSessionList from "@/components/booking/BookingSessionList";
-import { mockBookingSessions } from "@/lib/mockBookingSessions";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { BookingSession } from "@/types/booking";
 
 export default function StudentPage() {
-  const [sessions, setSessions] =
-    useState<BookingSession[]>(mockBookingSessions);
+  const [sessions, setSessions] = useState<BookingSession[]>([]);
+  useEffect(() => {
+    const fetchSessions = async () => {
+      const response = await fetch("/api/booking-sessions");
+
+      if (!response.ok) {
+        console.error("Kunde inte hämta bokningstillfällen");
+        return;
+      }
+
+      const data: BookingSession[] = await response.json();
+
+      setSessions(data);
+    };
+
+    fetchSessions();
+  }, []);
   const handleBookSession = (sessionId: number) => {
     setSessions((currentSessions) =>
       currentSessions.map((session) => {
