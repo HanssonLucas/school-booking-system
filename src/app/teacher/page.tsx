@@ -15,14 +15,23 @@ export default function TeacherPage() {
   const [sessions, setSessions] =
     useState<BookingSession[]>(mockBookingSessions);
 
-  const handleCreateSession = (newSession: CreateBookingSessionInput) => {
-    const session: BookingSession = {
-      id: Date.now(),
-      ...newSession,
-      bookedParticipants: 0,
-    };
+  const handleCreateSession = async (newSession: CreateBookingSessionInput) => {
+    const response = await fetch("/api/booking-sessions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(newSession),
+    });
 
-    setSessions((currentSessions) => [session, ...currentSessions]);
+    if (!response.ok) {
+      console.error("Kunde inte skapa bokningstillfälle");
+      return;
+    }
+
+    const createdSession: BookingSession = await response.json();
+
+    setSessions((currentSessions) => [createdSession, ...currentSessions]);
   };
 
   return (
