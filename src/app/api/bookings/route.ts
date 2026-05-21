@@ -31,6 +31,23 @@ export async function POST(request: Request) {
       { status: 404 },
     );
   }
+  const existingBooking = db
+    .prepare(
+      `
+    SELECT id
+    FROM bookings
+    WHERE session_id = ?
+      AND student_email = ?
+    `,
+    )
+    .get(sessionId, studentEmail) as { id: number } | undefined;
+
+  if (existingBooking) {
+    return NextResponse.json(
+      { message: "Den här emailen är redan bokad på tillfället" },
+      { status: 409 },
+    );
+  }
 
   const bookingCount = db
     .prepare(
