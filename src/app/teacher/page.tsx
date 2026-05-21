@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Box, Container, Typography } from "@mui/material";
 import AppHeader from "@/components/layout/AppHeader";
 import CreateBookingSessionForm from "@/components/booking/CreateBookingSessionForm";
@@ -12,6 +12,22 @@ import type {
 
 export default function TeacherPage() {
   const [sessions, setSessions] = useState<BookingSession[]>([]);
+  useEffect(() => {
+    const fetchSessions = async () => {
+      const response = await fetch("/api/booking-sessions");
+
+      if (!response.ok) {
+        console.error("Kunde inte hämta bokningstillfällen");
+        return;
+      }
+
+      const data: BookingSession[] = await response.json();
+
+      setSessions(data);
+    };
+
+    fetchSessions();
+  }, []);
 
   const handleCreateSession = async (newSession: CreateBookingSessionInput) => {
     const response = await fetch("/api/booking-sessions", {
