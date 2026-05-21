@@ -17,7 +17,10 @@ type BookSessionDialogProps = {
   open: boolean;
   sessionTitle?: string;
   onClose: () => void;
-  onSubmit: (studentName: string, studentEmail: string) => Promise<boolean>;
+  onSubmit: (
+    studentName: string,
+    studentEmail: string,
+  ) => Promise<{ success: boolean; message?: string }>;
 };
 
 export default function BookSessionDialog({
@@ -42,13 +45,13 @@ export default function BookSessionDialog({
     setIsSubmitting(true);
     setErrorMessage("");
 
-    const wasBooked = await onSubmit(studentName, studentEmail);
+    const result = await onSubmit(studentName, studentEmail);
 
     setIsSubmitting(false);
 
-    if (!wasBooked) {
+    if (!result.success) {
       setErrorMessage(
-        "Det gick inte att boka platsen. Tillfället kan vara fullbokat.",
+        result.message ?? "Det gick inte att boka platsen. Försök igen.",
       );
       return;
     }
