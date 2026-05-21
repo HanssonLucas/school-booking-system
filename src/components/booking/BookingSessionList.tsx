@@ -6,12 +6,16 @@ type BookingSessionListProps = {
   sessions: BookingSession[];
   showBookingButton?: boolean;
   onBookSession?: (sessionId: number) => void;
+  showCancelButton?: boolean;
+  onCancelSession?: (sessionId: number) => void;
 };
 
 export default function BookingSessionList({
   sessions,
   showBookingButton = false,
   onBookSession,
+  showCancelButton = false,
+  onCancelSession,
 }: BookingSessionListProps) {
   return (
     <Stack spacing={2}>
@@ -27,6 +31,8 @@ export default function BookingSessionList({
           bookedParticipants={session.bookedParticipants}
           showBookingButton={showBookingButton}
           onBook={() => onBookSession?.(session.id)}
+          showCancelButton={showCancelButton}
+          onCancel={() => onCancelSession?.(session.id)}
         />
       ))}
     </Stack>

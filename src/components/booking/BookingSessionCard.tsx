@@ -19,6 +19,8 @@ type BookingSessionCardProps = {
   bookedParticipants: number;
   showBookingButton?: boolean;
   onBook?: () => void;
+  showCancelButton?: boolean;
+  onCancel?: () => void;
 };
 
 export default function BookingSessionCard({
@@ -31,6 +33,8 @@ export default function BookingSessionCard({
   bookedParticipants,
   showBookingButton = false,
   onBook,
+  showCancelButton = false,
+  onCancel,
 }: BookingSessionCardProps) {
   const spotsLeft = maxParticipants - bookedParticipants;
   const isFull = spotsLeft === 0;
@@ -63,11 +67,24 @@ export default function BookingSessionCard({
           </Stack>
         </Stack>
       </CardContent>
-      {showBookingButton && (
-        <CardActions sx={{ px: 2, pb: 2 }}>
-          <Button variant="contained" disabled={isFull} onClick={onBook}>
-            {isFull ? "Fullbokad" : "Boka plats"}
-          </Button>
+      {(showBookingButton || showCancelButton) && (
+        <CardActions sx={{ px: 2, pb: 2, gap: 1 }}>
+          {showBookingButton && (
+            <Button variant="contained" disabled={isFull} onClick={onBook}>
+              {isFull ? "Fullbokad" : "Boka plats"}
+            </Button>
+          )}
+
+          {showCancelButton && (
+            <Button
+              variant="outlined"
+              color="error"
+              disabled={bookedParticipants === 0}
+              onClick={onCancel}
+            >
+              Avboka plats
+            </Button>
+          )}
         </CardActions>
       )}
     </Card>

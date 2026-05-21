@@ -28,6 +28,24 @@ export default function StudentPage() {
       }),
     );
   };
+  const handleCancelBooking = (sessionId: number) => {
+    setSessions((currentSessions) =>
+      currentSessions.map((session) => {
+        if (session.id !== sessionId) {
+          return session;
+        }
+
+        if (session.bookedParticipants <= 0) {
+          return session;
+        }
+
+        return {
+          ...session,
+          bookedParticipants: session.bookedParticipants - 1,
+        };
+      }),
+    );
+  };
   return (
     <>
       <AppHeader />
@@ -47,7 +65,9 @@ export default function StudentPage() {
         <BookingSessionList
           sessions={sessions}
           showBookingButton
+          showCancelButton
           onBookSession={handleBookSession}
+          onCancelSession={handleCancelBooking}
         />
       </Container>
     </>
