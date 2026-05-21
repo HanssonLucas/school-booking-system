@@ -5,15 +5,13 @@ import { Box, Container, Typography } from "@mui/material";
 import AppHeader from "@/components/layout/AppHeader";
 import CreateBookingSessionForm from "@/components/booking/CreateBookingSessionForm";
 import BookingSessionList from "@/components/booking/BookingSessionList";
-import { mockBookingSessions } from "@/lib/mockBookingSessions";
 import type {
   BookingSession,
   CreateBookingSessionInput,
 } from "@/types/booking";
 
 export default function TeacherPage() {
-  const [sessions, setSessions] =
-    useState<BookingSession[]>(mockBookingSessions);
+  const [sessions, setSessions] = useState<BookingSession[]>([]);
 
   const handleCreateSession = async (newSession: CreateBookingSessionInput) => {
     const response = await fetch("/api/booking-sessions", {
