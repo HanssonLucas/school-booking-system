@@ -79,3 +79,46 @@ export async function POST(request: Request) {
 
   return NextResponse.json(booking, { status: 201 });
 }
+
+export async function DELETE(request: Request) {
+  const body = await request.json();
+
+  const { sessionId, studentEmail } = body;
+
+  if (!sessionId || !studentEmail) {
+    return NextResponse.json(
+      { message: "Session och email krävs" },
+      { status: 400 },
+    );
+  }
+
+  const existingBooking = db
+    .prepare(
+      `
+      SELECT id
+      FROM bookings
+      WHERE session_id = ?
+        AND student_email = ?
+      `,
+    )
+    .get(sessionId, studentEmail) as { id: number } | undefined;
+
+  if (!existingBooking) {
+    return NextResponse.json(
+      { message: "Ingen bokning hittades för den emailen" },
+      { status: 404 },
+    );
+  }
+
+  db.prepare(
+    `
+    DELETE FROM bookings
+    WHERE id = ?
+    `,
+  ).run(existingBooking.id);
+
+  return NextResponse.json({
+    message: "Bokningen har avbokats",
+    bookingId: existingBooking.id,
+  });
+}
