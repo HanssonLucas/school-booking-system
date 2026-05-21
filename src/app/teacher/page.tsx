@@ -1,8 +1,30 @@
+"use client";
+
+import { useState } from "react";
 import { Box, Container, Typography } from "@mui/material";
 import AppHeader from "@/components/layout/AppHeader";
 import CreateBookingSessionForm from "@/components/booking/CreateBookingSessionForm";
+import BookingSessionList from "@/components/booking/BookingSessionList";
+import { mockBookingSessions } from "@/lib/mockBookingSessions";
+import type {
+  BookingSession,
+  CreateBookingSessionInput,
+} from "@/types/booking";
 
 export default function TeacherPage() {
+  const [sessions, setSessions] =
+    useState<BookingSession[]>(mockBookingSessions);
+
+  const handleCreateSession = (newSession: CreateBookingSessionInput) => {
+    const session: BookingSession = {
+      id: Date.now(),
+      ...newSession,
+      bookedParticipants: 0,
+    };
+
+    setSessions((currentSessions) => [session, ...currentSessions]);
+  };
+
   return (
     <>
       <AppHeader />
@@ -19,7 +41,19 @@ export default function TeacherPage() {
           </Typography>
         </Box>
 
-        <CreateBookingSessionForm />
+        <CreateBookingSessionForm onCreateSession={handleCreateSession} />
+
+        <Box sx={{ mt: 6 }}>
+          <Typography variant="h4" component="h2" gutterBottom>
+            Bokningstillfällen
+          </Typography>
+
+          <Typography color="text.secondary" sx={{ mb: 3 }}>
+            Här visas tillfällen som läraren har skapat.
+          </Typography>
+
+          <BookingSessionList sessions={sessions} />
+        </Box>
       </Container>
     </>
   );

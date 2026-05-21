@@ -9,7 +9,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-
+import type { CreateBookingSessionInput } from "@/types/booking";
 type FormValues = {
   title: string;
   description: string;
@@ -18,7 +18,9 @@ type FormValues = {
   endTime: string;
   maxParticipants: string;
 };
-
+type CreateBookingSessionFormProps = {
+  onCreateSession: (session: CreateBookingSessionInput) => void;
+};
 const initialFormValues: FormValues = {
   title: "",
   description: "",
@@ -28,7 +30,9 @@ const initialFormValues: FormValues = {
   maxParticipants: "",
 };
 
-export default function CreateBookingSessionForm() {
+export default function CreateBookingSessionForm({
+  onCreateSession,
+}: CreateBookingSessionFormProps) {
   const [formValues, setFormValues] = useState<FormValues>(initialFormValues);
   const [formErrors, setFormErrors] = useState<FormErrors>({});
   type FormErrors = Partial<Record<keyof FormValues, string>>;
@@ -85,7 +89,16 @@ export default function CreateBookingSessionForm() {
       return;
     }
 
-    console.log("Formulärdata:", formValues);
+    onCreateSession({
+      title: formValues.title,
+      description: formValues.description,
+      date: formValues.date,
+      startTime: formValues.startTime,
+      endTime: formValues.endTime,
+      maxParticipants: Number(formValues.maxParticipants),
+    });
+
+    setFormValues(initialFormValues);
   };
 
   return (

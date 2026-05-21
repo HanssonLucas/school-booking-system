@@ -8,3 +8,12 @@ export type BookingSession = {
   maxParticipants: number;
   bookedParticipants: number;
 };
+
+export type CreateBookingSessionInput = {
+  title: string;
+  description: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  maxParticipants: number;
+};
