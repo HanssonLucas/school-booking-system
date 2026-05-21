@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Box, Container, Typography } from "@mui/material";
+import { Alert, Box, Container, Snackbar, Typography } from "@mui/material";
 import AppHeader from "@/components/layout/AppHeader";
 import CreateBookingSessionForm from "@/components/booking/CreateBookingSessionForm";
 import BookingSessionList from "@/components/booking/BookingSessionList";
@@ -13,6 +13,7 @@ import type {
 export default function TeacherPage() {
   const [sessions, setSessions] = useState<BookingSession[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [successMessage, setSuccessMessage] = useState("");
   useEffect(() => {
     const fetchSessions = async () => {
       try {
@@ -50,11 +51,26 @@ export default function TeacherPage() {
     const createdSession: BookingSession = await response.json();
 
     setSessions((currentSessions) => [createdSession, ...currentSessions]);
+    setSuccessMessage("Bokningstillfället har skapats.");
   };
 
   return (
     <>
       <AppHeader />
+      <Snackbar
+        open={Boolean(successMessage)}
+        autoHideDuration={4000}
+        onClose={() => setSuccessMessage("")}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          severity="success"
+          variant="filled"
+          onClose={() => setSuccessMessage("")}
+        >
+          {successMessage}
+        </Alert>
+      </Snackbar>
 
       <Container sx={{ py: 6 }}>
         <Box sx={{ mb: 4 }}>
@@ -90,6 +106,20 @@ export default function TeacherPage() {
             />
           )}
         </Box>
+        <Snackbar
+          open={Boolean(successMessage)}
+          autoHideDuration={4000}
+          onClose={() => setSuccessMessage("")}
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        >
+          <Alert
+            severity="success"
+            variant="filled"
+            onClose={() => setSuccessMessage("")}
+          >
+            {successMessage}
+          </Alert>
+        </Snackbar>
       </Container>
     </>
   );
