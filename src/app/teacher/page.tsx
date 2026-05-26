@@ -14,15 +14,43 @@ export default function TeacherPage() {
   const [sessions, setSessions] = useState<BookingSession[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
   useEffect(() => {
     const fetchSessions = async () => {
       try {
         const response = await fetch("/api/booking-sessions");
 
-        if (!response.ok) {
-          console.error("Kunde inte hämta bokningstillfällen");
-          return;
-        }
+        const handleCreateSession = async (
+          newSession: CreateBookingSessionInput,
+        ) => {
+          const response = await fetch("/api/booking-sessions", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(newSession),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+
+            setErrorMessage(
+              errorData.message ??
+                "Det gick inte att skapa bokningstillfället.",
+            );
+
+            return;
+          }
+
+          const createdSession: BookingSession = await response.json();
+
+          setSessions((currentSessions) => [
+            createdSession,
+            ...currentSessions,
+          ]);
+          setErrorMessage("");
+          setSuccessMessage("Bokningstillfället har skapats.");
+        };
 
         const data: BookingSession[] = await response.json();
         setSessions(data);
@@ -118,6 +146,20 @@ export default function TeacherPage() {
             onClose={() => setSuccessMessage("")}
           >
             {successMessage}
+          </Alert>
+        </Snackbar>
+        <Snackbar
+          open={Boolean(errorMessage)}
+          autoHideDuration={5000}
+          onClose={() => setErrorMessage("")}
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        >
+          <Alert
+            severity="error"
+            variant="filled"
+            onClose={() => setErrorMessage("")}
+          >
+            {errorMessage}
           </Alert>
         </Snackbar>
       </Container>
