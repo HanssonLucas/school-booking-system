@@ -81,6 +81,17 @@ export const translations = {
       cancelButton: "Avboka plats",
       of: "av",
     },
+    bookSessionDialog: {
+      title: "Boka plats",
+      bookingFor: "Du bokar en plats på:",
+      nameLabel: "Namn",
+      emailLabel: "Email",
+      cancelButton: "Avbryt",
+      submitButton: "Boka plats",
+      submittingButton: "Bokar...",
+      requiredError: "Namn och email krävs",
+      fallbackError: "Det gick inte att boka platsen. Försök igen.",
+    },
   },
   en: {
     common: {
@@ -162,6 +173,17 @@ export const translations = {
       bookButton: "Book place",
       cancelButton: "Cancel booking",
       of: "of",
+    },
+    bookSessionDialog: {
+      title: "Book place",
+      bookingFor: "You are booking a place for:",
+      nameLabel: "Name",
+      emailLabel: "Email",
+      cancelButton: "Cancel",
+      submitButton: "Book place",
+      submittingButton: "Booking...",
+      requiredError: "Name and email are required",
+      fallbackError: "The place could not be booked. Please try again.",
     },
   },
 } as const;

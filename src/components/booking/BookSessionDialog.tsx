@@ -12,6 +12,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { useTranslations } from "@/i18n/useTranslations";
 
 type BookSessionDialogProps = {
   open: boolean;
@@ -34,11 +35,13 @@ export default function BookSessionDialog({
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const { t } = useTranslations();
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (!studentName.trim() || !studentEmail.trim()) {
-      setErrorMessage("Namn och email krävs");
+      setErrorMessage(t.bookSessionDialog.requiredError);
       return;
     }
 
@@ -50,9 +53,7 @@ export default function BookSessionDialog({
     setIsSubmitting(false);
 
     if (!result.success) {
-      setErrorMessage(
-        result.message ?? "Det gick inte att boka platsen. Försök igen.",
-      );
+      setErrorMessage(result.message ?? t.bookSessionDialog.fallbackError);
       return;
     }
 
@@ -62,7 +63,7 @@ export default function BookSessionDialog({
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Boka plats</DialogTitle>
+      <DialogTitle>{t.bookSessionDialog.title}</DialogTitle>
 
       <DialogContent>
         <Stack
@@ -73,19 +74,21 @@ export default function BookSessionDialog({
         >
           {sessionTitle && (
             <Typography color="text.secondary">
-              Du bokar en plats på: <strong>{sessionTitle}</strong>
+              {t.bookSessionDialog.bookingFor} <strong>{sessionTitle}</strong>
             </Typography>
           )}
+
           {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
+
           <TextField
-            label="Namn"
+            label={t.bookSessionDialog.nameLabel}
             fullWidth
             value={studentName}
             onChange={(event) => setStudentName(event.target.value)}
           />
 
           <TextField
-            label="Email"
+            label={t.bookSessionDialog.emailLabel}
             type="email"
             fullWidth
             value={studentEmail}
@@ -94,11 +97,13 @@ export default function BookSessionDialog({
 
           <DialogActions sx={{ px: 0 }}>
             <Button onClick={onClose} disabled={isSubmitting}>
-              Avbryt
+              {t.bookSessionDialog.cancelButton}
             </Button>
 
             <Button variant="contained" type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Bokar..." : "Boka plats"}
+              {isSubmitting
+                ? t.bookSessionDialog.submittingButton
+                : t.bookSessionDialog.submitButton}
             </Button>
           </DialogActions>
         </Stack>
