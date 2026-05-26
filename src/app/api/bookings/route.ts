@@ -99,7 +99,7 @@ export async function DELETE(request: Request) {
 
   if (!sessionId || !studentEmail) {
     return NextResponse.json(
-      { message: "Session och email krävs" },
+      { code: "MISSING_CANCELLATION_FIELDS" },
       { status: 400 },
     );
   }
@@ -116,10 +116,7 @@ export async function DELETE(request: Request) {
     .get(sessionId, studentEmail) as { id: number } | undefined;
 
   if (!existingBooking) {
-    return NextResponse.json(
-      { message: "Ingen bokning hittades för den emailen" },
-      { status: 404 },
-    );
+    return NextResponse.json({ code: "BOOKING_NOT_FOUND" }, { status: 404 });
   }
 
   db.prepare(
@@ -130,7 +127,6 @@ export async function DELETE(request: Request) {
   ).run(existingBooking.id);
 
   return NextResponse.json({
-    message: "Bokningen har avbokats",
     bookingId: existingBooking.id,
   });
 }
