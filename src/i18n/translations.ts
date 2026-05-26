@@ -25,6 +25,16 @@ export const translations = {
       loadingSessions: "Hämtar bokningstillfällen...",
       emptySessions: "Det finns inga bokningstillfällen att visa just nu.",
     },
+    onboarding: {
+      welcome: "Välkommen",
+      title: "Hur vill du använda systemet?",
+      description:
+        "Välj om du vill fortsätta som student eller lärare. Du kan också stänga detta och bara titta på översikten.",
+      studentButton: "Jag är student",
+      teacherButton: "Jag är lärare",
+      closeAndViewOverview: "Stäng och visa översikt",
+      closeDialog: "Stäng dialog",
+    },
   },
   en: {
     common: {
@@ -49,6 +59,16 @@ export const translations = {
         "Here you can see an overview of available sessions. To book or create sessions, choose the student or teacher view.",
       loadingSessions: "Loading booking sessions...",
       emptySessions: "There are no booking sessions to show right now.",
+    },
+    onboarding: {
+      welcome: "Welcome",
+      title: "How do you want to use the system?",
+      description:
+        "Choose whether you want to continue as a student or teacher. You can also close this and just view the overview.",
+      studentButton: "I am a student",
+      teacherButton: "I am a teacher",
+      closeAndViewOverview: "Close and view overview",
+      closeDialog: "Close dialog",
     },
   },
 } as const;

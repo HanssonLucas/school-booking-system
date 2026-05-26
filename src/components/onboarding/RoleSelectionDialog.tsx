@@ -12,6 +12,7 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import SchoolIcon from "@mui/icons-material/School";
 import EditCalendarIcon from "@mui/icons-material/EditCalendar";
+import { useTranslations } from "@/i18n/useTranslations";
 
 type UserRole = "student" | "teacher";
 
@@ -26,6 +27,8 @@ export default function RoleSelectionDialog({
   onClose,
   onSelectRole,
 }: RoleSelectionDialogProps) {
+  const { t } = useTranslations();
+
   return (
     <Dialog
       open={open}
@@ -49,7 +52,7 @@ export default function RoleSelectionDialog({
       }}
     >
       <IconButton
-        aria-label="Stäng dialog"
+        aria-label={t.onboarding.closeDialog}
         onClick={onClose}
         sx={{
           position: "absolute",
@@ -63,7 +66,7 @@ export default function RoleSelectionDialog({
       <DialogContent>
         <Box sx={{ textAlign: "center", mb: 4, pt: 3 }}>
           <Typography variant="overline" color="primary">
-            Välkommen
+            {t.onboarding.welcome}
           </Typography>
 
           <Typography
@@ -71,12 +74,11 @@ export default function RoleSelectionDialog({
             component="h1"
             sx={{ fontWeight: 700, mt: 1 }}
           >
-            Hur vill du använda systemet?
+            {t.onboarding.title}
           </Typography>
 
           <Typography color="text.secondary" sx={{ mt: 2 }}>
-            Välj om du vill fortsätta som student eller lärare. Du kan också
-            stänga detta och bara titta på översikten.
+            {t.onboarding.description}
           </Typography>
         </Box>
 
@@ -94,7 +96,7 @@ export default function RoleSelectionDialog({
               fontSize: "1rem",
             }}
           >
-            Jag är student
+            {t.onboarding.studentButton}
           </Button>
 
           <Button
@@ -110,13 +112,13 @@ export default function RoleSelectionDialog({
               fontSize: "1rem",
             }}
           >
-            Jag är lärare
+            {t.onboarding.teacherButton}
           </Button>
         </Stack>
 
         <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
           <Button onClick={onClose} sx={{ textTransform: "none" }}>
-            Stäng och visa översikt
+            {t.onboarding.closeAndViewOverview}
           </Button>
         </Box>
       </DialogContent>
