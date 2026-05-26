@@ -34,22 +34,8 @@ export default function StudentPage() {
         const response = await fetch("/api/booking-sessions");
 
         if (!response.ok) {
-          const errorData = await response.json();
-
-          const errorMessages: Record<string, string> = {
-            MISSING_BOOKING_FIELDS: t.errors.missingBookingFields,
-            SESSION_NOT_FOUND: t.errors.sessionNotFound,
-            BOOKING_ALREADY_EXISTS: t.errors.bookingAlreadyExists,
-            SESSION_FULL: t.errors.sessionFull,
-          };
-
-          return {
-            success: false,
-            message:
-              errorMessages[errorData.code] ??
-              t.student.bookingFallbackError ??
-              t.errors.unknown,
-          };
+          console.error("Kunde inte hämta bokningstillfällen");
+          return;
         }
 
         const data: BookingSession[] = await response.json();
@@ -92,9 +78,19 @@ export default function StudentPage() {
     if (!response.ok) {
       const errorData = await response.json();
 
+      const errorMessages: Record<string, string> = {
+        MISSING_BOOKING_FIELDS: t.errors.missingBookingFields,
+        SESSION_NOT_FOUND: t.errors.sessionNotFound,
+        BOOKING_ALREADY_EXISTS: t.errors.bookingAlreadyExists,
+        SESSION_FULL: t.errors.sessionFull,
+      };
+
       return {
         success: false,
-        message: errorData.message ?? t.student.bookingFallbackError,
+        message:
+          errorMessages[errorData.code] ??
+          t.student.bookingFallbackError ??
+          t.errors.unknown,
       };
     }
 
@@ -145,9 +141,17 @@ export default function StudentPage() {
     if (!response.ok) {
       const errorData = await response.json();
 
+      const errorMessages: Record<string, string> = {
+        MISSING_CANCELLATION_FIELDS: t.errors.missingCancellationFields,
+        BOOKING_NOT_FOUND: t.errors.bookingNotFound,
+      };
+
       return {
         success: false,
-        message: errorData.message ?? t.student.cancellationFallbackError,
+        message:
+          errorMessages[errorData.code] ??
+          t.student.cancellationFallbackError ??
+          t.errors.unknown,
       };
     }
 
