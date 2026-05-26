@@ -8,7 +8,7 @@ export async function POST(request: Request) {
 
   if (!sessionId || !studentName || !studentEmail) {
     return NextResponse.json(
-      { message: "Session, namn och email krävs" },
+      { code: "MISSING_BOOKING_FIELDS" },
       { status: 400 },
     );
   }
@@ -26,25 +26,23 @@ export async function POST(request: Request) {
     .get(sessionId) as { id: number; maxParticipants: number } | undefined;
 
   if (!session) {
-    return NextResponse.json(
-      { message: "Bokningstillfället finns inte" },
-      { status: 404 },
-    );
+    return NextResponse.json({ code: "SESSION_NOT_FOUND" }, { status: 404 });
   }
+
   const existingBooking = db
     .prepare(
       `
-    SELECT id
-    FROM bookings
-    WHERE session_id = ?
-      AND student_email = ?
-    `,
+      SELECT id
+      FROM bookings
+      WHERE session_id = ?
+        AND student_email = ?
+      `,
     )
     .get(sessionId, studentEmail) as { id: number } | undefined;
 
   if (existingBooking) {
     return NextResponse.json(
-      { message: "Den här emailen är redan bokad på tillfället" },
+      { code: "BOOKING_ALREADY_EXISTS" },
       { status: 409 },
     );
   }
@@ -60,10 +58,7 @@ export async function POST(request: Request) {
     .get(sessionId) as { count: number };
 
   if (bookingCount.count >= session.maxParticipants) {
-    return NextResponse.json(
-      { message: "Bokningstillfället är fullbokat" },
-      { status: 409 },
-    );
+    return NextResponse.json({ code: "SESSION_FULL" }, { status: 409 });
   }
 
   const result = db
