@@ -103,6 +103,13 @@ export const translations = {
       requiredError: "Email krävs",
       fallbackError: "Det gick inte att avboka platsen. Försök igen.",
     },
+    errors: {
+      missingBookingFields: "Namn och email krävs.",
+      sessionNotFound: "Bokningstillfället finns inte längre.",
+      bookingAlreadyExists: "Den här emailen är redan bokad på tillfället.",
+      sessionFull: "Bokningstillfället är fullbokat.",
+      unknown: "Något gick fel. Försök igen.",
+    },
   },
   en: {
     common: {
@@ -206,6 +213,13 @@ export const translations = {
       submittingButton: "Cancelling...",
       requiredError: "Email is required",
       fallbackError: "The booking could not be cancelled. Please try again.",
+    },
+    errors: {
+      missingBookingFields: "Name and email are required.",
+      sessionNotFound: "The booking session no longer exists.",
+      bookingAlreadyExists: "This email is already booked for this session.",
+      sessionFull: "The booking session is fully booked.",
+      unknown: "Something went wrong. Please try again.",
     },
   },
 } as const;

@@ -34,8 +34,22 @@ export default function StudentPage() {
         const response = await fetch("/api/booking-sessions");
 
         if (!response.ok) {
-          console.error("Kunde inte hämta bokningstillfällen");
-          return;
+          const errorData = await response.json();
+
+          const errorMessages: Record<string, string> = {
+            MISSING_BOOKING_FIELDS: t.errors.missingBookingFields,
+            SESSION_NOT_FOUND: t.errors.sessionNotFound,
+            BOOKING_ALREADY_EXISTS: t.errors.bookingAlreadyExists,
+            SESSION_FULL: t.errors.sessionFull,
+          };
+
+          return {
+            success: false,
+            message:
+              errorMessages[errorData.code] ??
+              t.student.bookingFallbackError ??
+              t.errors.unknown,
+          };
         }
 
         const data: BookingSession[] = await response.json();
