@@ -1,4 +1,5 @@
 "use client";
+
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
@@ -13,15 +14,21 @@ import {
 } from "@mui/material";
 import AppHeader from "@/components/layout/AppHeader";
 import RoleSelectionDialog from "@/components/onboarding/RoleSelectionDialog";
-import BookingSessionCard from "@/components/booking/BookingSessionCard";
-
 import BookingSessionList from "@/components/booking/BookingSessionList";
+import { useTranslations } from "@/i18n/useTranslations";
 import type { BookingSession } from "@/types/booking";
+
 type UserRole = "student" | "teacher" | null;
 
 export default function HomePage() {
   const [sessions, setSessions] = useState<BookingSession[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedRole, setSelectedRole] = useState<UserRole>(null);
+  const [isRoleDialogOpen, setIsRoleDialogOpen] = useState(true);
+
+  const router = useRouter();
+  const { t } = useTranslations();
+
   useEffect(() => {
     const fetchSessions = async () => {
       try {
@@ -41,14 +48,13 @@ export default function HomePage() {
 
     fetchSessions();
   }, []);
-  const [selectedRole, setSelectedRole] = useState<UserRole>(null);
-  const [isRoleDialogOpen, setIsRoleDialogOpen] = useState(true);
-  const router = useRouter();
+
   const handleSelectRole = (role: "student" | "teacher") => {
     setSelectedRole(role);
     setIsRoleDialogOpen(false);
     router.push(`/${role}`);
   };
+
   const handleCloseRoleDialog = () => {
     setIsRoleDialogOpen(false);
   };
@@ -66,17 +72,17 @@ export default function HomePage() {
       <Container sx={{ py: 6 }}>
         <Box sx={{ mb: 5 }}>
           <Typography variant="h3" component="h1" gutterBottom>
-            Bokningssystem
+            {t.home.title}
           </Typography>
 
           <Typography variant="body1" color="text.secondary">
-            Ett enkelt system där studenter kan boka tider för handledning och
-            muntliga redovisningar.
+            {t.home.description}
           </Typography>
 
           {selectedRole && (
             <Typography sx={{ mt: 2 }} color="text.secondary">
-              Vald vy: {selectedRole === "student" ? "Student" : "Lärare"}
+              {t.home.selectedView}{" "}
+              {selectedRole === "student" ? t.common.student : t.common.teacher}
             </Typography>
           )}
         </Box>
@@ -85,12 +91,11 @@ export default function HomePage() {
           <Card sx={{ flex: 1 }}>
             <CardContent>
               <Typography variant="h5" component="h2" gutterBottom>
-                Student
+                {t.common.student}
               </Typography>
 
               <Typography variant="body2" color="text.secondary">
-                Se tillgängliga bokningstillfällen, boka en plats och avboka vid
-                behov.
+                {t.home.studentCardDescription}
               </Typography>
             </CardContent>
 
@@ -99,7 +104,7 @@ export default function HomePage() {
                 variant="contained"
                 onClick={() => handleSelectRole("student")}
               >
-                Gå till studentvy
+                {t.home.goToStudentView}
               </Button>
             </CardActions>
           </Card>
@@ -107,12 +112,11 @@ export default function HomePage() {
           <Card sx={{ flex: 1 }}>
             <CardContent>
               <Typography variant="h5" component="h2" gutterBottom>
-                Lärare
+                {t.common.teacher}
               </Typography>
 
               <Typography variant="body2" color="text.secondary">
-                Skapa nya bokningstillfällen för handledning eller muntliga
-                redovisningar.
+                {t.home.teacherCardDescription}
               </Typography>
             </CardContent>
 
@@ -121,33 +125,31 @@ export default function HomePage() {
                 variant="outlined"
                 onClick={() => handleSelectRole("teacher")}
               >
-                Gå till lärarvy
+                {t.home.goToTeacherView}
               </Button>
             </CardActions>
           </Card>
         </Stack>
+
         <Box sx={{ mt: 6 }}>
           <Typography variant="h4" component="h2" gutterBottom>
-            Kommande bokningstillfällen
+            {t.home.upcomingSessionsTitle}
           </Typography>
 
           <Typography color="text.secondary" sx={{ mb: 3 }}>
-            Här visas en översikt över tillgängliga tider. För att boka eller
-            skapa tider behöver du välja student- eller lärarvy.
+            {t.home.upcomingSessionsDescription}
           </Typography>
 
-          <Stack spacing={2}>
-            {isLoading ? (
-              <Typography color="text.secondary">
-                Hämtar bokningstillfällen...
-              </Typography>
-            ) : (
-              <BookingSessionList
-                sessions={sessions}
-                emptyMessage="Det finns inga bokningstillfällen att visa just nu."
-              />
-            )}
-          </Stack>
+          {isLoading ? (
+            <Typography color="text.secondary">
+              {t.home.loadingSessions}
+            </Typography>
+          ) : (
+            <BookingSessionList
+              sessions={sessions}
+              emptyMessage={t.home.emptySessions}
+            />
+          )}
         </Box>
       </Container>
     </>
