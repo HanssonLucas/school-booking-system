@@ -7,6 +7,7 @@ import BookingSessionList from "@/components/booking/BookingSessionList";
 import BookSessionDialog from "@/components/booking/BookSessionDialog";
 import CancelBookingDialog from "@/components/booking/CancelBookingDialog";
 import type { BookingSession } from "@/types/booking";
+import { useTranslations } from "@/i18n/useTranslations";
 
 export default function StudentPage() {
   const [sessions, setSessions] = useState<BookingSession[]>([]);
@@ -16,6 +17,8 @@ export default function StudentPage() {
     null,
   );
   const [cancelSessionId, setCancelSessionId] = useState<number | null>(null);
+
+  const { t } = useTranslations();
 
   const selectedSession = sessions.find(
     (session) => session.id === selectedSessionId,
@@ -56,7 +59,7 @@ export default function StudentPage() {
     if (!selectedSessionId) {
       return {
         success: false,
-        message: "Inget bokningstillfälle är valt.",
+        message: t.student.noSelectedSession,
       };
     }
 
@@ -77,7 +80,7 @@ export default function StudentPage() {
 
       return {
         success: false,
-        message: errorData.message ?? "Det gick inte att boka platsen.",
+        message: errorData.message ?? t.student.bookingFallbackError,
       };
     }
 
@@ -95,7 +98,8 @@ export default function StudentPage() {
     );
 
     setSelectedSessionId(null);
-    setSuccessMessage("Din plats har bokats.");
+    setSuccessMessage(t.student.bookingSuccess);
+
     return {
       success: true,
     };
@@ -109,7 +113,7 @@ export default function StudentPage() {
     if (!cancelSessionId) {
       return {
         success: false,
-        message: "Inget bokningstillfälle är valt.",
+        message: t.student.noSelectedSession,
       };
     }
 
@@ -129,7 +133,7 @@ export default function StudentPage() {
 
       return {
         success: false,
-        message: errorData.message ?? "Det gick inte att avboka platsen.",
+        message: errorData.message ?? t.student.cancellationFallbackError,
       };
     }
 
@@ -147,7 +151,8 @@ export default function StudentPage() {
     );
 
     setCancelSessionId(null);
-    setSuccessMessage("Din bokning har avbokats.");
+    setSuccessMessage(t.student.cancellationSuccess);
+
     return {
       success: true,
     };
@@ -174,14 +179,14 @@ export default function StudentPage() {
       <Container sx={{ py: 6 }}>
         <Box sx={{ mb: 4 }}>
           <Typography variant="h3" component="h1" gutterBottom>
-            Studentvy
+            {t.student.title}
           </Typography>
 
           <Typography color="text.secondary">
-            Här kan du se kommande bokningstillfällen, boka en plats och avboka
-            dig vid behov.
+            {t.student.description}
           </Typography>
         </Box>
+
         <Snackbar
           open={Boolean(successMessage)}
           autoHideDuration={4000}
@@ -199,7 +204,7 @@ export default function StudentPage() {
 
         {isLoading ? (
           <Typography color="text.secondary">
-            Hämtar bokningstillfällen...
+            {t.student.loadingSessions}
           </Typography>
         ) : (
           <BookingSessionList
@@ -208,7 +213,7 @@ export default function StudentPage() {
             showCancelButton
             onBookSession={handleBookSession}
             onCancelSession={handleCancelBooking}
-            emptyMessage="Det finns inga bokningstillfällen att boka just nu."
+            emptyMessage={t.student.emptySessions}
           />
         )}
       </Container>

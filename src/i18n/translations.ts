@@ -35,6 +35,18 @@ export const translations = {
       closeAndViewOverview: "Stäng och visa översikt",
       closeDialog: "Stäng dialog",
     },
+    student: {
+      title: "Studentvy",
+      description:
+        "Här kan du se kommande bokningstillfällen, boka en plats och avboka dig vid behov.",
+      loadingSessions: "Hämtar bokningstillfällen...",
+      emptySessions: "Det finns inga bokningstillfällen att boka just nu.",
+      bookingSuccess: "Din plats har bokats.",
+      cancellationSuccess: "Din bokning har avbokats.",
+      noSelectedSession: "Inget bokningstillfälle är valt.",
+      bookingFallbackError: "Det gick inte att boka platsen.",
+      cancellationFallbackError: "Det gick inte att avboka platsen.",
+    },
   },
   en: {
     common: {
@@ -69,6 +81,18 @@ export const translations = {
       teacherButton: "I am a teacher",
       closeAndViewOverview: "Close and view overview",
       closeDialog: "Close dialog",
+    },
+    student: {
+      title: "Student view",
+      description:
+        "Here you can see upcoming booking sessions, book a place and cancel if needed.",
+      loadingSessions: "Loading booking sessions...",
+      emptySessions: "There are no booking sessions to book right now.",
+      bookingSuccess: "Your place has been booked.",
+      cancellationSuccess: "Your booking has been cancelled.",
+      noSelectedSession: "No booking session is selected.",
+      bookingFallbackError: "The place could not be booked.",
+      cancellationFallbackError: "The booking could not be cancelled.",
     },
   },
 } as const;
