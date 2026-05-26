@@ -92,6 +92,17 @@ export const translations = {
       requiredError: "Namn och email krävs",
       fallbackError: "Det gick inte att boka platsen. Försök igen.",
     },
+    cancelBookingDialog: {
+      title: "Avboka plats",
+      cancellingFor: "Du avbokar en plats från:",
+      description: "Skriv in den email som användes vid bokningen.",
+      emailLabel: "Email",
+      cancelButton: "Avbryt",
+      submitButton: "Avboka plats",
+      submittingButton: "Avbokar...",
+      requiredError: "Email krävs",
+      fallbackError: "Det gick inte att avboka platsen. Försök igen.",
+    },
   },
   en: {
     common: {
@@ -184,6 +195,17 @@ export const translations = {
       submittingButton: "Booking...",
       requiredError: "Name and email are required",
       fallbackError: "The place could not be booked. Please try again.",
+    },
+    cancelBookingDialog: {
+      title: "Cancel booking",
+      cancellingFor: "You are cancelling a place from:",
+      description: "Enter the email that was used when booking.",
+      emailLabel: "Email",
+      cancelButton: "Cancel",
+      submitButton: "Cancel booking",
+      submittingButton: "Cancelling...",
+      requiredError: "Email is required",
+      fallbackError: "The booking could not be cancelled. Please try again.",
     },
   },
 } as const;

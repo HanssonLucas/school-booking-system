@@ -12,6 +12,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { useTranslations } from "@/i18n/useTranslations";
 
 type CancelBookingDialogProps = {
   open: boolean;
@@ -32,6 +33,8 @@ export default function CancelBookingDialog({
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const { t } = useTranslations();
+
   const handleClose = () => {
     setStudentEmail("");
     setErrorMessage("");
@@ -42,7 +45,7 @@ export default function CancelBookingDialog({
     event.preventDefault();
 
     if (!studentEmail.trim()) {
-      setErrorMessage("Email krävs");
+      setErrorMessage(t.cancelBookingDialog.requiredError);
       return;
     }
 
@@ -54,9 +57,7 @@ export default function CancelBookingDialog({
     setIsSubmitting(false);
 
     if (!result.success) {
-      setErrorMessage(
-        result.message ?? "Det gick inte att avboka platsen. Försök igen.",
-      );
+      setErrorMessage(result.message ?? t.cancelBookingDialog.fallbackError);
       return;
     }
 
@@ -65,7 +66,7 @@ export default function CancelBookingDialog({
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Avboka plats</DialogTitle>
+      <DialogTitle>{t.cancelBookingDialog.title}</DialogTitle>
 
       <DialogContent>
         <Stack
@@ -76,18 +77,19 @@ export default function CancelBookingDialog({
         >
           {sessionTitle && (
             <Typography color="text.secondary">
-              Du avbokar en plats från: <strong>{sessionTitle}</strong>
+              {t.cancelBookingDialog.cancellingFor}{" "}
+              <strong>{sessionTitle}</strong>
             </Typography>
           )}
 
           <Typography color="text.secondary">
-            Skriv in den email som användes vid bokningen.
+            {t.cancelBookingDialog.description}
           </Typography>
 
           {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
 
           <TextField
-            label="Email"
+            label={t.cancelBookingDialog.emailLabel}
             type="email"
             fullWidth
             value={studentEmail}
@@ -96,7 +98,7 @@ export default function CancelBookingDialog({
 
           <DialogActions sx={{ px: 0 }}>
             <Button onClick={handleClose} disabled={isSubmitting}>
-              Avbryt
+              {t.cancelBookingDialog.cancelButton}
             </Button>
 
             <Button
@@ -105,7 +107,9 @@ export default function CancelBookingDialog({
               type="submit"
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Avbokar..." : "Avboka plats"}
+              {isSubmitting
+                ? t.cancelBookingDialog.submittingButton
+                : t.cancelBookingDialog.submitButton}
             </Button>
           </DialogActions>
         </Stack>
