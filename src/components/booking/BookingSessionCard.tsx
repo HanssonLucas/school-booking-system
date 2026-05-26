@@ -8,6 +8,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import { useTranslations } from "@/i18n/useTranslations";
 
 type BookingSessionCardProps = {
   title: string;
@@ -36,6 +37,8 @@ export default function BookingSessionCard({
   showCancelButton = false,
   onCancel,
 }: BookingSessionCardProps) {
+  const { t } = useTranslations();
+
   const spotsLeft = maxParticipants - bookedParticipants;
   const isFull = spotsLeft === 0;
 
@@ -60,18 +63,19 @@ export default function BookingSessionCard({
               color={isFull ? "error" : "success"}
               label={
                 isFull
-                  ? "Fullbokad"
-                  : `${spotsLeft} av ${maxParticipants} platser kvar`
+                  ? t.bookingSession.full
+                  : `${spotsLeft} ${t.bookingSession.of} ${maxParticipants} ${t.bookingSession.spotsLeft}`
               }
             />
           </Stack>
         </Stack>
       </CardContent>
+
       {(showBookingButton || showCancelButton) && (
         <CardActions sx={{ px: 2, pb: 2, gap: 1 }}>
           {showBookingButton && (
             <Button variant="contained" disabled={isFull} onClick={onBook}>
-              {isFull ? "Fullbokad" : "Boka plats"}
+              {isFull ? t.bookingSession.full : t.bookingSession.bookButton}
             </Button>
           )}
 
@@ -82,7 +86,7 @@ export default function BookingSessionCard({
               disabled={bookedParticipants === 0}
               onClick={onCancel}
             >
-              Avboka plats
+              {t.bookingSession.cancelButton}
             </Button>
           )}
         </CardActions>

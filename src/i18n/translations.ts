@@ -74,6 +74,13 @@ export const translations = {
       maxParticipantsRequired: "Max antal deltagare krävs",
       maxParticipantsMin: "Antalet deltagare måste vara minst 1",
     },
+    bookingSession: {
+      full: "Fullbokad",
+      spotsLeft: "platser kvar",
+      bookButton: "Boka plats",
+      cancelButton: "Avboka plats",
+      of: "av",
+    },
   },
   en: {
     common: {
@@ -148,6 +155,13 @@ export const translations = {
       endTimeRequired: "End time is required",
       maxParticipantsRequired: "Maximum number of participants is required",
       maxParticipantsMin: "The number of participants must be at least 1",
+    },
+    bookingSession: {
+      full: "Fully booked",
+      spotsLeft: "spots left",
+      bookButton: "Book place",
+      cancelButton: "Cancel booking",
+      of: "of",
     },
   },
 } as const;
