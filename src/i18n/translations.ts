@@ -47,6 +47,17 @@ export const translations = {
       bookingFallbackError: "Det gick inte att boka platsen.",
       cancellationFallbackError: "Det gick inte att avboka platsen.",
     },
+    teacher: {
+      title: "Lärarvy",
+      description:
+        "Här kan lärare skapa bokningstillfällen för handledning och muntliga redovisningar.",
+      sessionsTitle: "Bokningstillfällen",
+      sessionsDescription: "Här visas tillfällen som läraren har skapat.",
+      loadingSessions: "Hämtar bokningstillfällen...",
+      emptySessions: "Du har inte skapat några bokningstillfällen ännu.",
+      createSuccess: "Bokningstillfället har skapats.",
+      createFallbackError: "Det gick inte att skapa bokningstillfället.",
+    },
   },
   en: {
     common: {
@@ -93,6 +104,18 @@ export const translations = {
       noSelectedSession: "No booking session is selected.",
       bookingFallbackError: "The place could not be booked.",
       cancellationFallbackError: "The booking could not be cancelled.",
+    },
+    teacher: {
+      title: "Teacher view",
+      description:
+        "Here teachers can create booking sessions for supervision and oral presentations.",
+      sessionsTitle: "Booking sessions",
+      sessionsDescription:
+        "Here you can see the sessions created by the teacher.",
+      loadingSessions: "Loading booking sessions...",
+      emptySessions: "You have not created any booking sessions yet.",
+      createSuccess: "The booking session has been created.",
+      createFallbackError: "The booking session could not be created.",
     },
   },
 } as const;

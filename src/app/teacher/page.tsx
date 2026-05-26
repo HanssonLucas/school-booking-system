@@ -5,6 +5,7 @@ import { Alert, Box, Container, Snackbar, Typography } from "@mui/material";
 import AppHeader from "@/components/layout/AppHeader";
 import CreateBookingSessionForm from "@/components/booking/CreateBookingSessionForm";
 import BookingSessionList from "@/components/booking/BookingSessionList";
+import { useTranslations } from "@/i18n/useTranslations";
 import type {
   BookingSession,
   CreateBookingSessionInput,
@@ -15,42 +16,18 @@ export default function TeacherPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+
+  const { t } = useTranslations();
+
   useEffect(() => {
     const fetchSessions = async () => {
       try {
         const response = await fetch("/api/booking-sessions");
 
-        const handleCreateSession = async (
-          newSession: CreateBookingSessionInput,
-        ) => {
-          const response = await fetch("/api/booking-sessions", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(newSession),
-          });
-
-          if (!response.ok) {
-            const errorData = await response.json();
-
-            setErrorMessage(
-              errorData.message ??
-                "Det gick inte att skapa bokningstillfället.",
-            );
-
-            return;
-          }
-
-          const createdSession: BookingSession = await response.json();
-
-          setSessions((currentSessions) => [
-            createdSession,
-            ...currentSessions,
-          ]);
-          setErrorMessage("");
-          setSuccessMessage("Bokningstillfället har skapats.");
-        };
+        if (!response.ok) {
+          console.error("Kunde inte hämta bokningstillfällen");
+          return;
+        }
 
         const data: BookingSession[] = await response.json();
         setSessions(data);
@@ -72,19 +49,24 @@ export default function TeacherPage() {
     });
 
     if (!response.ok) {
-      console.error("Kunde inte skapa bokningstillfälle");
+      const errorData = await response.json();
+
+      setErrorMessage(errorData.message ?? t.teacher.createFallbackError);
+
       return;
     }
 
     const createdSession: BookingSession = await response.json();
 
     setSessions((currentSessions) => [createdSession, ...currentSessions]);
-    setSuccessMessage("Bokningstillfället har skapats.");
+    setErrorMessage("");
+    setSuccessMessage(t.teacher.createSuccess);
   };
 
   return (
     <>
       <AppHeader />
+
       <Snackbar
         open={Boolean(successMessage)}
         autoHideDuration={4000}
@@ -100,15 +82,29 @@ export default function TeacherPage() {
         </Alert>
       </Snackbar>
 
+      <Snackbar
+        open={Boolean(errorMessage)}
+        autoHideDuration={5000}
+        onClose={() => setErrorMessage("")}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          severity="error"
+          variant="filled"
+          onClose={() => setErrorMessage("")}
+        >
+          {errorMessage}
+        </Alert>
+      </Snackbar>
+
       <Container sx={{ py: 6 }}>
         <Box sx={{ mb: 4 }}>
           <Typography variant="h3" component="h1" gutterBottom>
-            Lärarvy
+            {t.teacher.title}
           </Typography>
 
           <Typography color="text.secondary">
-            Här kan lärare skapa bokningstillfällen för handledning och muntliga
-            redovisningar.
+            {t.teacher.description}
           </Typography>
         </Box>
 
@@ -116,52 +112,24 @@ export default function TeacherPage() {
 
         <Box sx={{ mt: 6 }}>
           <Typography variant="h4" component="h2" gutterBottom>
-            Bokningstillfällen
+            {t.teacher.sessionsTitle}
           </Typography>
 
           <Typography color="text.secondary" sx={{ mb: 3 }}>
-            Här visas tillfällen som läraren har skapat.
+            {t.teacher.sessionsDescription}
           </Typography>
 
           {isLoading ? (
             <Typography color="text.secondary">
-              Hämtar bokningstillfällen...
+              {t.teacher.loadingSessions}
             </Typography>
           ) : (
             <BookingSessionList
               sessions={sessions}
-              emptyMessage="Du har inte skapat några bokningstillfällen ännu."
+              emptyMessage={t.teacher.emptySessions}
             />
           )}
         </Box>
-        <Snackbar
-          open={Boolean(successMessage)}
-          autoHideDuration={4000}
-          onClose={() => setSuccessMessage("")}
-          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        >
-          <Alert
-            severity="success"
-            variant="filled"
-            onClose={() => setSuccessMessage("")}
-          >
-            {successMessage}
-          </Alert>
-        </Snackbar>
-        <Snackbar
-          open={Boolean(errorMessage)}
-          autoHideDuration={5000}
-          onClose={() => setErrorMessage("")}
-          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        >
-          <Alert
-            severity="error"
-            variant="filled"
-            onClose={() => setErrorMessage("")}
-          >
-            {errorMessage}
-          </Alert>
-        </Snackbar>
       </Container>
     </>
   );
