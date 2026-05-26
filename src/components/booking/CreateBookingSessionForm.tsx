@@ -10,6 +10,8 @@ import {
   Typography,
 } from "@mui/material";
 import type { CreateBookingSessionInput } from "@/types/booking";
+import { useTranslations } from "@/i18n/useTranslations";
+
 type FormValues = {
   title: string;
   description: string;
@@ -18,9 +20,13 @@ type FormValues = {
   endTime: string;
   maxParticipants: string;
 };
+
+type FormErrors = Partial<Record<keyof FormValues, string>>;
+
 type CreateBookingSessionFormProps = {
   onCreateSession: (session: CreateBookingSessionInput) => void;
 };
+
 const initialFormValues: FormValues = {
   title: "",
   description: "",
@@ -35,7 +41,8 @@ export default function CreateBookingSessionForm({
 }: CreateBookingSessionFormProps) {
   const [formValues, setFormValues] = useState<FormValues>(initialFormValues);
   const [formErrors, setFormErrors] = useState<FormErrors>({});
-  type FormErrors = Partial<Record<keyof FormValues, string>>;
+
+  const { t } = useTranslations();
 
   const handleChange = (field: keyof FormValues, value: string) => {
     setFormValues((currentValues) => ({
@@ -53,33 +60,34 @@ export default function CreateBookingSessionForm({
     const errors: FormErrors = {};
 
     if (!formValues.title.trim()) {
-      errors.title = "Titel krävs";
+      errors.title = t.createSessionForm.titleRequired;
     }
 
     if (!formValues.date) {
-      errors.date = "Datum krävs";
+      errors.date = t.createSessionForm.dateRequired;
     }
 
     if (!formValues.startTime) {
-      errors.startTime = "Starttid krävs";
+      errors.startTime = t.createSessionForm.startTimeRequired;
     }
 
     if (!formValues.endTime) {
-      errors.endTime = "Sluttid krävs";
+      errors.endTime = t.createSessionForm.endTimeRequired;
     }
 
     if (!formValues.maxParticipants) {
-      errors.maxParticipants = "Max antal deltagare krävs";
+      errors.maxParticipants = t.createSessionForm.maxParticipantsRequired;
     }
 
     if (formValues.maxParticipants && Number(formValues.maxParticipants) <= 0) {
-      errors.maxParticipants = "Antalet deltagare måste vara minst 1";
+      errors.maxParticipants = t.createSessionForm.maxParticipantsMin;
     }
 
     setFormErrors(errors);
 
     return Object.keys(errors).length === 0;
   };
+
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -104,12 +112,12 @@ export default function CreateBookingSessionForm({
   return (
     <Paper sx={{ p: 3, borderRadius: 3 }}>
       <Typography variant="h5" component="h2" gutterBottom>
-        Skapa bokningstillfälle
+        {t.createSessionForm.title}
       </Typography>
 
       <Stack spacing={3} component="form" onSubmit={handleSubmit}>
         <TextField
-          label="Titel"
+          label={t.createSessionForm.titleLabel}
           fullWidth
           value={formValues.title}
           onChange={(event) => handleChange("title", event.target.value)}
@@ -118,7 +126,7 @@ export default function CreateBookingSessionForm({
         />
 
         <TextField
-          label="Beskrivning"
+          label={t.createSessionForm.descriptionLabel}
           fullWidth
           multiline
           minRows={3}
@@ -130,7 +138,7 @@ export default function CreateBookingSessionForm({
 
         <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
           <TextField
-            label="Datum"
+            label={t.createSessionForm.dateLabel}
             type="date"
             fullWidth
             value={formValues.date}
@@ -145,7 +153,7 @@ export default function CreateBookingSessionForm({
           />
 
           <TextField
-            label="Starttid"
+            label={t.createSessionForm.startTimeLabel}
             type="time"
             fullWidth
             value={formValues.startTime}
@@ -160,7 +168,7 @@ export default function CreateBookingSessionForm({
           />
 
           <TextField
-            label="Sluttid"
+            label={t.createSessionForm.endTimeLabel}
             type="time"
             fullWidth
             value={formValues.endTime}
@@ -176,7 +184,7 @@ export default function CreateBookingSessionForm({
         </Stack>
 
         <TextField
-          label="Max antal deltagare"
+          label={t.createSessionForm.maxParticipantsLabel}
           type="number"
           fullWidth
           value={formValues.maxParticipants}
@@ -189,7 +197,7 @@ export default function CreateBookingSessionForm({
 
         <Box>
           <Button variant="contained" type="submit">
-            Skapa tillfälle
+            {t.createSessionForm.submitButton}
           </Button>
         </Box>
       </Stack>
