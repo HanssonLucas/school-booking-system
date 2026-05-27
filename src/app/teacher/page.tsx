@@ -17,6 +17,10 @@ export default function TeacherPage() {
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
+  const handleEditSession = (sessionId: number) => {
+    console.log("Redigera tillfälle:", sessionId);
+  };
+
   const { t } = useTranslations();
 
   useEffect(() => {
@@ -134,6 +138,8 @@ export default function TeacherPage() {
           ) : (
             <BookingSessionList
               sessions={sessions}
+              showEditButton
+              onEditSession={handleEditSession}
               emptyMessage={t.teacher.emptySessions}
             />
           )}

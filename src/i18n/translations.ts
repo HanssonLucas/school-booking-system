@@ -83,6 +83,7 @@ export const translations = {
       spotsLeft: "platser kvar",
       bookButton: "Boka plats",
       cancelButton: "Avboka plats",
+      editButton: "Redigera",
       of: "av",
     },
     bookSessionDialog: {
@@ -201,6 +202,7 @@ export const translations = {
       spotsLeft: "spots left",
       bookButton: "Book place",
       cancelButton: "Cancel booking",
+      editButton: "Edit",
       of: "of",
     },
     bookSessionDialog: {

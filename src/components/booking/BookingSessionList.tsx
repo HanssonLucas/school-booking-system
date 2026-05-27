@@ -8,6 +8,8 @@ type BookingSessionListProps = {
   onBookSession?: (sessionId: number) => void;
   showCancelButton?: boolean;
   onCancelSession?: (sessionId: number) => void;
+  showEditButton?: boolean;
+  onEditSession?: (sessionId: number) => void;
   emptyMessage?: string;
 };
 
@@ -17,6 +19,8 @@ export default function BookingSessionList({
   onBookSession,
   showCancelButton = false,
   onCancelSession,
+  showEditButton = false,
+  onEditSession,
   emptyMessage = "Det finns inga bokningstillfällen att visa.",
 }: BookingSessionListProps) {
   if (sessions.length === 0) {
@@ -42,6 +46,8 @@ export default function BookingSessionList({
           onBook={() => onBookSession?.(session.id)}
           showCancelButton={showCancelButton}
           onCancel={() => onCancelSession?.(session.id)}
+          showEditButton={showEditButton}
+          onEdit={() => onEditSession?.(session.id)}
         />
       ))}
     </Stack>
