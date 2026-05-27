@@ -94,6 +94,11 @@ export default function StudentPage() {
       };
     }
 
+    const bookingResult: {
+      slotStartTime?: string;
+      slotEndTime?: string;
+    } = await response.json();
+
     setSessions((currentSessions) =>
       currentSessions.map((session) => {
         if (session.id !== selectedSessionId) {
@@ -108,7 +113,13 @@ export default function StudentPage() {
     );
 
     setSelectedSessionId(null);
-    setSuccessMessage(t.student.bookingSuccess);
+    if (bookingResult.slotStartTime && bookingResult.slotEndTime) {
+      setSuccessMessage(
+        `${t.student.bookingSuccessWithTime} ${bookingResult.slotStartTime}–${bookingResult.slotEndTime}`,
+      );
+    } else {
+      setSuccessMessage(t.student.bookingSuccess);
+    }
 
     return {
       success: true,
