@@ -41,12 +41,25 @@ export default function AppHeader() {
           <Button color="inherit" onClick={() => router.push("/teacher")}>
             {t.common.teacher}
           </Button>
-          <IconButton color="inherit" onClick={toggleColorMode}>
+          <IconButton
+            color="inherit"
+            onClick={toggleColorMode}
+            aria-label={
+              mode === "light"
+                ? t.common.switchToDarkMode
+                : t.common.switchToLightMode
+            }
+          >
             {mode === "light" ? <DarkModeIcon /> : <LightModeIcon />}
           </IconButton>
 
           <Button
             color="inherit"
+            aria-label={
+              language === "sv"
+                ? t.common.switchToEnglish
+                : t.common.switchToSwedish
+            }
             onClick={() => setLanguage(language === "sv" ? "en" : "sv")}
           >
             {language === "sv" ? "EN" : "SV"}

@@ -7,6 +7,10 @@ export const translations = {
       student: "Student",
       teacher: "Lärare",
       close: "Stäng",
+      switchToEnglish: "Byt till engelska",
+      switchToSwedish: "Byt till svenska",
+      switchToDarkMode: "Byt till mörkt läge",
+      switchToLightMode: "Byt till ljust läge",
     },
     home: {
       title: "Bokningssystem",
@@ -120,6 +124,10 @@ export const translations = {
       student: "Student",
       teacher: "Teacher",
       close: "Close",
+      switchToEnglish: "Switch to English",
+      switchToSwedish: "Switch to Swedish",
+      switchToDarkMode: "Switch to dark mode",
+      switchToLightMode: "Switch to light mode",
     },
     home: {
       title: "Booking system",
