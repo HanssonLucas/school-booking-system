@@ -1,59 +1,118 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { getSlotTime } from "@/lib/BookingSlots";
+import { getSlotTime } from "@/lib/bookingSlots";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const sessionId = Number(searchParams.get("sessionId"));
+  const studentEmail = searchParams.get("studentEmail");
 
-  if (!sessionId) {
-    return NextResponse.json({ code: "MISSING_SESSION_ID" }, { status: 400 });
+  if (sessionId) {
+    const session = db
+      .prepare(
+        `
+        SELECT
+          id,
+          start_time AS startTime
+        FROM booking_sessions
+        WHERE id = ?
+        `,
+      )
+      .get(sessionId) as { id: number; startTime: string } | undefined;
+
+    if (!session) {
+      return NextResponse.json({ code: "SESSION_NOT_FOUND" }, { status: 404 });
+    }
+
+    const bookings = db
+      .prepare(
+        `
+        SELECT
+          id,
+          session_id AS sessionId,
+          student_name AS studentName,
+          student_email AS studentEmail,
+          created_at AS createdAt
+        FROM bookings
+        WHERE session_id = ?
+        ORDER BY created_at ASC, id ASC
+        `,
+      )
+      .all(sessionId) as {
+      id: number;
+      sessionId: number;
+      studentName: string;
+      studentEmail: string;
+      createdAt: string;
+    }[];
+
+    const bookingsWithSlotTimes = bookings.map((booking, index) => ({
+      ...booking,
+      ...getSlotTime(session.startTime, index),
+    }));
+
+    return NextResponse.json(bookingsWithSlotTimes);
   }
 
-  const session = db
-    .prepare(
-      `
-      SELECT
-        id,
-        start_time AS startTime
-      FROM booking_sessions
-      WHERE id = ?
-      `,
-    )
-    .get(sessionId) as { id: number; startTime: string } | undefined;
+  if (studentEmail) {
+    const bookings = db
+      .prepare(
+        `
+        SELECT
+          bookings.id,
+          bookings.session_id AS sessionId,
+          bookings.student_name AS studentName,
+          bookings.student_email AS studentEmail,
+          bookings.created_at AS createdAt,
+          booking_sessions.title AS sessionTitle,
+          booking_sessions.date AS sessionDate,
+          booking_sessions.start_time AS sessionStartTime,
+          booking_sessions.end_time AS sessionEndTime
+        FROM bookings
+        INNER JOIN booking_sessions
+          ON booking_sessions.id = bookings.session_id
+        WHERE bookings.student_email = ?
+        ORDER BY booking_sessions.date ASC, booking_sessions.start_time ASC
+        `,
+      )
+      .all(studentEmail) as {
+      id: number;
+      sessionId: number;
+      studentName: string;
+      studentEmail: string;
+      createdAt: string;
+      sessionTitle: string;
+      sessionDate: string;
+      sessionStartTime: string;
+      sessionEndTime: string;
+    }[];
 
-  if (!session) {
-    return NextResponse.json({ code: "SESSION_NOT_FOUND" }, { status: 404 });
+    const bookingsWithSlotTimes = bookings.map((booking) => {
+      const allBookingsForSession = db
+        .prepare(
+          `
+          SELECT id
+          FROM bookings
+          WHERE session_id = ?
+          ORDER BY created_at ASC, id ASC
+          `,
+        )
+        .all(booking.sessionId) as { id: number }[];
+
+      const bookingIndex = allBookingsForSession.findIndex(
+        (sessionBooking) => sessionBooking.id === booking.id,
+      );
+
+      return {
+        ...booking,
+        ...getSlotTime(booking.sessionStartTime, bookingIndex),
+      };
+    });
+
+    return NextResponse.json(bookingsWithSlotTimes);
   }
 
-  const bookings = db
-    .prepare(
-      `
-      SELECT
-        id,
-        session_id AS sessionId,
-        student_name AS studentName,
-        student_email AS studentEmail,
-        created_at AS createdAt
-      FROM bookings
-      WHERE session_id = ?
-      ORDER BY created_at ASC, id ASC
-      `,
-    )
-    .all(sessionId) as {
-    id: number;
-    sessionId: number;
-    studentName: string;
-    studentEmail: string;
-    createdAt: string;
-  }[];
-
-  const bookingsWithSlotTimes = bookings.map((booking, index) => ({
-    ...booking,
-    ...getSlotTime(session.startTime, index),
-  }));
-
-  return NextResponse.json(bookingsWithSlotTimes);
+  return NextResponse.json({ code: "MISSING_BOOKINGS_QUERY" }, { status: 400 });
 }
 
 export async function POST(request: Request) {
@@ -137,15 +196,15 @@ export async function POST(request: Request) {
   const booking = db
     .prepare(
       `
-    SELECT
-      id,
-      session_id AS sessionId,
-      student_name AS studentName,
-      student_email AS studentEmail,
-      created_at AS createdAt
-    FROM bookings
-    WHERE id = ?
-    `,
+      SELECT
+        id,
+        session_id AS sessionId,
+        student_name AS studentName,
+        student_email AS studentEmail,
+        created_at AS createdAt
+      FROM bookings
+      WHERE id = ?
+      `,
     )
     .get(result.lastInsertRowid) as {
     id: number;
