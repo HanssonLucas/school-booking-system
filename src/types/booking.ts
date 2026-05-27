@@ -27,3 +27,17 @@ export type BookingWithSlotTime = {
   slotStartTime: string;
   slotEndTime: string;
 };
+
+export type StudentBookingLookup = {
+  id: number;
+  sessionId: number;
+  studentName: string;
+  studentEmail: string;
+  createdAt: string;
+  sessionTitle: string;
+  sessionDate: string;
+  sessionStartTime: string;
+  sessionEndTime: string;
+  slotStartTime: string;
+  slotEndTime: string;
+};

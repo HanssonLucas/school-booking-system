@@ -1,13 +1,22 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Alert, Box, Container, Snackbar, Typography } from "@mui/material";
+import {
+  Alert,
+  Button,
+  Box,
+  Container,
+  Snackbar,
+  Typography,
+} from "@mui/material";
 import AppHeader from "@/components/layout/AppHeader";
 import BookingSessionList from "@/components/booking/BookingSessionList";
 import BookSessionDialog from "@/components/booking/BookSessionDialog";
 import CancelBookingDialog from "@/components/booking/CancelBookingDialog";
 import type { BookingSession } from "@/types/booking";
 import { useTranslations } from "@/i18n/useTranslations";
+
+import MyBookingsDialog from "@/components/booking/MyBookingsDialog";
 
 export default function StudentPage() {
   const [sessions, setSessions] = useState<BookingSession[]>([]);
@@ -17,6 +26,7 @@ export default function StudentPage() {
     null,
   );
   const [cancelSessionId, setCancelSessionId] = useState<number | null>(null);
+  const [isMyBookingsDialogOpen, setIsMyBookingsDialogOpen] = useState(false);
 
   const { t } = useTranslations();
 
@@ -205,6 +215,11 @@ export default function StudentPage() {
         onSubmit={handleSubmitCancellation}
       />
 
+      <MyBookingsDialog
+        open={isMyBookingsDialogOpen}
+        onClose={() => setIsMyBookingsDialogOpen(false)}
+      />
+
       <Container sx={{ py: 6 }}>
         <Box sx={{ mb: 4 }}>
           <Typography variant="h3" component="h1" gutterBottom>
@@ -230,6 +245,14 @@ export default function StudentPage() {
             {successMessage}
           </Alert>
         </Snackbar>
+        <Box sx={{ mb: 3 }}>
+          <Button
+            variant="outlined"
+            onClick={() => setIsMyBookingsDialogOpen(true)}
+          >
+            {t.myBookingsDialog.openButton}
+          </Button>
+        </Box>
 
         {isLoading ? (
           <Typography color="text.secondary">
