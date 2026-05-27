@@ -2,6 +2,60 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getSlotTime } from "@/lib/BookingSlots";
 
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const sessionId = Number(searchParams.get("sessionId"));
+
+  if (!sessionId) {
+    return NextResponse.json({ code: "MISSING_SESSION_ID" }, { status: 400 });
+  }
+
+  const session = db
+    .prepare(
+      `
+      SELECT
+        id,
+        start_time AS startTime
+      FROM booking_sessions
+      WHERE id = ?
+      `,
+    )
+    .get(sessionId) as { id: number; startTime: string } | undefined;
+
+  if (!session) {
+    return NextResponse.json({ code: "SESSION_NOT_FOUND" }, { status: 404 });
+  }
+
+  const bookings = db
+    .prepare(
+      `
+      SELECT
+        id,
+        session_id AS sessionId,
+        student_name AS studentName,
+        student_email AS studentEmail,
+        created_at AS createdAt
+      FROM bookings
+      WHERE session_id = ?
+      ORDER BY created_at ASC, id ASC
+      `,
+    )
+    .all(sessionId) as {
+    id: number;
+    sessionId: number;
+    studentName: string;
+    studentEmail: string;
+    createdAt: string;
+  }[];
+
+  const bookingsWithSlotTimes = bookings.map((booking, index) => ({
+    ...booking,
+    ...getSlotTime(session.startTime, index),
+  }));
+
+  return NextResponse.json(bookingsWithSlotTimes);
+}
+
 export async function POST(request: Request) {
   const body = await request.json();
 
