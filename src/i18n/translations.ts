@@ -61,6 +61,8 @@ export const translations = {
       emptySessions: "Du har inte skapat några bokningstillfällen ännu.",
       createSuccess: "Bokningstillfället har skapats.",
       createFallbackError: "Det gick inte att skapa bokningstillfället.",
+      updateSuccess: "Bokningstillfället har uppdaterats.",
+      updateFallbackError: "Det gick inte att uppdatera bokningstillfället.",
     },
     createSessionForm: {
       title: "Skapa bokningstillfälle",
@@ -191,6 +193,8 @@ export const translations = {
       emptySessions: "You have not created any booking sessions yet.",
       createSuccess: "The booking session has been created.",
       createFallbackError: "The booking session could not be created.",
+      updateSuccess: "The booking session has been updated.",
+      updateFallbackError: "The booking session could not be updated.",
     },
     createSessionForm: {
       title: "Create booking session",

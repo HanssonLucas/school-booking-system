@@ -59,7 +59,7 @@ export default function TeacherPage() {
 
       setErrorMessage(
         errorMessages[errorData.code] ??
-          t.teacher.createFallbackError ??
+          t.teacher.updateFallbackError ??
           t.errors.unknown,
       );
 
@@ -76,7 +76,7 @@ export default function TeacherPage() {
 
     setEditingSessionId(null);
     setErrorMessage("");
-    setSuccessMessage("Bokningstillfället har uppdaterats.");
+    setSuccessMessage(t.teacher.updateSuccess);
   };
 
   const { t } = useTranslations();
