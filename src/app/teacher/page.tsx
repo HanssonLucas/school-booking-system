@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Alert, Box, Container, Snackbar, Typography } from "@mui/material";
 import AppHeader from "@/components/layout/AppHeader";
 import CreateBookingSessionForm from "@/components/booking/CreateBookingSessionForm";
+import EditBookingSessionDialog from "@/components/booking/EditBookingSessionDialog";
 import BookingSessionList from "@/components/booking/BookingSessionList";
 import { useTranslations } from "@/i18n/useTranslations";
 import type {
@@ -16,9 +17,19 @@ export default function TeacherPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [editingSessionId, setEditingSessionId] = useState<number | null>(null);
+
+  const editingSession = sessions.find(
+    (session) => session.id === editingSessionId,
+  );
 
   const handleEditSession = (sessionId: number) => {
-    console.log("Redigera tillfälle:", sessionId);
+    setEditingSessionId(sessionId);
+  };
+
+  const handleSaveSession = (sessionId: number, values: unknown) => {
+    console.log("Spara ändringar:", sessionId, values);
+    setEditingSessionId(null);
   };
 
   const { t } = useTranslations();
@@ -78,6 +89,13 @@ export default function TeacherPage() {
   return (
     <>
       <AppHeader />
+
+      <EditBookingSessionDialog
+        open={editingSessionId !== null}
+        session={editingSession ?? null}
+        onClose={() => setEditingSessionId(null)}
+        onSave={handleSaveSession}
+      />
 
       <Snackbar
         open={Boolean(successMessage)}
