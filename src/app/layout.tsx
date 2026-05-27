@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import LanguageProvider from "@/i18n/LanguageProvider";
+import AppThemeProvider from "@/theme/AppThemeProvider";
 
 export const metadata: Metadata = {
   title: "Bokningssystem",
@@ -16,7 +17,9 @@ export default function RootLayout({
     <html lang="sv">
       <body>
         <AppRouterCacheProvider>
-          <LanguageProvider>{children}</LanguageProvider>
+          <LanguageProvider>
+            <AppThemeProvider>{children}</AppThemeProvider>
+          </LanguageProvider>
         </AppRouterCacheProvider>
       </body>
     </html>
