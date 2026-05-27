@@ -111,6 +111,7 @@ export const translations = {
       missingCancellationFields: "Email krävs för att avboka.",
       bookingNotFound: "Ingen bokning hittades för den emailen.",
       unknown: "Något gick fel. Försök igen.",
+      missingSessionFields: "Alla obligatoriska fält måste fyllas i.",
     },
   },
   en: {
@@ -224,6 +225,7 @@ export const translations = {
       missingCancellationFields: "Email is required to cancel a booking.",
       bookingNotFound: "No booking was found for that email.",
       unknown: "Something went wrong. Please try again.",
+      missingSessionFields: "All required fields must be filled in.",
     },
   },
 } as const;

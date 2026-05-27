@@ -51,7 +51,15 @@ export default function TeacherPage() {
     if (!response.ok) {
       const errorData = await response.json();
 
-      setErrorMessage(errorData.message ?? t.teacher.createFallbackError);
+      const errorMessages: Record<string, string> = {
+        MISSING_SESSION_FIELDS: t.errors.missingSessionFields,
+      };
+
+      setErrorMessage(
+        errorMessages[errorData.code] ??
+          t.teacher.createFallbackError ??
+          t.errors.unknown,
+      );
 
       return;
     }

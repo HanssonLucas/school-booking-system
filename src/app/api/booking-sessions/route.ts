@@ -33,7 +33,7 @@ export async function POST(request: Request) {
 
   if (!title || !date || !startTime || !endTime || !maxParticipants) {
     return NextResponse.json(
-      { message: "Obligatoriska fält saknas" },
+      { code: "MISSING_SESSION_FIELDS" },
       { status: 400 },
     );
   }
