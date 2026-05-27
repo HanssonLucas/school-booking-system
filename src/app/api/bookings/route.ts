@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { getSlotTime } from "@/lib/BookingSlots";
 
 export async function POST(request: Request) {
   const body = await request.json();
@@ -18,12 +19,15 @@ export async function POST(request: Request) {
       `
       SELECT
         id,
+        start_time AS startTime,
         max_participants AS maxParticipants
       FROM booking_sessions
       WHERE id = ?
       `,
     )
-    .get(sessionId) as { id: number; maxParticipants: number } | undefined;
+    .get(sessionId) as
+    | { id: number; startTime: string; maxParticipants: number }
+    | undefined;
 
   if (!session) {
     return NextResponse.json({ code: "SESSION_NOT_FOUND" }, { status: 404 });
@@ -61,6 +65,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ code: "SESSION_FULL" }, { status: 409 });
   }
 
+  const slotTime = getSlotTime(session.startTime, bookingCount.count);
+
   const result = db
     .prepare(
       `
@@ -77,19 +83,31 @@ export async function POST(request: Request) {
   const booking = db
     .prepare(
       `
-      SELECT
-        id,
-        session_id AS sessionId,
-        student_name AS studentName,
-        student_email AS studentEmail,
-        created_at AS createdAt
-      FROM bookings
-      WHERE id = ?
-      `,
+    SELECT
+      id,
+      session_id AS sessionId,
+      student_name AS studentName,
+      student_email AS studentEmail,
+      created_at AS createdAt
+    FROM bookings
+    WHERE id = ?
+    `,
     )
-    .get(result.lastInsertRowid);
+    .get(result.lastInsertRowid) as {
+    id: number;
+    sessionId: number;
+    studentName: string;
+    studentEmail: string;
+    createdAt: string;
+  };
 
-  return NextResponse.json(booking, { status: 201 });
+  return NextResponse.json(
+    {
+      ...booking,
+      ...slotTime,
+    },
+    { status: 201 },
+  );
 }
 
 export async function DELETE(request: Request) {
