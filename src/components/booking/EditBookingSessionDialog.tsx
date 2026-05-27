@@ -13,7 +13,7 @@ import {
 import type { BookingSession } from "@/types/booking";
 import { useTranslations } from "@/i18n/useTranslations";
 
-type EditFormValues = {
+export type EditFormValues = {
   title: string;
   description: string;
   date: string;

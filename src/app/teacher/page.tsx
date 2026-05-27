@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 import { Alert, Box, Container, Snackbar, Typography } from "@mui/material";
 import AppHeader from "@/components/layout/AppHeader";
 import CreateBookingSessionForm from "@/components/booking/CreateBookingSessionForm";
-import EditBookingSessionDialog from "@/components/booking/EditBookingSessionDialog";
+import EditBookingSessionDialog, {
+  type EditFormValues,
+} from "@/components/booking/EditBookingSessionDialog";
 import BookingSessionList from "@/components/booking/BookingSessionList";
 import { useTranslations } from "@/i18n/useTranslations";
 import type {
@@ -27,9 +29,54 @@ export default function TeacherPage() {
     setEditingSessionId(sessionId);
   };
 
-  const handleSaveSession = (sessionId: number, values: unknown) => {
-    console.log("Spara ändringar:", sessionId, values);
+  const handleSaveSession = async (
+    sessionId: number,
+    values: EditFormValues,
+  ) => {
+    const response = await fetch(`/api/booking-sessions/${sessionId}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        title: values.title,
+        description: values.description,
+        date: values.date,
+        startTime: values.startTime,
+        endTime: values.endTime,
+        maxParticipants: Number(values.maxParticipants),
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+
+      const errorMessages: Record<string, string> = {
+        INVALID_SESSION_ID: t.errors.sessionNotFound,
+        MISSING_SESSION_FIELDS: t.errors.missingSessionFields,
+        SESSION_NOT_FOUND: t.errors.sessionNotFound,
+      };
+
+      setErrorMessage(
+        errorMessages[errorData.code] ??
+          t.teacher.createFallbackError ??
+          t.errors.unknown,
+      );
+
+      return;
+    }
+
+    const updatedSession: BookingSession = await response.json();
+
+    setSessions((currentSessions) =>
+      currentSessions.map((session) =>
+        session.id === sessionId ? updatedSession : session,
+      ),
+    );
+
     setEditingSessionId(null);
+    setErrorMessage("");
+    setSuccessMessage("Bokningstillfället har uppdaterats.");
   };
 
   const { t } = useTranslations();
