@@ -123,6 +123,15 @@ export const translations = {
       requiredError: "Email krävs",
       fallbackError: "Det gick inte att avboka platsen. Försök igen.",
     },
+    bookingsDialog: {
+      title: "Bokningar",
+      loading: "Hämtar bokningar...",
+      empty: "Ingen har bokat detta tillfälle ännu.",
+      name: "Namn",
+      email: "Email",
+      assignedTime: "Tilldelad tid",
+      closeButton: "Stäng",
+    },
     errors: {
       missingBookingFields: "Namn och email krävs.",
       sessionNotFound: "Bokningstillfället finns inte längre.",
@@ -256,6 +265,15 @@ export const translations = {
       submittingButton: "Cancelling...",
       requiredError: "Email is required",
       fallbackError: "The booking could not be cancelled. Please try again.",
+    },
+    bookingsDialog: {
+      title: "Bookings",
+      loading: "Loading bookings...",
+      empty: "No one has booked this session yet.",
+      name: "Name",
+      email: "Email",
+      assignedTime: "Assigned time",
+      closeButton: "Close",
     },
     errors: {
       missingBookingFields: "Name and email are required.",

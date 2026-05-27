@@ -13,6 +13,7 @@ import type {
   BookingSession,
   CreateBookingSessionInput,
 } from "@/types/booking";
+import ViewBookingsDialog from "@/components/booking/ViewBookingsDialog";
 
 export default function TeacherPage() {
   const [sessions, setSessions] = useState<BookingSession[]>([]);
@@ -20,9 +21,16 @@ export default function TeacherPage() {
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [editingSessionId, setEditingSessionId] = useState<number | null>(null);
+  const [viewBookingsSessionId, setViewBookingsSessionId] = useState<
+    number | null
+  >(null);
+
+  const viewBookingsSession = sessions.find(
+    (session) => session.id === viewBookingsSessionId,
+  );
 
   const handleViewBookings = (sessionId: number) => {
-    console.log("Visa bokningar för tillfälle:", sessionId);
+    setViewBookingsSessionId(sessionId);
   };
 
   const editingSession = sessions.find(
@@ -146,6 +154,12 @@ export default function TeacherPage() {
         session={editingSession ?? null}
         onClose={() => setEditingSessionId(null)}
         onSave={handleSaveSession}
+      />
+
+      <ViewBookingsDialog
+        open={viewBookingsSessionId !== null}
+        session={viewBookingsSession ?? null}
+        onClose={() => setViewBookingsSessionId(null)}
       />
 
       <Snackbar

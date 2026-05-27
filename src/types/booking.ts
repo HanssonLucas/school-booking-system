@@ -17,3 +17,13 @@ export type CreateBookingSessionInput = {
   endTime: string;
   maxParticipants: number;
 };
+
+export type BookingWithSlotTime = {
+  id: number;
+  sessionId: number;
+  studentName: string;
+  studentEmail: string;
+  createdAt: string;
+  slotStartTime: string;
+  slotEndTime: string;
+};
