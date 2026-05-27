@@ -21,6 +21,10 @@ export default function TeacherPage() {
   const [errorMessage, setErrorMessage] = useState("");
   const [editingSessionId, setEditingSessionId] = useState<number | null>(null);
 
+  const handleViewBookings = (sessionId: number) => {
+    console.log("Visa bokningar för tillfälle:", sessionId);
+  };
+
   const editingSession = sessions.find(
     (session) => session.id === editingSessionId,
   );
@@ -204,7 +208,9 @@ export default function TeacherPage() {
             <BookingSessionList
               sessions={sessions}
               showEditButton
+              showViewBookingsButton
               onEditSession={handleEditSession}
+              onViewBookingsSession={handleViewBookings}
               emptyMessage={t.teacher.emptySessions}
             />
           )}

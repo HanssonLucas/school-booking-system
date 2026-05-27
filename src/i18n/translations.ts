@@ -98,6 +98,7 @@ export const translations = {
       bookButton: "Boka plats",
       cancelButton: "Avboka plats",
       editButton: "Redigera",
+      viewBookingsButton: "Visa bokningar",
       of: "av",
     },
     bookSessionDialog: {
@@ -231,6 +232,7 @@ export const translations = {
       bookButton: "Book place",
       cancelButton: "Cancel booking",
       editButton: "Edit",
+      viewBookingsButton: "View bookings",
       of: "of",
     },
     bookSessionDialog: {
