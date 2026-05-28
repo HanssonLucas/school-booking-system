@@ -11,6 +11,8 @@ export const translations = {
       switchToSwedish: "Byt till svenska",
       switchToDarkMode: "Byt till mörkt läge",
       switchToLightMode: "Byt till ljust läge",
+      appSubtitle: "Planera och boka tider",
+      languageLabel: "Språk",
     },
     home: {
       title: "Bokningssystem",
@@ -182,6 +184,8 @@ export const translations = {
       switchToSwedish: "Switch to Swedish",
       switchToDarkMode: "Switch to dark mode",
       switchToLightMode: "Switch to light mode",
+      appSubtitle: "Plan and book times",
+      languageLabel: "Language",
     },
     home: {
       title: "Booking system",

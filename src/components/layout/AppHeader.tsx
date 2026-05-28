@@ -4,7 +4,6 @@ import {
   AppBar,
   Box,
   Button,
-  Chip,
   IconButton,
   Stack,
   Toolbar,
@@ -13,14 +12,32 @@ import {
 import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
 import LightModeIcon from "@mui/icons-material/LightMode";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "@/i18n/useTranslations";
 import { useAppTheme } from "@/theme/AppThemeProvider";
 
 export default function AppHeader() {
   const router = useRouter();
+  const pathname = usePathname();
+
   const { t, language, setLanguage } = useTranslations();
   const { mode, toggleColorMode } = useAppTheme();
+
+  const isStudentPage = pathname === "/student";
+  const isTeacherPage = pathname === "/teacher";
+
+  const navButtonSx = (isActive: boolean) => ({
+    borderRadius: 999,
+    textTransform: "none",
+    fontWeight: 800,
+    px: 2.25,
+    color: isActive ? "primary.contrastText" : "text.primary",
+    bgcolor: isActive ? "primary.main" : "action.hover",
+    boxShadow: isActive ? 3 : 0,
+    "&:hover": {
+      bgcolor: isActive ? "primary.dark" : "action.selected",
+    },
+  });
 
   return (
     <AppBar
@@ -60,14 +77,17 @@ export default function AppHeader() {
         >
           <Box
             sx={{
-              width: 40,
-              height: 40,
+              width: 42,
+              height: 42,
               borderRadius: 3,
               display: "grid",
               placeItems: "center",
-              bgcolor: "primary.main",
+              background:
+                mode === "light"
+                  ? "linear-gradient(135deg, #1976d2, #42a5f5)"
+                  : "linear-gradient(135deg, #90caf9, #1976d2)",
               color: "primary.contrastText",
-              boxShadow: 3,
+              boxShadow: 4,
               flexShrink: 0,
             }}
           >
@@ -78,8 +98,8 @@ export default function AppHeader() {
             <Typography
               variant="h6"
               sx={{
-                fontWeight: 800,
-                letterSpacing: -0.4,
+                fontWeight: 900,
+                letterSpacing: -0.5,
                 lineHeight: 1.1,
               }}
             >
@@ -94,9 +114,7 @@ export default function AppHeader() {
                 lineHeight: 1.2,
               }}
             >
-              {language === "sv"
-                ? "Planera och boka tider"
-                : "Plan and book times"}
+              {t.common.appSubtitle}
             </Typography>
           </Box>
         </Box>
@@ -111,34 +129,14 @@ export default function AppHeader() {
         >
           <Button
             onClick={() => router.push("/student")}
-            sx={{
-              borderRadius: 999,
-              textTransform: "none",
-              fontWeight: 700,
-              px: 2,
-              color: "text.primary",
-              bgcolor: "action.hover",
-              "&:hover": {
-                bgcolor: "action.selected",
-              },
-            }}
+            sx={navButtonSx(isStudentPage)}
           >
             {t.common.student}
           </Button>
 
           <Button
             onClick={() => router.push("/teacher")}
-            sx={{
-              borderRadius: 999,
-              textTransform: "none",
-              fontWeight: 700,
-              px: 2,
-              color: "text.primary",
-              bgcolor: "action.hover",
-              "&:hover": {
-                bgcolor: "action.selected",
-              },
-            }}
+            sx={navButtonSx(isTeacherPage)}
           >
             {t.common.teacher}
           </Button>
@@ -164,26 +162,61 @@ export default function AppHeader() {
             {mode === "light" ? <DarkModeIcon /> : <LightModeIcon />}
           </IconButton>
 
-          <Chip
-            clickable
-            label={language === "sv" ? "EN" : "SV"}
-            aria-label={
-              language === "sv"
-                ? t.common.switchToEnglish
-                : t.common.switchToSwedish
-            }
-            onClick={() => setLanguage(language === "sv" ? "en" : "sv")}
+          <Box
+            aria-label={t.common.languageLabel}
             sx={{
-              height: 40,
+              display: "flex",
+              alignItems: "center",
+              gap: 0.5,
+              p: 0.5,
               borderRadius: 999,
-              fontWeight: 800,
-              px: 0.75,
               bgcolor: "action.hover",
-              "&:hover": {
-                bgcolor: "action.selected",
-              },
             }}
-          />
+          >
+            <Button
+              size="small"
+              onClick={() => setLanguage("sv")}
+              aria-label={t.common.switchToSwedish}
+              sx={{
+                minWidth: 42,
+                borderRadius: 999,
+                textTransform: "none",
+                fontWeight: 900,
+                px: 1.25,
+                color:
+                  language === "sv" ? "primary.contrastText" : "text.primary",
+                bgcolor: language === "sv" ? "primary.main" : "transparent",
+                "&:hover": {
+                  bgcolor:
+                    language === "sv" ? "primary.dark" : "action.selected",
+                },
+              }}
+            >
+              SV
+            </Button>
+
+            <Button
+              size="small"
+              onClick={() => setLanguage("en")}
+              aria-label={t.common.switchToEnglish}
+              sx={{
+                minWidth: 42,
+                borderRadius: 999,
+                textTransform: "none",
+                fontWeight: 900,
+                px: 1.25,
+                color:
+                  language === "en" ? "primary.contrastText" : "text.primary",
+                bgcolor: language === "en" ? "primary.main" : "transparent",
+                "&:hover": {
+                  bgcolor:
+                    language === "en" ? "primary.dark" : "action.selected",
+                },
+              }}
+            >
+              EN
+            </Button>
+          </Box>
         </Stack>
       </Toolbar>
     </AppBar>
