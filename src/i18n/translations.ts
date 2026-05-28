@@ -156,6 +156,8 @@ export const translations = {
       unknown: "Något gick fel. Försök igen.",
       missingSessionFields: "Alla obligatoriska fält måste fyllas i.",
       invalidSessionTimeRange: "Sluttiden måste vara efter starttiden.",
+      tooFewSlotsForExistingBookings:
+        "Tiden är för kort för antalet befintliga bokningar.",
     },
   },
   en: {
@@ -314,6 +316,8 @@ export const translations = {
       unknown: "Something went wrong. Please try again.",
       missingSessionFields: "All required fields must be filled in.",
       invalidSessionTimeRange: "The end time must be after the start time.",
+      tooFewSlotsForExistingBookings:
+        "The time range is too short for the existing bookings.",
     },
   },
 } as const;

@@ -67,6 +67,9 @@ export default function TeacherPage() {
         INVALID_SESSION_ID: t.errors.sessionNotFound,
         MISSING_SESSION_FIELDS: t.errors.missingSessionFields,
         SESSION_NOT_FOUND: t.errors.sessionNotFound,
+        INVALID_SESSION_TIME_RANGE: t.errors.invalidSessionTimeRange,
+        TOO_FEW_SLOTS_FOR_EXISTING_BOOKINGS:
+          t.errors.tooFewSlotsForExistingBookings,
       };
 
       setErrorMessage(

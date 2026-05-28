@@ -35,6 +35,22 @@ export async function PATCH(request: Request, context: RouteContext) {
     );
   }
 
+  const bookingCount = db
+    .prepare(
+      `
+    SELECT COUNT(*) AS count
+    FROM bookings
+    WHERE session_id = ?
+    `,
+    )
+    .get(sessionId) as { count: number };
+
+  if (maxParticipants < bookingCount.count) {
+    return NextResponse.json(
+      { code: "TOO_FEW_SLOTS_FOR_EXISTING_BOOKINGS" },
+      { status: 409 },
+    );
+  }
   const existingSession = db
     .prepare(
       `
