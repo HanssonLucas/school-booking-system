@@ -3,16 +3,22 @@
 import { useState } from "react";
 import {
   Alert,
+  Box,
   Button,
+  Chip,
   Dialog,
   DialogActions,
   DialogContent,
-  DialogTitle,
   Paper,
   Stack,
   TextField,
   Typography,
 } from "@mui/material";
+import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
+import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
+import EventAvailableOutlinedIcon from "@mui/icons-material/EventAvailableOutlined";
+import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
+import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
 import type { StudentBookingLookup } from "@/types/booking";
 import { useTranslations } from "@/i18n/useTranslations";
 
@@ -73,21 +79,78 @@ export default function MyBookingsDialog({
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-      <DialogTitle>{t.myBookingsDialog.title}</DialogTitle>
-
-      <DialogContent>
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      maxWidth="sm"
+      fullWidth
+      slotProps={{
+        paper: {
+          sx: {
+            borderRadius: 5,
+            overflow: "hidden",
+            border: 1,
+            borderColor: "divider",
+          },
+        },
+      }}
+    >
+      <Box
+        sx={{
+          p: { xs: 3, sm: 4 },
+          pb: 2,
+          background:
+            "linear-gradient(135deg, rgba(25, 118, 210, 0.14), rgba(76, 175, 80, 0.08))",
+          borderBottom: 1,
+          borderColor: "divider",
+        }}
+      >
         <Stack
-          spacing={3}
-          component="form"
-          onSubmit={handleSearch}
-          sx={{ mt: 1 }}
+          direction="row"
+          spacing={2}
+          sx={{
+            alignItems: "center",
+          }}
         >
-          <Typography color="text.secondary">
-            {t.myBookingsDialog.description}
-          </Typography>
+          <Box
+            sx={{
+              width: 48,
+              height: 48,
+              borderRadius: 4,
+              display: "grid",
+              placeItems: "center",
+              bgcolor: "primary.main",
+              color: "primary.contrastText",
+              boxShadow: 3,
+              flexShrink: 0,
+            }}
+          >
+            <SearchOutlinedIcon />
+          </Box>
 
-          {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
+          <Box>
+            <Typography
+              variant="h5"
+              component="h2"
+              sx={{ fontWeight: 900, letterSpacing: -0.4 }}
+            >
+              {t.myBookingsDialog.title}
+            </Typography>
+
+            <Typography color="text.secondary" sx={{ mt: 0.5 }}>
+              {t.myBookingsDialog.description}
+            </Typography>
+          </Box>
+        </Stack>
+      </Box>
+
+      <DialogContent sx={{ p: { xs: 3, sm: 4 } }}>
+        <Stack spacing={3} component="form" onSubmit={handleSearch}>
+          {errorMessage && (
+            <Alert severity="error" sx={{ borderRadius: 3 }}>
+              {errorMessage}
+            </Alert>
+          )}
 
           <TextField
             label={t.myBookingsDialog.emailLabel}
@@ -95,14 +158,53 @@ export default function MyBookingsDialog({
             fullWidth
             value={studentEmail}
             onChange={(event) => setStudentEmail(event.target.value)}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <EmailOutlinedIcon sx={{ mr: 1, color: "text.secondary" }} />
+                ),
+              },
+            }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: 3,
+              },
+            }}
           />
 
-          <DialogActions sx={{ px: 0 }}>
-            <Button onClick={handleClose} disabled={isSearching}>
+          <DialogActions
+            sx={{
+              px: 0,
+              pt: 1,
+              gap: 1,
+              flexWrap: "wrap",
+            }}
+          >
+            <Button
+              onClick={handleClose}
+              disabled={isSearching}
+              sx={{
+                borderRadius: 999,
+                textTransform: "none",
+                fontWeight: 800,
+                px: 2.5,
+              }}
+            >
               {t.myBookingsDialog.closeButton}
             </Button>
 
-            <Button variant="contained" type="submit" disabled={isSearching}>
+            <Button
+              variant="contained"
+              type="submit"
+              disabled={isSearching}
+              startIcon={<SearchOutlinedIcon />}
+              sx={{
+                borderRadius: 999,
+                textTransform: "none",
+                fontWeight: 800,
+                px: 2.5,
+              }}
+            >
               {isSearching
                 ? t.myBookingsDialog.searchingButton
                 : t.myBookingsDialog.searchButton}
@@ -110,28 +212,80 @@ export default function MyBookingsDialog({
           </DialogActions>
 
           {hasSearched && bookings.length === 0 && (
-            <Typography color="text.secondary">
+            <Alert severity="info" sx={{ borderRadius: 3 }}>
               {t.myBookingsDialog.empty}
-            </Typography>
+            </Alert>
           )}
 
           {bookings.length > 0 && (
             <Stack spacing={2}>
               {bookings.map((booking) => (
-                <Paper key={booking.id} sx={{ p: 2, borderRadius: 2 }}>
-                  <Stack spacing={0.5}>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                      {booking.sessionTitle}
-                    </Typography>
+                <Paper
+                  key={booking.id}
+                  elevation={0}
+                  sx={{
+                    p: 2.5,
+                    borderRadius: 4,
+                    border: 1,
+                    borderColor: "divider",
+                    bgcolor: "background.default",
+                  }}
+                >
+                  <Stack spacing={1.5}>
+                    <Stack
+                      direction={{ xs: "column", sm: "row" }}
+                      spacing={1}
+                      sx={{
+                        justifyContent: "space-between",
+                        alignItems: { xs: "flex-start", sm: "center" },
+                      }}
+                    >
+                      <Typography
+                        variant="subtitle1"
+                        sx={{ fontWeight: 900, letterSpacing: -0.2 }}
+                      >
+                        {booking.sessionTitle}
+                      </Typography>
 
-                    <Typography color="text.secondary">
-                      {t.myBookingsDialog.date}: {booking.sessionDate}
-                    </Typography>
+                      <Chip
+                        icon={<EventAvailableOutlinedIcon />}
+                        label={`${booking.slotStartTime}–${booking.slotEndTime}`}
+                        color="success"
+                        sx={{
+                          borderRadius: 999,
+                          fontWeight: 800,
+                        }}
+                      />
+                    </Stack>
 
-                    <Typography color="text.secondary">
-                      {t.myBookingsDialog.assignedTime}: {booking.slotStartTime}
-                      –{booking.slotEndTime}
-                    </Typography>
+                    <Stack
+                      direction="row"
+                      spacing={1}
+                      useFlexGap
+                      sx={{
+                        flexWrap: "wrap",
+                      }}
+                    >
+                      <Chip
+                        icon={<CalendarMonthOutlinedIcon />}
+                        label={`${t.myBookingsDialog.date}: ${booking.sessionDate}`}
+                        variant="outlined"
+                        sx={{
+                          borderRadius: 999,
+                          bgcolor: "action.hover",
+                        }}
+                      />
+
+                      <Chip
+                        icon={<AccessTimeOutlinedIcon />}
+                        label={`${t.myBookingsDialog.assignedTime}: ${booking.slotStartTime}–${booking.slotEndTime}`}
+                        variant="outlined"
+                        sx={{
+                          borderRadius: 999,
+                          bgcolor: "action.hover",
+                        }}
+                      />
+                    </Stack>
                   </Stack>
                 </Paper>
               ))}
