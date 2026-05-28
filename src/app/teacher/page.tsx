@@ -8,10 +8,7 @@ import {
   Chip,
   Container,
   Dialog,
-  DialogActions,
   DialogContent,
-  DialogContentText,
-  DialogTitle,
   Paper,
   Snackbar,
   Stack,
@@ -34,6 +31,7 @@ import type {
   CreateBookingSessionInput,
 } from "@/types/booking";
 import ViewBookingsDialog from "@/components/booking/ViewBookingsDialog";
+import DeleteBookingSessionDialog from "@/components/booking/DeleteBookingSessionDialog";
 
 export default function TeacherPage() {
   const [sessions, setSessions] = useState<BookingSession[]>([]);
@@ -242,34 +240,12 @@ export default function TeacherPage() {
         onClose={() => setViewBookingsSessionId(null)}
       />
 
-      <Dialog
+      <DeleteBookingSessionDialog
         open={deleteSessionId !== null}
+        sessionTitle={deleteSession?.title}
         onClose={() => setDeleteSessionId(null)}
-      >
-        <DialogTitle>{t.deleteSessionDialog.title}</DialogTitle>
-
-        <DialogContent>
-          <DialogContentText>
-            {t.deleteSessionDialog.descriptionStart}{" "}
-            <strong>{deleteSession?.title}</strong>?{" "}
-            {t.deleteSessionDialog.descriptionEnd}
-          </DialogContentText>
-        </DialogContent>
-
-        <DialogActions>
-          <Button onClick={() => setDeleteSessionId(null)}>
-            {t.deleteSessionDialog.cancelButton}
-          </Button>
-
-          <Button
-            color="error"
-            variant="contained"
-            onClick={handleConfirmDeleteSession}
-          >
-            {t.deleteSessionDialog.deleteButton}
-          </Button>
-        </DialogActions>
-      </Dialog>
+        onConfirm={handleConfirmDeleteSession}
+      />
 
       <Snackbar
         open={Boolean(successMessage)}
