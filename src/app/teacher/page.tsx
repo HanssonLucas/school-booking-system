@@ -5,15 +5,23 @@ import {
   Alert,
   Box,
   Button,
+  Chip,
   Container,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Paper,
   Snackbar,
+  Stack,
   Typography,
 } from "@mui/material";
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
+import EditCalendarOutlinedIcon from "@mui/icons-material/EditCalendarOutlined";
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import AppHeader from "@/components/layout/AppHeader";
 import CreateBookingSessionForm from "@/components/booking/CreateBookingSessionForm";
 import EditBookingSessionDialog, {
@@ -293,34 +301,187 @@ export default function TeacherPage() {
         </Alert>
       </Snackbar>
 
-      <Container sx={{ py: 6 }}>
-        <Box sx={{ mb: 4 }}>
-          <Typography variant="h3" component="h1" gutterBottom>
-            {t.teacher.title}
-          </Typography>
+      <Container sx={{ py: { xs: 4, md: 7 } }}>
+        <Paper
+          sx={{
+            position: "relative",
+            overflow: "hidden",
+            borderRadius: 6,
+            p: { xs: 3, sm: 5 },
+            mb: 5,
+            border: 1,
+            borderColor: "divider",
+            background:
+              "linear-gradient(135deg, rgba(156, 39, 176, 0.14), rgba(25, 118, 210, 0.08))",
+          }}
+        >
+          <Box
+            sx={{
+              position: "absolute",
+              width: 220,
+              height: 220,
+              borderRadius: "50%",
+              bgcolor: "secondary.main",
+              opacity: 0.12,
+              right: -70,
+              top: -80,
+            }}
+          />
 
-          <Typography color="text.secondary">
-            {t.teacher.description}
-          </Typography>
-        </Box>
+          <Box
+            sx={{
+              position: "absolute",
+              width: 160,
+              height: 160,
+              borderRadius: "50%",
+              bgcolor: "primary.main",
+              opacity: 0.1,
+              right: 120,
+              bottom: -80,
+            }}
+          />
 
-        <Box sx={{ mb: 4 }}>
-          <Button
-            variant="contained"
-            onClick={() => setIsCreateDialogOpen(true)}
-          >
-            {t.teacher.createSessionButton}
-          </Button>
-        </Box>
+          <Box sx={{ position: "relative", maxWidth: 760 }}>
+            <Chip
+              icon={<EditCalendarOutlinedIcon />}
+              label={t.common.teacher}
+              sx={{
+                mb: 3,
+                borderRadius: 999,
+                fontWeight: 800,
+                bgcolor: "background.paper",
+              }}
+            />
 
-        <Box sx={{ mt: 6 }}>
-          <Typography variant="h4" component="h2" gutterBottom>
-            {t.teacher.sessionsTitle}
-          </Typography>
+            <Typography
+              variant="h2"
+              component="h1"
+              sx={{
+                fontWeight: 900,
+                letterSpacing: -1.3,
+                lineHeight: 1.05,
+                fontSize: { xs: "2.25rem", md: "3.5rem" },
+                mb: 2,
+              }}
+            >
+              {t.teacher.title}
+            </Typography>
 
-          <Typography color="text.secondary" sx={{ mb: 3 }}>
-            {t.teacher.sessionsDescription}
-          </Typography>
+            <Typography
+              variant="h6"
+              color="text.secondary"
+              sx={{
+                lineHeight: 1.7,
+                maxWidth: 680,
+                mb: 4,
+              }}
+            >
+              {t.teacher.description}
+            </Typography>
+
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+              <Button
+                variant="contained"
+                size="large"
+                startIcon={<AddRoundedIcon />}
+                onClick={() => setIsCreateDialogOpen(true)}
+                sx={{
+                  borderRadius: 999,
+                  textTransform: "none",
+                  fontWeight: 800,
+                  px: 3,
+                  py: 1.3,
+                }}
+              >
+                {t.teacher.createSessionButton}
+              </Button>
+
+              <Button
+                variant="outlined"
+                size="large"
+                startIcon={<VisibilityOutlinedIcon />}
+                onClick={() => {
+                  document
+                    .getElementById("teacher-sessions")
+                    ?.scrollIntoView({ behavior: "smooth" });
+                }}
+                sx={{
+                  borderRadius: 999,
+                  textTransform: "none",
+                  fontWeight: 800,
+                  px: 3,
+                  py: 1.3,
+                  bgcolor: "background.paper",
+                }}
+              >
+                {t.teacher.sessionsTitle}
+              </Button>
+            </Stack>
+
+            <Stack
+              direction="row"
+              spacing={1}
+              useFlexGap
+              sx={{
+                flexWrap: "wrap",
+                mt: 4,
+              }}
+            >
+              <Chip
+                icon={<AddRoundedIcon />}
+                label={t.teacher.createSessionButton}
+                variant="outlined"
+                sx={{ borderRadius: 999, bgcolor: "background.paper" }}
+              />
+
+              <Chip
+                icon={<EditOutlinedIcon />}
+                label={t.bookingSession.editButton}
+                variant="outlined"
+                sx={{ borderRadius: 999, bgcolor: "background.paper" }}
+              />
+
+              <Chip
+                icon={<VisibilityOutlinedIcon />}
+                label={t.bookingSession.viewBookingsButton}
+                variant="outlined"
+                sx={{ borderRadius: 999, bgcolor: "background.paper" }}
+              />
+
+              <Chip
+                icon={<DeleteOutlineOutlinedIcon />}
+                label={t.bookingSession.deleteButton}
+                variant="outlined"
+                sx={{ borderRadius: 999, bgcolor: "background.paper" }}
+              />
+            </Stack>
+          </Box>
+        </Paper>
+
+        <Paper
+          id="teacher-sessions"
+          sx={{
+            p: { xs: 3, md: 4 },
+            borderRadius: 5,
+            border: 1,
+            borderColor: "divider",
+            boxShadow: 1,
+          }}
+        >
+          <Box sx={{ mb: 3 }}>
+            <Typography
+              variant="h4"
+              component="h2"
+              sx={{ fontWeight: 850, letterSpacing: -0.5 }}
+              gutterBottom
+            >
+              {t.teacher.sessionsTitle}
+            </Typography>
+
+            <Typography color="text.secondary" sx={{ maxWidth: 720 }}>
+              {t.teacher.sessionsDescription}
+            </Typography>
+          </Box>
 
           {isLoading ? (
             <Typography color="text.secondary">
@@ -338,7 +499,7 @@ export default function TeacherPage() {
               emptyMessage={t.teacher.emptySessions}
             />
           )}
-        </Box>
+        </Paper>
       </Container>
     </>
   );
