@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { getSlotCount } from "@/lib/bookingSlots";
 
 type RouteContext = {
   params: Promise<{
@@ -17,12 +18,19 @@ export async function PATCH(request: Request, context: RouteContext) {
 
   const body = await request.json();
 
-  const { title, description, date, startTime, endTime, maxParticipants } =
-    body;
+  const { title, description, date, startTime, endTime } = body;
 
-  if (!title || !date || !startTime || !endTime || !maxParticipants) {
+  if (!title || !date || !startTime || !endTime) {
     return NextResponse.json(
       { code: "MISSING_SESSION_FIELDS" },
+      { status: 400 },
+    );
+  }
+  const maxParticipants = getSlotCount(startTime, endTime);
+
+  if (maxParticipants <= 0) {
+    return NextResponse.json(
+      { code: "INVALID_SESSION_TIME_RANGE" },
       { status: 400 },
     );
   }

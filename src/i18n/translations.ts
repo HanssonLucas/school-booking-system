@@ -154,6 +154,7 @@ export const translations = {
       bookingNotFound: "Ingen bokning hittades för den emailen.",
       unknown: "Något gick fel. Försök igen.",
       missingSessionFields: "Alla obligatoriska fält måste fyllas i.",
+      invalidSessionTimeRange: "Sluttiden måste vara efter starttiden.",
     },
   },
   en: {
@@ -310,6 +311,7 @@ export const translations = {
       bookingNotFound: "No booking was found for that email.",
       unknown: "Something went wrong. Please try again.",
       missingSessionFields: "All required fields must be filled in.",
+      invalidSessionTimeRange: "The end time must be after the start time.",
     },
   },
 } as const;
