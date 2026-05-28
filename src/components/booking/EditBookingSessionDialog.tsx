@@ -9,9 +9,11 @@ import {
   DialogTitle,
   Stack,
   TextField,
+  Typography,
 } from "@mui/material";
 import type { BookingSession } from "@/types/booking";
 import { useTranslations } from "@/i18n/useTranslations";
+import { getSlotCount } from "@/lib/bookingSlots";
 
 export type EditFormValues = {
   title: string;
@@ -49,6 +51,11 @@ export default function EditBookingSessionDialog({
 
   const { t } = useTranslations();
 
+  const calculatedSlotCount =
+    formValues.startTime && formValues.endTime
+      ? getSlotCount(formValues.startTime, formValues.endTime)
+      : 0;
+
   useEffect(() => {
     if (!session) {
       setFormValues(initialFormValues);
@@ -79,7 +86,10 @@ export default function EditBookingSessionDialog({
       return;
     }
 
-    onSave(session.id, formValues);
+    onSave(session.id, {
+      ...formValues,
+      maxParticipants: String(calculatedSlotCount),
+    });
   };
 
   return (
@@ -154,15 +164,10 @@ export default function EditBookingSessionDialog({
             />
           </Stack>
 
-          <TextField
-            label={t.editSessionDialog.maxParticipantsLabel}
-            type="number"
-            fullWidth
-            value={formValues.maxParticipants}
-            onChange={(event) =>
-              handleChange("maxParticipants", event.target.value)
-            }
-          />
+          <Typography color="text.secondary">
+            {t.createSessionForm.calculatedSlotsLabel}{" "}
+            {calculatedSlotCount > 0 ? calculatedSlotCount : "-"}
+          </Typography>
 
           <DialogActions sx={{ px: 0 }}>
             <Button onClick={onClose}>
