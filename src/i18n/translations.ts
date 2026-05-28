@@ -150,6 +150,13 @@ export const translations = {
       assignedTime: "Tilldelad tid",
       date: "Datum",
     },
+    deleteSessionDialog: {
+      title: "Ta bort bokningstillfälle?",
+      descriptionStart: "Är du säker på att du vill ta bort",
+      descriptionEnd: "Alla bokningar för tillfället tas också bort.",
+      cancelButton: "Avbryt",
+      deleteButton: "Ta bort",
+    },
     errors: {
       missingBookingFields: "Namn och email krävs.",
       sessionNotFound: "Bokningstillfället finns inte längre.",
@@ -313,6 +320,13 @@ export const translations = {
       empty: "No bookings were found for that email.",
       assignedTime: "Assigned time",
       date: "Date",
+    },
+    deleteSessionDialog: {
+      title: "Delete booking session?",
+      descriptionStart: "Are you sure you want to delete",
+      descriptionEnd: "All bookings for this session will also be deleted.",
+      cancelButton: "Cancel",
+      deleteButton: "Delete",
     },
     errors: {
       missingBookingFields: "Name and email are required.",

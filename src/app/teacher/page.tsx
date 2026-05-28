@@ -225,25 +225,27 @@ export default function TeacherPage() {
         open={deleteSessionId !== null}
         onClose={() => setDeleteSessionId(null)}
       >
-        <DialogTitle>Ta bort bokningstillfälle?</DialogTitle>
+        <DialogTitle>{t.deleteSessionDialog.title}</DialogTitle>
 
         <DialogContent>
           <DialogContentText>
-            Är du säker på att du vill ta bort{" "}
-            <strong>{deleteSession?.title}</strong>? Alla bokningar för
-            tillfället tas också bort.
+            {t.deleteSessionDialog.descriptionStart}{" "}
+            <strong>{deleteSession?.title}</strong>?{" "}
+            {t.deleteSessionDialog.descriptionEnd}
           </DialogContentText>
         </DialogContent>
 
         <DialogActions>
-          <Button onClick={() => setDeleteSessionId(null)}>Avbryt</Button>
+          <Button onClick={() => setDeleteSessionId(null)}>
+            {t.deleteSessionDialog.cancelButton}
+          </Button>
 
           <Button
             color="error"
             variant="contained"
             onClick={handleConfirmDeleteSession}
           >
-            Ta bort
+            {t.deleteSessionDialog.deleteButton}
           </Button>
         </DialogActions>
       </Dialog>
