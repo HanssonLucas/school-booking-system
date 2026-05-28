@@ -3,20 +3,26 @@
 import { useEffect, useState } from "react";
 import {
   Alert,
-  Button,
   Box,
+  Button,
+  Chip,
   Container,
+  Paper,
   Snackbar,
+  Stack,
   Typography,
 } from "@mui/material";
+import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
+import EventAvailableOutlinedIcon from "@mui/icons-material/EventAvailableOutlined";
+import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
+import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
 import AppHeader from "@/components/layout/AppHeader";
 import BookingSessionList from "@/components/booking/BookingSessionList";
 import BookSessionDialog from "@/components/booking/BookSessionDialog";
 import CancelBookingDialog from "@/components/booking/CancelBookingDialog";
+import MyBookingsDialog from "@/components/booking/MyBookingsDialog";
 import type { BookingSession } from "@/types/booking";
 import { useTranslations } from "@/i18n/useTranslations";
-
-import MyBookingsDialog from "@/components/booking/MyBookingsDialog";
 
 export default function StudentPage() {
   const [sessions, setSessions] = useState<BookingSession[]>([]);
@@ -123,6 +129,7 @@ export default function StudentPage() {
     );
 
     setSelectedSessionId(null);
+
     if (bookingResult.slotStartTime && bookingResult.slotEndTime) {
       setSuccessMessage(
         `${t.student.bookingSuccessWithTime} ${bookingResult.slotStartTime}–${bookingResult.slotEndTime}`,
@@ -220,54 +227,211 @@ export default function StudentPage() {
         onClose={() => setIsMyBookingsDialogOpen(false)}
       />
 
-      <Container sx={{ py: 6 }}>
-        <Box sx={{ mb: 4 }}>
-          <Typography variant="h3" component="h1" gutterBottom>
-            {t.student.title}
-          </Typography>
-
-          <Typography color="text.secondary">
-            {t.student.description}
-          </Typography>
-        </Box>
-
-        <Snackbar
-          open={Boolean(successMessage)}
-          autoHideDuration={4000}
+      <Snackbar
+        open={Boolean(successMessage)}
+        autoHideDuration={4000}
+        onClose={() => setSuccessMessage("")}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          severity="success"
+          variant="filled"
           onClose={() => setSuccessMessage("")}
-          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
         >
-          <Alert
-            severity="success"
-            variant="filled"
-            onClose={() => setSuccessMessage("")}
-          >
-            {successMessage}
-          </Alert>
-        </Snackbar>
-        <Box sx={{ mb: 3 }}>
-          <Button
-            variant="outlined"
-            onClick={() => setIsMyBookingsDialogOpen(true)}
-          >
-            {t.myBookingsDialog.openButton}
-          </Button>
-        </Box>
+          {successMessage}
+        </Alert>
+      </Snackbar>
 
-        {isLoading ? (
-          <Typography color="text.secondary">
-            {t.student.loadingSessions}
-          </Typography>
-        ) : (
-          <BookingSessionList
-            sessions={sessions}
-            showBookingButton
-            showCancelButton
-            onBookSession={handleBookSession}
-            onCancelSession={handleCancelBooking}
-            emptyMessage={t.student.emptySessions}
+      <Container sx={{ py: { xs: 4, md: 7 } }}>
+        <Paper
+          sx={{
+            position: "relative",
+            overflow: "hidden",
+            borderRadius: 6,
+            p: { xs: 3, sm: 5 },
+            mb: 5,
+            border: 1,
+            borderColor: "divider",
+            background:
+              "linear-gradient(135deg, rgba(25, 118, 210, 0.14), rgba(76, 175, 80, 0.08))",
+          }}
+        >
+          <Box
+            sx={{
+              position: "absolute",
+              width: 220,
+              height: 220,
+              borderRadius: "50%",
+              bgcolor: "primary.main",
+              opacity: 0.12,
+              right: -70,
+              top: -80,
+            }}
           />
-        )}
+
+          <Box
+            sx={{
+              position: "absolute",
+              width: 160,
+              height: 160,
+              borderRadius: "50%",
+              bgcolor: "success.main",
+              opacity: 0.1,
+              right: 120,
+              bottom: -80,
+            }}
+          />
+
+          <Box sx={{ position: "relative", maxWidth: 760 }}>
+            <Chip
+              icon={<EventAvailableOutlinedIcon />}
+              label={t.common.student}
+              sx={{
+                mb: 3,
+                borderRadius: 999,
+                fontWeight: 800,
+                bgcolor: "background.paper",
+              }}
+            />
+
+            <Typography
+              variant="h2"
+              component="h1"
+              sx={{
+                fontWeight: 900,
+                letterSpacing: -1.3,
+                lineHeight: 1.05,
+                fontSize: { xs: "2.25rem", md: "3.5rem" },
+                mb: 2,
+              }}
+            >
+              {t.student.title}
+            </Typography>
+
+            <Typography
+              variant="h6"
+              color="text.secondary"
+              sx={{
+                lineHeight: 1.7,
+                maxWidth: 680,
+                mb: 4,
+              }}
+            >
+              {t.student.description}
+            </Typography>
+
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+              <Button
+                variant="contained"
+                size="large"
+                startIcon={<SearchOutlinedIcon />}
+                onClick={() => setIsMyBookingsDialogOpen(true)}
+                sx={{
+                  borderRadius: 999,
+                  textTransform: "none",
+                  fontWeight: 800,
+                  px: 3,
+                  py: 1.3,
+                }}
+              >
+                {t.myBookingsDialog.openButton}
+              </Button>
+
+              <Button
+                variant="outlined"
+                size="large"
+                startIcon={<EventAvailableOutlinedIcon />}
+                onClick={() => {
+                  document
+                    .getElementById("available-sessions")
+                    ?.scrollIntoView({ behavior: "smooth" });
+                }}
+                sx={{
+                  borderRadius: 999,
+                  textTransform: "none",
+                  fontWeight: 800,
+                  px: 3,
+                  py: 1.3,
+                  bgcolor: "background.paper",
+                }}
+              >
+                {t.home.upcomingSessionsTitle}
+              </Button>
+            </Stack>
+
+            <Stack
+              direction="row"
+              spacing={1}
+              useFlexGap
+              sx={{
+                flexWrap: "wrap",
+                mt: 4,
+              }}
+            >
+              <Chip
+                icon={<AccessTimeOutlinedIcon />}
+                label={t.bookingSession.slotDuration}
+                variant="outlined"
+                sx={{ borderRadius: 999, bgcolor: "background.paper" }}
+              />
+
+              <Chip
+                icon={<SearchOutlinedIcon />}
+                label={t.myBookingsDialog.openButton}
+                variant="outlined"
+                sx={{ borderRadius: 999, bgcolor: "background.paper" }}
+              />
+
+              <Chip
+                icon={<CancelOutlinedIcon />}
+                label={t.bookingSession.cancelButton}
+                variant="outlined"
+                sx={{ borderRadius: 999, bgcolor: "background.paper" }}
+              />
+            </Stack>
+          </Box>
+        </Paper>
+
+        <Paper
+          id="available-sessions"
+          sx={{
+            p: { xs: 3, md: 4 },
+            borderRadius: 5,
+            border: 1,
+            borderColor: "divider",
+            boxShadow: 1,
+          }}
+        >
+          <Box sx={{ mb: 3 }}>
+            <Typography
+              variant="h4"
+              component="h2"
+              sx={{ fontWeight: 850, letterSpacing: -0.5 }}
+              gutterBottom
+            >
+              {t.home.upcomingSessionsTitle}
+            </Typography>
+
+            <Typography color="text.secondary" sx={{ maxWidth: 720 }}>
+              {t.home.upcomingSessionsDescription}
+            </Typography>
+          </Box>
+
+          {isLoading ? (
+            <Typography color="text.secondary">
+              {t.student.loadingSessions}
+            </Typography>
+          ) : (
+            <BookingSessionList
+              sessions={sessions}
+              showBookingButton
+              showCancelButton
+              onBookSession={handleBookSession}
+              onCancelSession={handleCancelBooking}
+              emptyMessage={t.student.emptySessions}
+            />
+          )}
+        </Paper>
       </Container>
     </>
   );
