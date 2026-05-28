@@ -5,9 +5,18 @@ import {
   CardActions,
   CardContent,
   Chip,
+  Divider,
   Stack,
   Typography,
 } from "@mui/material";
+import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
+import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
+import TimerOutlinedIcon from "@mui/icons-material/TimerOutlined";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
+import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
+import EventAvailableOutlinedIcon from "@mui/icons-material/EventAvailableOutlined";
+import EventBusyOutlinedIcon from "@mui/icons-material/EventBusyOutlined";
 import { useTranslations } from "@/i18n/useTranslations";
 
 type BookingSessionCardProps = {
@@ -51,34 +60,124 @@ export default function BookingSessionCard({
 }: BookingSessionCardProps) {
   const { t } = useTranslations();
 
-  const spotsLeft = maxParticipants - bookedParticipants;
-  const isFull = spotsLeft === 0;
+  const slotsLeft = maxParticipants - bookedParticipants;
+  const isFull = slotsLeft === 0;
+
+  const statusLabel = isFull
+    ? t.bookingSession.full
+    : `${slotsLeft} ${t.bookingSession.of} ${maxParticipants} ${t.bookingSession.slotsLeft}`;
 
   return (
-    <Card>
-      <CardContent>
-        <Stack spacing={2}>
-          <Box>
-            <Typography variant="h6" component="h2">
-              {title}
-            </Typography>
+    <Card
+      sx={{
+        borderRadius: 4,
+        border: 1,
+        borderColor: "divider",
+        boxShadow: 2,
+        overflow: "hidden",
+        transition: "transform 0.2s ease, box-shadow 0.2s ease",
+        "&:hover": {
+          transform: "translateY(-3px)",
+          boxShadow: 6,
+        },
+      }}
+    >
+      <CardContent sx={{ p: 3 }}>
+        <Stack spacing={3}>
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            justifyContent="space-between"
+            alignItems={{ xs: "flex-start", sm: "flex-start" }}
+            spacing={3}
+          >
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <Typography
+                variant="h6"
+                component="h2"
+                sx={{ fontWeight: 700, mb: 0.5 }}
+              >
+                {title}
+              </Typography>
 
-            <Typography variant="body2" color="text.secondary">
-              {description}
-            </Typography>
-          </Box>
+              {description && (
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{
+                    maxWidth: 720,
+                    lineHeight: 1.6,
+                  }}
+                >
+                  {description}
+                </Typography>
+              )}
+            </Box>
 
-          <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
-            <Chip label={date} />
-            <Chip label={`${startTime}–${endTime}`} />
-            <Chip label={t.bookingSession.slotDuration} />
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: { xs: "flex-start", sm: "flex-end" },
+                minWidth: { sm: 190 },
+              }}
+            >
+              <Chip
+                icon={
+                  isFull ? (
+                    <EventBusyOutlinedIcon />
+                  ) : (
+                    <EventAvailableOutlinedIcon />
+                  )
+                }
+                color={isFull ? "error" : "success"}
+                label={statusLabel}
+                sx={{
+                  fontWeight: 700,
+                  borderRadius: 999,
+                  px: 0.75,
+                  height: 34,
+                  "& .MuiChip-icon": {
+                    fontSize: 19,
+                  },
+                }}
+              />
+            </Box>
+          </Stack>
+
+          <Stack direction="row" spacing={1.25} useFlexGap flexWrap="wrap">
             <Chip
-              color={isFull ? "error" : "success"}
-              label={
-                isFull
-                  ? t.bookingSession.full
-                  : `${spotsLeft} ${t.bookingSession.of} ${maxParticipants} ${t.bookingSession.slotsLeft}`
-              }
+              icon={<CalendarMonthOutlinedIcon />}
+              label={date}
+              variant="outlined"
+              sx={{
+                borderRadius: 999,
+                bgcolor: "action.hover",
+              }}
+            />
+
+            <Chip
+              icon={<AccessTimeOutlinedIcon />}
+              label={`${startTime}–${endTime}`}
+              variant="outlined"
+              sx={{
+                borderRadius: 999,
+                bgcolor: "action.hover",
+              }}
+            />
+
+            <Chip
+              icon={<TimerOutlinedIcon />}
+              label={t.bookingSession.slotDuration}
+              variant="outlined"
+              sx={{
+                borderRadius: 999,
+                bgcolor: "action.hover",
+                borderColor: "divider",
+                fontWeight: 500,
+                height: 34,
+                "& .MuiChip-icon": {
+                  fontSize: 18,
+                },
+              }}
             />
           </Stack>
         </Stack>
@@ -89,40 +188,108 @@ export default function BookingSessionCard({
         showEditButton ||
         showViewBookingsButton ||
         showDeleteButton) && (
-        <CardActions sx={{ px: 2, pb: 2, gap: 1 }}>
-          {showBookingButton && (
-            <Button variant="contained" disabled={isFull} onClick={onBook}>
-              {isFull ? t.bookingSession.full : t.bookingSession.bookButton}
-            </Button>
-          )}
+        <>
+          <Divider />
 
-          {showCancelButton && (
-            <Button
-              variant="outlined"
-              color="error"
-              disabled={bookedParticipants === 0}
-              onClick={onCancel}
-            >
-              {t.bookingSession.cancelButton}
-            </Button>
-          )}
+          <CardActions
+            sx={{
+              px: 3,
+              py: 2,
+              gap: 1,
+              flexWrap: "wrap",
+              justifyContent: {
+                xs: "flex-start",
+                sm: "flex-end",
+              },
+              bgcolor: "action.hover",
+            }}
+          >
+            {showBookingButton && (
+              <Button
+                variant="contained"
+                disabled={isFull}
+                onClick={onBook}
+                startIcon={
+                  isFull ? (
+                    <EventBusyOutlinedIcon />
+                  ) : (
+                    <EventAvailableOutlinedIcon />
+                  )
+                }
+                sx={{
+                  borderRadius: 999,
+                  textTransform: "none",
+                  fontWeight: 700,
+                }}
+              >
+                {isFull ? t.bookingSession.full : t.bookingSession.bookButton}
+              </Button>
+            )}
 
-          {showEditButton && (
-            <Button variant="outlined" onClick={onEdit}>
-              {t.bookingSession.editButton}
-            </Button>
-          )}
-          {showViewBookingsButton && (
-            <Button variant="outlined" onClick={onViewBookings}>
-              {t.bookingSession.viewBookingsButton}
-            </Button>
-          )}
-          {showDeleteButton && (
-            <Button variant="outlined" color="error" onClick={onDelete}>
-              {t.bookingSession.deleteButton}
-            </Button>
-          )}
-        </CardActions>
+            {showCancelButton && (
+              <Button
+                variant="outlined"
+                color="error"
+                disabled={bookedParticipants === 0}
+                onClick={onCancel}
+                startIcon={<EventBusyOutlinedIcon />}
+                sx={{
+                  borderRadius: 999,
+                  textTransform: "none",
+                  fontWeight: 700,
+                }}
+              >
+                {t.bookingSession.cancelButton}
+              </Button>
+            )}
+
+            {showEditButton && (
+              <Button
+                variant="outlined"
+                onClick={onEdit}
+                startIcon={<EditOutlinedIcon />}
+                sx={{
+                  borderRadius: 999,
+                  textTransform: "none",
+                  fontWeight: 700,
+                }}
+              >
+                {t.bookingSession.editButton}
+              </Button>
+            )}
+
+            {showViewBookingsButton && (
+              <Button
+                variant="contained"
+                onClick={onViewBookings}
+                startIcon={<VisibilityOutlinedIcon />}
+                sx={{
+                  borderRadius: 999,
+                  textTransform: "none",
+                  fontWeight: 700,
+                }}
+              >
+                {t.bookingSession.viewBookingsButton}
+              </Button>
+            )}
+
+            {showDeleteButton && (
+              <Button
+                variant="outlined"
+                color="error"
+                onClick={onDelete}
+                startIcon={<DeleteOutlineOutlinedIcon />}
+                sx={{
+                  borderRadius: 999,
+                  textTransform: "none",
+                  fontWeight: 700,
+                }}
+              >
+                {t.bookingSession.deleteButton}
+              </Button>
+            )}
+          </CardActions>
+        </>
       )}
     </Card>
   );
