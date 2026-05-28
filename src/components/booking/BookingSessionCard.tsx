@@ -26,6 +26,8 @@ type BookingSessionCardProps = {
   onEdit?: () => void;
   showViewBookingsButton?: boolean;
   onViewBookings?: () => void;
+  showDeleteButton?: boolean;
+  onDelete?: () => void;
 };
 
 export default function BookingSessionCard({
@@ -44,6 +46,8 @@ export default function BookingSessionCard({
   onEdit,
   showViewBookingsButton = false,
   onViewBookings,
+  showDeleteButton = false,
+  onDelete,
 }: BookingSessionCardProps) {
   const { t } = useTranslations();
 
@@ -83,7 +87,8 @@ export default function BookingSessionCard({
       {(showBookingButton ||
         showCancelButton ||
         showEditButton ||
-        showViewBookingsButton) && (
+        showViewBookingsButton ||
+        showDeleteButton) && (
         <CardActions sx={{ px: 2, pb: 2, gap: 1 }}>
           {showBookingButton && (
             <Button variant="contained" disabled={isFull} onClick={onBook}>
@@ -110,6 +115,11 @@ export default function BookingSessionCard({
           {showViewBookingsButton && (
             <Button variant="outlined" onClick={onViewBookings}>
               {t.bookingSession.viewBookingsButton}
+            </Button>
+          )}
+          {showDeleteButton && (
+            <Button variant="outlined" color="error" onClick={onDelete}>
+              {t.bookingSession.deleteButton}
             </Button>
           )}
         </CardActions>

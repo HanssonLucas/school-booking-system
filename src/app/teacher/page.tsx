@@ -1,7 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Alert, Box, Container, Snackbar, Typography } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Snackbar,
+  Typography,
+} from "@mui/material";
 import AppHeader from "@/components/layout/AppHeader";
 import CreateBookingSessionForm from "@/components/booking/CreateBookingSessionForm";
 import EditBookingSessionDialog, {
@@ -24,6 +36,50 @@ export default function TeacherPage() {
   const [viewBookingsSessionId, setViewBookingsSessionId] = useState<
     number | null
   >(null);
+
+  const [deleteSessionId, setDeleteSessionId] = useState<number | null>(null);
+
+  const deleteSession = sessions.find(
+    (session) => session.id === deleteSessionId,
+  );
+  const handleDeleteSessionClick = (sessionId: number) => {
+    setDeleteSessionId(sessionId);
+  };
+
+  const handleConfirmDeleteSession = async () => {
+    if (!deleteSessionId) {
+      return;
+    }
+
+    const response = await fetch(`/api/booking-sessions/${deleteSessionId}`, {
+      method: "DELETE",
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+
+      const errorMessages: Record<string, string> = {
+        INVALID_SESSION_ID: t.errors.sessionNotFound,
+        SESSION_NOT_FOUND: t.errors.sessionNotFound,
+      };
+
+      setErrorMessage(
+        errorMessages[errorData.code] ??
+          t.teacher.deleteFallbackError ??
+          t.errors.unknown,
+      );
+
+      return;
+    }
+
+    setSessions((currentSessions) =>
+      currentSessions.filter((session) => session.id !== deleteSessionId),
+    );
+
+    setDeleteSessionId(null);
+    setErrorMessage("");
+    setSuccessMessage(t.teacher.deleteSuccess);
+  };
 
   const viewBookingsSession = sessions.find(
     (session) => session.id === viewBookingsSessionId,
@@ -165,6 +221,33 @@ export default function TeacherPage() {
         onClose={() => setViewBookingsSessionId(null)}
       />
 
+      <Dialog
+        open={deleteSessionId !== null}
+        onClose={() => setDeleteSessionId(null)}
+      >
+        <DialogTitle>Ta bort bokningstillfälle?</DialogTitle>
+
+        <DialogContent>
+          <DialogContentText>
+            Är du säker på att du vill ta bort{" "}
+            <strong>{deleteSession?.title}</strong>? Alla bokningar för
+            tillfället tas också bort.
+          </DialogContentText>
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={() => setDeleteSessionId(null)}>Avbryt</Button>
+
+          <Button
+            color="error"
+            variant="contained"
+            onClick={handleConfirmDeleteSession}
+          >
+            Ta bort
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       <Snackbar
         open={Boolean(successMessage)}
         autoHideDuration={4000}
@@ -226,8 +309,10 @@ export default function TeacherPage() {
               sessions={sessions}
               showEditButton
               showViewBookingsButton
+              showDeleteButton
               onEditSession={handleEditSession}
               onViewBookingsSession={handleViewBookings}
+              onDeleteSession={handleDeleteSessionClick}
               emptyMessage={t.teacher.emptySessions}
             />
           )}
