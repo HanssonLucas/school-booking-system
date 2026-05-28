@@ -95,7 +95,8 @@ export const translations = {
     },
     bookingSession: {
       full: "Fullbokad",
-      spotsLeft: "platser kvar",
+      slotsLeft: "tider kvar",
+      slotDuration: "15 min per bokning",
       bookButton: "Boka plats",
       cancelButton: "Avboka plats",
       editButton: "Redigera",
@@ -255,7 +256,8 @@ export const translations = {
     },
     bookingSession: {
       full: "Fully booked",
-      spotsLeft: "spots left",
+      slotsLeft: "slots left",
+      slotDuration: "15 min per booking",
       bookButton: "Book place",
       cancelButton: "Cancel booking",
       editButton: "Edit",

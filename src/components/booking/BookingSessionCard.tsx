@@ -67,12 +67,13 @@ export default function BookingSessionCard({
           <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
             <Chip label={date} />
             <Chip label={`${startTime}–${endTime}`} />
+            <Chip label={t.bookingSession.slotDuration} />
             <Chip
               color={isFull ? "error" : "success"}
               label={
                 isFull
                   ? t.bookingSession.full
-                  : `${spotsLeft} ${t.bookingSession.of} ${maxParticipants} ${t.bookingSession.spotsLeft}`
+                  : `${spotsLeft} ${t.bookingSession.of} ${maxParticipants} ${t.bookingSession.slotsLeft}`
               }
             />
           </Stack>
