@@ -17,6 +17,7 @@ import {
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import EventAvailableOutlinedIcon from "@mui/icons-material/EventAvailableOutlined";
+import EventBusyOutlinedIcon from "@mui/icons-material/EventBusyOutlined";
 import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
 import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
 import type { StudentBookingLookup } from "@/types/booking";
@@ -25,17 +26,23 @@ import { useTranslations } from "@/i18n/useTranslations";
 type MyBookingsDialogProps = {
   open: boolean;
   onClose: () => void;
+  onBookingCancelled?: (sessionId: number) => void;
 };
 
 export default function MyBookingsDialog({
   open,
   onClose,
+  onBookingCancelled,
 }: MyBookingsDialogProps) {
   const [studentEmail, setStudentEmail] = useState("");
   const [bookings, setBookings] = useState<StudentBookingLookup[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [isSearching, setIsSearching] = useState(false);
+  const [cancellingBookingId, setCancellingBookingId] = useState<number | null>(
+    null,
+  );
 
   const { t } = useTranslations();
 
@@ -44,6 +51,8 @@ export default function MyBookingsDialog({
     setBookings([]);
     setHasSearched(false);
     setErrorMessage("");
+    setSuccessMessage("");
+    setCancellingBookingId(null);
     onClose();
   };
 
@@ -57,6 +66,7 @@ export default function MyBookingsDialog({
 
     setIsSearching(true);
     setErrorMessage("");
+    setSuccessMessage("");
     setHasSearched(false);
 
     try {
@@ -75,6 +85,49 @@ export default function MyBookingsDialog({
       setHasSearched(true);
     } finally {
       setIsSearching(false);
+    }
+  };
+
+  const handleCancelBooking = async (booking: StudentBookingLookup) => {
+    setCancellingBookingId(booking.id);
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    try {
+      const response = await fetch("/api/bookings", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          sessionId: booking.sessionId,
+          studentEmail: booking.studentEmail,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+
+        const errorMessages: Record<string, string> = {
+          MISSING_CANCELLATION_FIELDS: t.errors.missingCancellationFields,
+          BOOKING_NOT_FOUND: t.errors.bookingNotFound,
+        };
+
+        setErrorMessage(errorMessages[errorData.code] ?? t.errors.unknown);
+
+        return;
+      }
+
+      setBookings((currentBookings) =>
+        currentBookings.filter(
+          (currentBooking) => currentBooking.id !== booking.id,
+        ),
+      );
+
+      onBookingCancelled?.(booking.sessionId);
+      setSuccessMessage(t.student.cancellationSuccess);
+    } finally {
+      setCancellingBookingId(null);
     }
   };
 
@@ -152,6 +205,12 @@ export default function MyBookingsDialog({
             </Alert>
           )}
 
+          {successMessage && (
+            <Alert severity="success" sx={{ borderRadius: 3 }}>
+              {successMessage}
+            </Alert>
+          )}
+
           <TextField
             label={t.myBookingsDialog.emailLabel}
             type="email"
@@ -182,7 +241,7 @@ export default function MyBookingsDialog({
           >
             <Button
               onClick={handleClose}
-              disabled={isSearching}
+              disabled={isSearching || cancellingBookingId !== null}
               sx={{
                 borderRadius: 999,
                 textTransform: "none",
@@ -196,7 +255,7 @@ export default function MyBookingsDialog({
             <Button
               variant="contained"
               type="submit"
-              disabled={isSearching}
+              disabled={isSearching || cancellingBookingId !== null}
               startIcon={<SearchOutlinedIcon />}
               sx={{
                 borderRadius: 999,
@@ -286,6 +345,25 @@ export default function MyBookingsDialog({
                         }}
                       />
                     </Stack>
+
+                    <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                      <Button
+                        variant="outlined"
+                        color="error"
+                        startIcon={<EventBusyOutlinedIcon />}
+                        disabled={cancellingBookingId === booking.id}
+                        onClick={() => handleCancelBooking(booking)}
+                        sx={{
+                          borderRadius: 999,
+                          textTransform: "none",
+                          fontWeight: 800,
+                        }}
+                      >
+                        {cancellingBookingId === booking.id
+                          ? t.cancelBookingDialog.submittingButton
+                          : t.bookingSession.cancelButton}
+                      </Button>
+                    </Box>
                   </Stack>
                 </Paper>
               ))}

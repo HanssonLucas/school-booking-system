@@ -44,6 +44,21 @@ export default function StudentPage() {
     (session) => session.id === cancelSessionId,
   );
 
+  const handleBookingCancelledFromLookup = (sessionId: number) => {
+    setSessions((currentSessions) =>
+      currentSessions.map((session) => {
+        if (session.id !== sessionId) {
+          return session;
+        }
+
+        return {
+          ...session,
+          bookedParticipants: Math.max(0, session.bookedParticipants - 1),
+        };
+      }),
+    );
+  };
+
   useEffect(() => {
     const fetchSessions = async () => {
       try {
@@ -225,6 +240,7 @@ export default function StudentPage() {
       <MyBookingsDialog
         open={isMyBookingsDialogOpen}
         onClose={() => setIsMyBookingsDialogOpen(false)}
+        onBookingCancelled={handleBookingCancelledFromLookup}
       />
 
       <Snackbar
