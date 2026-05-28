@@ -39,6 +39,17 @@ type BookingSessionCardProps = {
   onDelete?: () => void;
 };
 
+const metaChipSx = {
+  borderRadius: 999,
+  bgcolor: "action.hover",
+  borderColor: "divider",
+  fontWeight: 500,
+  height: 34,
+  "& .MuiChip-icon": {
+    fontSize: 18,
+  },
+};
+
 export default function BookingSessionCard({
   title,
   description,
@@ -86,9 +97,11 @@ export default function BookingSessionCard({
         <Stack spacing={3}>
           <Stack
             direction={{ xs: "column", sm: "row" }}
-            justifyContent="space-between"
-            alignItems={{ xs: "flex-start", sm: "flex-start" }}
             spacing={3}
+            sx={{
+              justifyContent: "space-between",
+              alignItems: { xs: "flex-start", sm: "flex-start" },
+            }}
           >
             <Box sx={{ flex: 1, minWidth: 0 }}>
               <Typography
@@ -143,41 +156,33 @@ export default function BookingSessionCard({
             </Box>
           </Stack>
 
-          <Stack direction="row" spacing={1.25} useFlexGap flexWrap="wrap">
+          <Stack
+            direction="row"
+            spacing={1.25}
+            useFlexGap
+            sx={{
+              flexWrap: "wrap",
+            }}
+          >
             <Chip
               icon={<CalendarMonthOutlinedIcon />}
               label={date}
               variant="outlined"
-              sx={{
-                borderRadius: 999,
-                bgcolor: "action.hover",
-              }}
+              sx={metaChipSx}
             />
 
             <Chip
               icon={<AccessTimeOutlinedIcon />}
               label={`${startTime}–${endTime}`}
               variant="outlined"
-              sx={{
-                borderRadius: 999,
-                bgcolor: "action.hover",
-              }}
+              sx={metaChipSx}
             />
 
             <Chip
               icon={<TimerOutlinedIcon />}
               label={t.bookingSession.slotDuration}
               variant="outlined"
-              sx={{
-                borderRadius: 999,
-                bgcolor: "action.hover",
-                borderColor: "divider",
-                fontWeight: 500,
-                height: 34,
-                "& .MuiChip-icon": {
-                  fontSize: 18,
-                },
-              }}
+              sx={metaChipSx}
             />
           </Stack>
         </Stack>
