@@ -11,6 +11,7 @@ import {
 } from "@mui/material";
 import type { CreateBookingSessionInput } from "@/types/booking";
 import { useTranslations } from "@/i18n/useTranslations";
+import { getSlotCount } from "@/lib/bookingSlots";
 
 type FormValues = {
   title: string;
@@ -44,6 +45,11 @@ export default function CreateBookingSessionForm({
 
   const { t } = useTranslations();
 
+  const calculatedSlotCount =
+    formValues.startTime && formValues.endTime
+      ? getSlotCount(formValues.startTime, formValues.endTime)
+      : 0;
+
   const handleChange = (field: keyof FormValues, value: string) => {
     setFormValues((currentValues) => ({
       ...currentValues,
@@ -75,12 +81,12 @@ export default function CreateBookingSessionForm({
       errors.endTime = t.createSessionForm.endTimeRequired;
     }
 
-    if (!formValues.maxParticipants) {
-      errors.maxParticipants = t.createSessionForm.maxParticipantsRequired;
-    }
-
-    if (formValues.maxParticipants && Number(formValues.maxParticipants) <= 0) {
-      errors.maxParticipants = t.createSessionForm.maxParticipantsMin;
+    if (
+      formValues.startTime &&
+      formValues.endTime &&
+      calculatedSlotCount <= 0
+    ) {
+      errors.endTime = t.errors.invalidSessionTimeRange;
     }
 
     setFormErrors(errors);
@@ -103,7 +109,7 @@ export default function CreateBookingSessionForm({
       date: formValues.date,
       startTime: formValues.startTime,
       endTime: formValues.endTime,
-      maxParticipants: Number(formValues.maxParticipants),
+      maxParticipants: calculatedSlotCount,
     });
 
     setFormValues(initialFormValues);
@@ -183,17 +189,10 @@ export default function CreateBookingSessionForm({
           />
         </Stack>
 
-        <TextField
-          label={t.createSessionForm.maxParticipantsLabel}
-          type="number"
-          fullWidth
-          value={formValues.maxParticipants}
-          onChange={(event) =>
-            handleChange("maxParticipants", event.target.value)
-          }
-          error={Boolean(formErrors.maxParticipants)}
-          helperText={formErrors.maxParticipants}
-        />
+        <Typography color="text.secondary">
+          Antal bokningsbara tider:{" "}
+          {calculatedSlotCount > 0 ? calculatedSlotCount : "-"}
+        </Typography>
 
         <Box>
           <Button variant="contained" type="submit">
