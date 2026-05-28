@@ -19,7 +19,6 @@ import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import EventAvailableOutlinedIcon from "@mui/icons-material/EventAvailableOutlined";
 import EventBusyOutlinedIcon from "@mui/icons-material/EventBusyOutlined";
 import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
-import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
 import type { StudentBookingLookup } from "@/types/booking";
 import { useTranslations } from "@/i18n/useTranslations";
 
@@ -206,7 +205,16 @@ export default function MyBookingsDialog({
           )}
 
           {successMessage && (
-            <Alert severity="success" sx={{ borderRadius: 3 }}>
+            <Alert
+              severity="success"
+              sx={{
+                borderRadius: 3,
+                py: 0.5,
+                "& .MuiAlert-message": {
+                  py: 0.5,
+                },
+              }}
+            >
               {successMessage}
             </Alert>
           )}
@@ -277,20 +285,20 @@ export default function MyBookingsDialog({
           )}
 
           {bookings.length > 0 && (
-            <Stack spacing={2}>
+            <Stack spacing={1.5}>
               {bookings.map((booking) => (
                 <Paper
                   key={booking.id}
                   elevation={0}
                   sx={{
-                    p: 2.5,
+                    p: 2.25,
                     borderRadius: 4,
                     border: 1,
                     borderColor: "divider",
                     bgcolor: "background.default",
                   }}
                 >
-                  <Stack spacing={1.5}>
+                  <Stack spacing={1.75}>
                     <Stack
                       direction={{ xs: "column", sm: "row" }}
                       spacing={1}
@@ -299,12 +307,22 @@ export default function MyBookingsDialog({
                         alignItems: { xs: "flex-start", sm: "center" },
                       }}
                     >
-                      <Typography
-                        variant="subtitle1"
-                        sx={{ fontWeight: 900, letterSpacing: -0.2 }}
-                      >
-                        {booking.sessionTitle}
-                      </Typography>
+                      <Box>
+                        <Typography
+                          variant="subtitle1"
+                          sx={{ fontWeight: 900, letterSpacing: -0.2 }}
+                        >
+                          {booking.sessionTitle}
+                        </Typography>
+
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{ mt: 0.25 }}
+                        >
+                          {t.myBookingsDialog.date}: {booking.sessionDate}
+                        </Typography>
+                      </Box>
 
                       <Chip
                         icon={<EventAvailableOutlinedIcon />}
@@ -317,39 +335,30 @@ export default function MyBookingsDialog({
                       />
                     </Stack>
 
-                    <Stack
-                      direction="row"
-                      spacing={1}
-                      useFlexGap
+                    <Box
                       sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        gap: 1,
                         flexWrap: "wrap",
                       }}
                     >
                       <Chip
                         icon={<CalendarMonthOutlinedIcon />}
-                        label={`${t.myBookingsDialog.date}: ${booking.sessionDate}`}
+                        label={booking.sessionDate}
                         variant="outlined"
+                        size="small"
                         sx={{
                           borderRadius: 999,
                           bgcolor: "action.hover",
                         }}
                       />
 
-                      <Chip
-                        icon={<AccessTimeOutlinedIcon />}
-                        label={`${t.myBookingsDialog.assignedTime}: ${booking.slotStartTime}–${booking.slotEndTime}`}
-                        variant="outlined"
-                        sx={{
-                          borderRadius: 999,
-                          bgcolor: "action.hover",
-                        }}
-                      />
-                    </Stack>
-
-                    <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
                       <Button
-                        variant="outlined"
+                        variant="text"
                         color="error"
+                        size="small"
                         startIcon={<EventBusyOutlinedIcon />}
                         disabled={cancellingBookingId === booking.id}
                         onClick={() => handleCancelBooking(booking)}
@@ -357,6 +366,7 @@ export default function MyBookingsDialog({
                           borderRadius: 999,
                           textTransform: "none",
                           fontWeight: 800,
+                          px: 1.5,
                         }}
                       >
                         {cancellingBookingId === booking.id
