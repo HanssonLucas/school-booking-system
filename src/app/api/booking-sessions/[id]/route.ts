@@ -110,3 +110,37 @@ export async function PATCH(request: Request, context: RouteContext) {
 
   return NextResponse.json(updatedSession);
 }
+
+export async function DELETE(request: Request, context: RouteContext) {
+  const { id } = await context.params;
+  const sessionId = Number(id);
+
+  if (!sessionId) {
+    return NextResponse.json({ code: "INVALID_SESSION_ID" }, { status: 400 });
+  }
+
+  const existingSession = db
+    .prepare(
+      `
+      SELECT id
+      FROM booking_sessions
+      WHERE id = ?
+      `,
+    )
+    .get(sessionId) as { id: number } | undefined;
+
+  if (!existingSession) {
+    return NextResponse.json({ code: "SESSION_NOT_FOUND" }, { status: 404 });
+  }
+
+  db.prepare(
+    `
+    DELETE FROM booking_sessions
+    WHERE id = ?
+    `,
+  ).run(sessionId);
+
+  return NextResponse.json({
+    deletedSessionId: sessionId,
+  });
+}
