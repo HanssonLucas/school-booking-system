@@ -33,65 +33,78 @@ export default function TeacherPage() {
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [editingSessionId, setEditingSessionId] = useState<number | null>(null);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [viewBookingsSessionId, setViewBookingsSessionId] = useState<
     number | null
   >(null);
-
   const [deleteSessionId, setDeleteSessionId] = useState<number | null>(null);
+
+  const { t } = useTranslations();
 
   const deleteSession = sessions.find(
     (session) => session.id === deleteSessionId,
   );
-  const handleDeleteSessionClick = (sessionId: number) => {
-    setDeleteSessionId(sessionId);
-  };
 
-  const handleConfirmDeleteSession = async () => {
-    if (!deleteSessionId) {
-      return;
-    }
+  const viewBookingsSession = sessions.find(
+    (session) => session.id === viewBookingsSessionId,
+  );
 
-    const response = await fetch(`/api/booking-sessions/${deleteSessionId}`, {
-      method: "DELETE",
+  const editingSession = sessions.find(
+    (session) => session.id === editingSessionId,
+  );
+
+  useEffect(() => {
+    const fetchSessions = async () => {
+      try {
+        const response = await fetch("/api/booking-sessions");
+
+        if (!response.ok) {
+          console.error("Kunde inte hämta bokningstillfällen");
+          return;
+        }
+
+        const data: BookingSession[] = await response.json();
+        setSessions(data);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSessions();
+  }, []);
+
+  const handleCreateSession = async (newSession: CreateBookingSessionInput) => {
+    const response = await fetch("/api/booking-sessions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(newSession),
     });
 
     if (!response.ok) {
       const errorData = await response.json();
 
       const errorMessages: Record<string, string> = {
-        INVALID_SESSION_ID: t.errors.sessionNotFound,
-        SESSION_NOT_FOUND: t.errors.sessionNotFound,
+        MISSING_SESSION_FIELDS: t.errors.missingSessionFields,
       };
 
       setErrorMessage(
         errorMessages[errorData.code] ??
-          t.teacher.deleteFallbackError ??
+          t.teacher.createFallbackError ??
           t.errors.unknown,
       );
 
       return;
     }
 
-    setSessions((currentSessions) =>
-      currentSessions.filter((session) => session.id !== deleteSessionId),
-    );
+    const createdSession: BookingSession = await response.json();
 
-    setDeleteSessionId(null);
+    setSessions((currentSessions) => [createdSession, ...currentSessions]);
+    setIsCreateDialogOpen(false);
     setErrorMessage("");
-    setSuccessMessage(t.teacher.deleteSuccess);
+    setSuccessMessage(t.teacher.createSuccess);
   };
-
-  const viewBookingsSession = sessions.find(
-    (session) => session.id === viewBookingsSessionId,
-  );
-
-  const handleViewBookings = (sessionId: number) => {
-    setViewBookingsSessionId(sessionId);
-  };
-
-  const editingSession = sessions.find(
-    (session) => session.id === editingSessionId,
-  );
 
   const handleEditSession = (sessionId: number) => {
     setEditingSessionId(sessionId);
@@ -150,63 +163,63 @@ export default function TeacherPage() {
     setSuccessMessage(t.teacher.updateSuccess);
   };
 
-  const { t } = useTranslations();
+  const handleViewBookings = (sessionId: number) => {
+    setViewBookingsSessionId(sessionId);
+  };
 
-  useEffect(() => {
-    const fetchSessions = async () => {
-      try {
-        const response = await fetch("/api/booking-sessions");
+  const handleDeleteSessionClick = (sessionId: number) => {
+    setDeleteSessionId(sessionId);
+  };
 
-        if (!response.ok) {
-          console.error("Kunde inte hämta bokningstillfällen");
-          return;
-        }
+  const handleConfirmDeleteSession = async () => {
+    if (!deleteSessionId) {
+      return;
+    }
 
-        const data: BookingSession[] = await response.json();
-        setSessions(data);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchSessions();
-  }, []);
-
-  const handleCreateSession = async (newSession: CreateBookingSessionInput) => {
-    const response = await fetch("/api/booking-sessions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(newSession),
+    const response = await fetch(`/api/booking-sessions/${deleteSessionId}`, {
+      method: "DELETE",
     });
 
     if (!response.ok) {
       const errorData = await response.json();
 
       const errorMessages: Record<string, string> = {
-        MISSING_SESSION_FIELDS: t.errors.missingSessionFields,
+        INVALID_SESSION_ID: t.errors.sessionNotFound,
+        SESSION_NOT_FOUND: t.errors.sessionNotFound,
       };
 
       setErrorMessage(
         errorMessages[errorData.code] ??
-          t.teacher.createFallbackError ??
+          t.teacher.deleteFallbackError ??
           t.errors.unknown,
       );
 
       return;
     }
 
-    const createdSession: BookingSession = await response.json();
+    setSessions((currentSessions) =>
+      currentSessions.filter((session) => session.id !== deleteSessionId),
+    );
 
-    setSessions((currentSessions) => [createdSession, ...currentSessions]);
+    setDeleteSessionId(null);
     setErrorMessage("");
-    setSuccessMessage(t.teacher.createSuccess);
+    setSuccessMessage(t.teacher.deleteSuccess);
   };
 
   return (
     <>
       <AppHeader />
+
+      <Dialog
+        open={isCreateDialogOpen}
+        onClose={() => setIsCreateDialogOpen(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogContent>
+          <CreateBookingSessionForm onCreateSession={handleCreateSession} />
+        </DialogContent>
+      </Dialog>
 
       <EditBookingSessionDialog
         open={editingSessionId !== null}
@@ -291,7 +304,14 @@ export default function TeacherPage() {
           </Typography>
         </Box>
 
-        <CreateBookingSessionForm onCreateSession={handleCreateSession} />
+        <Box sx={{ mb: 4 }}>
+          <Button
+            variant="contained"
+            onClick={() => setIsCreateDialogOpen(true)}
+          >
+            {t.teacher.createSessionButton}
+          </Button>
+        </Box>
 
         <Box sx={{ mt: 6 }}>
           <Typography variant="h4" component="h2" gutterBottom>

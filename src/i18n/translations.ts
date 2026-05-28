@@ -66,6 +66,7 @@ export const translations = {
       updateFallbackError: "Det gick inte att uppdatera bokningstillfället.",
       deleteSuccess: "Bokningstillfället har tagits bort.",
       deleteFallbackError: "Det gick inte att ta bort bokningstillfället.",
+      createSessionButton: "Skapa nytt tillfälle",
     },
     createSessionForm: {
       title: "Skapa bokningstillfälle",
@@ -237,6 +238,7 @@ export const translations = {
       updateFallbackError: "The booking session could not be updated.",
       deleteSuccess: "The booking session has been deleted.",
       deleteFallbackError: "The booking session could not be deleted.",
+      createSessionButton: "Create new session",
     },
     createSessionForm: {
       title: "Create booking session",
