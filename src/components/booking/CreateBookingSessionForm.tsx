@@ -190,7 +190,7 @@ export default function CreateBookingSessionForm({
         </Stack>
 
         <Typography color="text.secondary">
-          Antal bokningsbara tider:{" "}
+          {t.createSessionForm.calculatedSlotsLabel}{" "}
           {calculatedSlotCount > 0 ? calculatedSlotCount : "-"}
         </Typography>
 

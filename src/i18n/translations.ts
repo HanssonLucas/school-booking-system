@@ -80,6 +80,7 @@ export const translations = {
       endTimeRequired: "Sluttid krävs",
       maxParticipantsRequired: "Max antal deltagare krävs",
       maxParticipantsMin: "Antalet deltagare måste vara minst 1",
+      calculatedSlotsLabel: "Antal bokningsbara tider:",
     },
     editSessionDialog: {
       title: "Redigera bokningstillfälle",
@@ -237,6 +238,7 @@ export const translations = {
       endTimeRequired: "End time is required",
       maxParticipantsRequired: "Maximum number of participants is required",
       maxParticipantsMin: "The number of participants must be at least 1",
+      calculatedSlotsLabel: "Number of bookable slots:",
     },
     editSessionDialog: {
       title: "Edit booking session",
