@@ -172,6 +172,9 @@ export const translations = {
       invalidSessionTimeRange: "Sluttiden måste vara efter starttiden.",
       tooFewSlotsForExistingBookings:
         "Tiden är för kort för antalet befintliga bokningar.",
+      cannotChangeSlotStructureWithBookings:
+        "Du kan inte ändra starttid, sluttid eller längd på tidsluckor när tillfället redan har bokningar.",
+      invalidSlotDuration: "Du behöver välja en giltig längd på tidsluckorna.",
     },
   },
   en: {
@@ -346,6 +349,9 @@ export const translations = {
       invalidSessionTimeRange: "The end time must be after the start time.",
       tooFewSlotsForExistingBookings:
         "The time range is too short for the existing bookings.",
+      cannotChangeSlotStructureWithBookings:
+        "You cannot change the start time, end time or slot duration when this session already has bookings.",
+      invalidSlotDuration: "Please choose a valid slot duration.",
     },
   },
 } as const;

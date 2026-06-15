@@ -59,23 +59,23 @@ export default function TeacherPage() {
     (session) => session.id === editingSessionId,
   );
 
-  useEffect(() => {
-    const fetchSessions = async () => {
-      try {
-        const response = await fetch("/api/booking-sessions");
+  const fetchSessions = async () => {
+    try {
+      const response = await fetch("/api/booking-sessions");
 
-        if (!response.ok) {
-          console.error("Kunde inte hämta bokningstillfällen");
-          return;
-        }
-
-        const data: BookingSession[] = await response.json();
-        setSessions(data);
-      } finally {
-        setIsLoading(false);
+      if (!response.ok) {
+        console.error("Kunde inte hämta bokningstillfällen");
+        return;
       }
-    };
 
+      const data: BookingSession[] = await response.json();
+      setSessions(data);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchSessions();
   }, []);
 
@@ -131,7 +131,7 @@ export default function TeacherPage() {
         date: values.date,
         startTime: values.startTime,
         endTime: values.endTime,
-        maxParticipants: Number(values.maxParticipants),
+        slotDurationMinutes: Number(values.slotDurationMinutes),
       }),
     });
 
@@ -145,6 +145,9 @@ export default function TeacherPage() {
         INVALID_SESSION_TIME_RANGE: t.errors.invalidSessionTimeRange,
         TOO_FEW_SLOTS_FOR_EXISTING_BOOKINGS:
           t.errors.tooFewSlotsForExistingBookings,
+        CANNOT_CHANGE_SLOT_STRUCTURE_WITH_BOOKINGS:
+          t.errors.cannotChangeSlotStructureWithBookings,
+        INVALID_SLOT_DURATION: t.errors.invalidSlotDuration,
       };
 
       setErrorMessage(
@@ -156,13 +159,7 @@ export default function TeacherPage() {
       return;
     }
 
-    const updatedSession: BookingSession = await response.json();
-
-    setSessions((currentSessions) =>
-      currentSessions.map((session) =>
-        session.id === sessionId ? updatedSession : session,
-      ),
-    );
+    await fetchSessions();
 
     setEditingSessionId(null);
     setErrorMessage("");

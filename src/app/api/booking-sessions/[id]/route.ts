@@ -49,12 +49,23 @@ export async function PATCH(request: Request, context: RouteContext) {
   const existingSession = db
     .prepare(
       `
-      SELECT id
+      SELECT
+        id,
+        start_time AS startTime,
+        end_time AS endTime,
+        slot_duration_minutes AS slotDurationMinutes
       FROM booking_sessions
       WHERE id = ?
       `,
     )
-    .get(sessionId) as { id: number } | undefined;
+    .get(sessionId) as
+    | {
+        id: number;
+        startTime: string;
+        endTime: string;
+        slotDurationMinutes: number;
+      }
+    | undefined;
 
   if (!existingSession) {
     return NextResponse.json({ code: "SESSION_NOT_FOUND" }, { status: 404 });
@@ -82,6 +93,20 @@ export async function PATCH(request: Request, context: RouteContext) {
       `,
     )
     .get(sessionId) as { count: number };
+
+  const hasBookings = bookingCount.count > 0;
+
+  const isChangingSlotStructure =
+    existingSession.startTime !== startTime ||
+    existingSession.endTime !== endTime ||
+    existingSession.slotDurationMinutes !== parsedSlotDurationMinutes;
+
+  if (hasBookings && isChangingSlotStructure) {
+    return NextResponse.json(
+      { code: "CANNOT_CHANGE_SLOT_STRUCTURE_WITH_BOOKINGS" },
+      { status: 409 },
+    );
+  }
 
   if (maxParticipants < bookingCount.count) {
     return NextResponse.json(
