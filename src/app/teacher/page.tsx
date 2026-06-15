@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Box,
@@ -13,7 +13,12 @@ import {
   Snackbar,
   Stack,
   Typography,
+  FormControlLabel,
+  MenuItem,
+  Switch,
+  TextField,
 } from "@mui/material";
+import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import EditCalendarOutlinedIcon from "@mui/icons-material/EditCalendarOutlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
@@ -33,6 +38,8 @@ import type {
 import ViewBookingsDialog from "@/components/booking/ViewBookingsDialog";
 import DeleteBookingSessionDialog from "@/components/booking/DeleteBookingSessionDialog";
 
+type SortOption = "dateAsc" | "dateDesc" | "bookedFirst";
+
 export default function TeacherPage() {
   const [sessions, setSessions] = useState<BookingSession[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -44,6 +51,10 @@ export default function TeacherPage() {
     number | null
   >(null);
   const [deleteSessionId, setDeleteSessionId] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showOnlyFull, setShowOnlyFull] = useState(false);
+  const [showOnlyWithBookings, setShowOnlyWithBookings] = useState(false);
+  const [sortOption, setSortOption] = useState<SortOption>("dateAsc");
 
   const { t } = useTranslations();
 
@@ -58,6 +69,58 @@ export default function TeacherPage() {
   const editingSession = sessions.find(
     (session) => session.id === editingSessionId,
   );
+
+  const filteredSessions = useMemo(() => {
+    const normalizedSearchQuery = searchQuery.trim().toLowerCase();
+
+    return [...sessions]
+      .filter((session) => {
+        const slotsLeft = session.maxParticipants - session.bookedParticipants;
+        const isFull = slotsLeft === 0;
+        const hasBookings = session.bookedParticipants > 0;
+
+        const matchesFullFilter = !showOnlyFull || isFull;
+        const matchesBookingsFilter = !showOnlyWithBookings || hasBookings;
+
+        const searchableText = [
+          session.title,
+          session.description,
+          session.date,
+          session.startTime,
+          session.endTime,
+        ]
+          .join(" ")
+          .toLowerCase();
+
+        const matchesSearch =
+          !normalizedSearchQuery ||
+          searchableText.includes(normalizedSearchQuery);
+
+        return matchesFullFilter && matchesBookingsFilter && matchesSearch;
+      })
+      .sort((firstSession, secondSession) => {
+        const firstDateTime = `${firstSession.date}T${firstSession.startTime}`;
+        const secondDateTime = `${secondSession.date}T${secondSession.startTime}`;
+
+        if (sortOption === "dateDesc") {
+          return secondDateTime.localeCompare(firstDateTime);
+        }
+
+        if (sortOption === "bookedFirst") {
+          if (
+            firstSession.bookedParticipants !== secondSession.bookedParticipants
+          ) {
+            return (
+              secondSession.bookedParticipants - firstSession.bookedParticipants
+            );
+          }
+
+          return firstDateTime.localeCompare(secondDateTime);
+        }
+
+        return firstDateTime.localeCompare(secondDateTime);
+      });
+  }, [sessions, searchQuery, showOnlyFull, showOnlyWithBookings, sortOption]);
 
   const fetchSessions = async () => {
     try {
@@ -451,6 +514,113 @@ export default function TeacherPage() {
               {t.teacher.sessionsTitle}
             </Typography>
 
+            <Paper
+              variant="outlined"
+              sx={{
+                p: 2,
+                mb: 3,
+                borderRadius: 4,
+                bgcolor: "background.default",
+              }}
+            >
+              <Stack spacing={2}>
+                <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
+                  <TextField
+                    label={t.sessionFilters.searchLabel}
+                    placeholder={t.sessionFilters.searchPlaceholder}
+                    fullWidth
+                    value={searchQuery}
+                    onChange={(event) => setSearchQuery(event.target.value)}
+                    slotProps={{
+                      input: {
+                        startAdornment: (
+                          <SearchOutlinedIcon
+                            sx={{ mr: 1, color: "text.secondary" }}
+                          />
+                        ),
+                      },
+                    }}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: 3,
+                      },
+                    }}
+                  />
+
+                  <TextField
+                    select
+                    label={t.sessionFilters.sortLabel}
+                    value={sortOption}
+                    onChange={(event) =>
+                      setSortOption(event.target.value as SortOption)
+                    }
+                    sx={{
+                      minWidth: { xs: "100%", md: 260 },
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: 3,
+                      },
+                    }}
+                  >
+                    <MenuItem value="dateAsc">
+                      {t.sessionFilters.sortDateAsc}
+                    </MenuItem>
+                    <MenuItem value="dateDesc">
+                      {t.sessionFilters.sortDateDesc}
+                    </MenuItem>
+                    <MenuItem value="bookedFirst">
+                      {t.sessionFilters.sortBookedFirst}
+                    </MenuItem>
+                  </TextField>
+                </Stack>
+
+                <Stack
+                  direction={{ xs: "column", sm: "row" }}
+                  spacing={2}
+                  sx={{
+                    justifyContent: "space-between",
+                    alignItems: { xs: "flex-start", sm: "center" },
+                  }}
+                >
+                  <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={showOnlyFull}
+                          onChange={(event) =>
+                            setShowOnlyFull(event.target.checked)
+                          }
+                        />
+                      }
+                      label={t.sessionFilters.onlyFull}
+                    />
+
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={showOnlyWithBookings}
+                          onChange={(event) =>
+                            setShowOnlyWithBookings(event.target.checked)
+                          }
+                        />
+                      }
+                      label={t.sessionFilters.onlyWithBookings}
+                    />
+                  </Stack>
+
+                  <Typography variant="body2" color="text.secondary">
+                    {t.sessionFilters.showing}{" "}
+                    <Box component="span" sx={{ fontWeight: 800 }}>
+                      {filteredSessions.length}
+                    </Box>{" "}
+                    {t.sessionFilters.of}{" "}
+                    <Box component="span" sx={{ fontWeight: 800 }}>
+                      {sessions.length}
+                    </Box>
+                  </Typography>
+                </Stack>
+              </Stack>
+            </Paper>
+
             <Typography color="text.secondary" sx={{ maxWidth: 720 }}>
               {t.teacher.sessionsDescription}
             </Typography>
@@ -462,14 +632,18 @@ export default function TeacherPage() {
             </Typography>
           ) : (
             <BookingSessionList
-              sessions={sessions}
+              sessions={filteredSessions}
               showEditButton
               showViewBookingsButton
               showDeleteButton
               onEditSession={handleEditSession}
               onViewBookingsSession={handleViewBookings}
               onDeleteSession={handleDeleteSessionClick}
-              emptyMessage={t.teacher.emptySessions}
+              emptyMessage={
+                sessions.length === 0
+                  ? t.teacher.emptySessions
+                  : t.sessionFilters.noMatchingSessions
+              }
             />
           )}
         </Paper>
