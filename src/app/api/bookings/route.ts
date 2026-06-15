@@ -11,14 +11,12 @@ export async function GET(request: Request) {
     const session = db
       .prepare(
         `
-        SELECT
-          id,
-          start_time AS startTime
+        SELECT id
         FROM booking_sessions
         WHERE id = ?
         `,
       )
-      .get(sessionId) as { id: number; startTime: string } | undefined;
+      .get(sessionId) as { id: number } | undefined;
 
     if (!session) {
       return NextResponse.json({ code: "SESSION_NOT_FOUND" }, { status: 404 });
@@ -32,26 +30,17 @@ export async function GET(request: Request) {
           session_id AS sessionId,
           student_name AS studentName,
           student_email AS studentEmail,
+          slot_start_time AS slotStartTime,
+          slot_end_time AS slotEndTime,
           created_at AS createdAt
         FROM bookings
         WHERE session_id = ?
-        ORDER BY created_at ASC, id ASC
+        ORDER BY slot_start_time ASC, id ASC
         `,
       )
-      .all(sessionId) as {
-      id: number;
-      sessionId: number;
-      studentName: string;
-      studentEmail: string;
-      createdAt: string;
-    }[];
+      .all(sessionId);
 
-    const bookingsWithSlotTimes = bookings.map((booking, index) => ({
-      ...booking,
-      ...getSlotTime(session.startTime, index),
-    }));
-
-    return NextResponse.json(bookingsWithSlotTimes);
+    return NextResponse.json(bookings);
   }
 
   if (studentEmail) {
@@ -63,6 +52,8 @@ export async function GET(request: Request) {
           bookings.session_id AS sessionId,
           bookings.student_name AS studentName,
           bookings.student_email AS studentEmail,
+          bookings.slot_start_time AS slotStartTime,
+          bookings.slot_end_time AS slotEndTime,
           bookings.created_at AS createdAt,
           booking_sessions.title AS sessionTitle,
           booking_sessions.date AS sessionDate,
@@ -72,44 +63,12 @@ export async function GET(request: Request) {
         INNER JOIN booking_sessions
           ON booking_sessions.id = bookings.session_id
         WHERE bookings.student_email = ?
-        ORDER BY booking_sessions.date ASC, booking_sessions.start_time ASC
+        ORDER BY booking_sessions.date ASC, bookings.slot_start_time ASC
         `,
       )
-      .all(studentEmail) as {
-      id: number;
-      sessionId: number;
-      studentName: string;
-      studentEmail: string;
-      createdAt: string;
-      sessionTitle: string;
-      sessionDate: string;
-      sessionStartTime: string;
-      sessionEndTime: string;
-    }[];
+      .all(studentEmail);
 
-    const bookingsWithSlotTimes = bookings.map((booking) => {
-      const allBookingsForSession = db
-        .prepare(
-          `
-          SELECT id
-          FROM bookings
-          WHERE session_id = ?
-          ORDER BY created_at ASC, id ASC
-          `,
-        )
-        .all(booking.sessionId) as { id: number }[];
-
-      const bookingIndex = allBookingsForSession.findIndex(
-        (sessionBooking) => sessionBooking.id === booking.id,
-      );
-
-      return {
-        ...booking,
-        ...getSlotTime(booking.sessionStartTime, bookingIndex),
-      };
-    });
-
-    return NextResponse.json(bookingsWithSlotTimes);
+    return NextResponse.json(bookings);
   }
 
   return NextResponse.json({ code: "MISSING_BOOKINGS_QUERY" }, { status: 400 });
@@ -139,7 +98,11 @@ export async function POST(request: Request) {
       `,
     )
     .get(sessionId) as
-    | { id: number; startTime: string; maxParticipants: number }
+    | {
+        id: number;
+        startTime: string;
+        maxParticipants: number;
+      }
     | undefined;
 
   if (!session) {
@@ -186,12 +149,20 @@ export async function POST(request: Request) {
       INSERT INTO bookings (
         session_id,
         student_name,
-        student_email
+        student_email,
+        slot_start_time,
+        slot_end_time
       )
-      VALUES (?, ?, ?)
+      VALUES (?, ?, ?, ?, ?)
       `,
     )
-    .run(sessionId, studentName, studentEmail);
+    .run(
+      sessionId,
+      studentName,
+      studentEmail,
+      slotTime.slotStartTime,
+      slotTime.slotEndTime,
+    );
 
   const booking = db
     .prepare(
@@ -201,26 +172,16 @@ export async function POST(request: Request) {
         session_id AS sessionId,
         student_name AS studentName,
         student_email AS studentEmail,
+        slot_start_time AS slotStartTime,
+        slot_end_time AS slotEndTime,
         created_at AS createdAt
       FROM bookings
       WHERE id = ?
       `,
     )
-    .get(result.lastInsertRowid) as {
-    id: number;
-    sessionId: number;
-    studentName: string;
-    studentEmail: string;
-    createdAt: string;
-  };
+    .get(result.lastInsertRowid);
 
-  return NextResponse.json(
-    {
-      ...booking,
-      ...slotTime,
-    },
-    { status: 201 },
-  );
+  return NextResponse.json(booking, { status: 201 });
 }
 
 export async function DELETE(request: Request) {
