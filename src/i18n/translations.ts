@@ -176,6 +176,18 @@ export const translations = {
         "Du kan inte ändra starttid, sluttid eller längd på tidsluckor när tillfället redan har bokningar.",
       invalidSlotDuration: "Du behöver välja en giltig längd på tidsluckorna.",
     },
+    sessionFilters: {
+      searchLabel: "Sök bokningstillfällen",
+      searchPlaceholder: "Sök på titel, beskrivning eller datum",
+      sortLabel: "Sortera",
+      sortDateAsc: "Datum, tidigast först",
+      sortDateDesc: "Datum, senast först",
+      sortAvailableFirst: "Flest lediga tider först",
+      onlyAvailable: "Visa endast lediga tillfällen",
+      showing: "Visar",
+      of: "av",
+      noMatchingSessions: "Inga bokningstillfällen matchar dina filter.",
+    },
   },
   en: {
     common: {
@@ -352,6 +364,18 @@ export const translations = {
       cannotChangeSlotStructureWithBookings:
         "You cannot change the start time, end time or slot duration when this session already has bookings.",
       invalidSlotDuration: "Please choose a valid slot duration.",
+    },
+    sessionFilters: {
+      searchLabel: "Search booking sessions",
+      searchPlaceholder: "Search by title, description or date",
+      sortLabel: "Sort",
+      sortDateAsc: "Date, earliest first",
+      sortDateDesc: "Date, latest first",
+      sortAvailableFirst: "Most available times first",
+      onlyAvailable: "Show only available sessions",
+      showing: "Showing",
+      of: "of",
+      noMatchingSessions: "No booking sessions match your filters.",
     },
   },
 } as const;

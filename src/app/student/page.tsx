@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Box,
@@ -11,6 +11,10 @@ import {
   Snackbar,
   Stack,
   Typography,
+  FormControlLabel,
+  MenuItem,
+  Switch,
+  TextField,
 } from "@mui/material";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import EventAvailableOutlinedIcon from "@mui/icons-material/EventAvailableOutlined";
@@ -24,6 +28,8 @@ import MyBookingsDialog from "@/components/booking/MyBookingsDialog";
 import type { BookingSession } from "@/types/booking";
 import { useTranslations } from "@/i18n/useTranslations";
 
+type SortOption = "dateAsc" | "dateDesc" | "availableFirst";
+
 export default function StudentPage() {
   const [sessions, setSessions] = useState<BookingSession[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -33,6 +39,9 @@ export default function StudentPage() {
   );
   const [cancelSessionId, setCancelSessionId] = useState<number | null>(null);
   const [isMyBookingsDialogOpen, setIsMyBookingsDialogOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showOnlyAvailable, setShowOnlyAvailable] = useState(false);
+  const [sortOption, setSortOption] = useState<SortOption>("dateAsc");
 
   const { t } = useTranslations();
 
@@ -43,6 +52,58 @@ export default function StudentPage() {
   const cancelSession = sessions.find(
     (session) => session.id === cancelSessionId,
   );
+
+  const filteredSessions = useMemo(() => {
+    const normalizedSearchQuery = searchQuery.trim().toLowerCase();
+
+    return [...sessions]
+      .filter((session) => {
+        const hasAvailableSlots =
+          session.bookedParticipants < session.maxParticipants;
+
+        const matchesAvailabilityFilter =
+          !showOnlyAvailable || hasAvailableSlots;
+
+        const searchableText = [
+          session.title,
+          session.description,
+          session.date,
+          session.startTime,
+          session.endTime,
+        ]
+          .join(" ")
+          .toLowerCase();
+
+        const matchesSearch =
+          !normalizedSearchQuery ||
+          searchableText.includes(normalizedSearchQuery);
+
+        return matchesAvailabilityFilter && matchesSearch;
+      })
+      .sort((firstSession, secondSession) => {
+        const firstDateTime = `${firstSession.date}T${firstSession.startTime}`;
+        const secondDateTime = `${secondSession.date}T${secondSession.startTime}`;
+
+        if (sortOption === "dateDesc") {
+          return secondDateTime.localeCompare(firstDateTime);
+        }
+
+        if (sortOption === "availableFirst") {
+          const firstSlotsLeft =
+            firstSession.maxParticipants - firstSession.bookedParticipants;
+          const secondSlotsLeft =
+            secondSession.maxParticipants - secondSession.bookedParticipants;
+
+          if (firstSlotsLeft !== secondSlotsLeft) {
+            return secondSlotsLeft - firstSlotsLeft;
+          }
+
+          return firstDateTime.localeCompare(secondDateTime);
+        }
+
+        return firstDateTime.localeCompare(secondDateTime);
+      });
+  }, [sessions, searchQuery, showOnlyAvailable, sortOption]);
 
   const handleBookingCancelledFromLookup = (sessionId: number) => {
     setSessions((currentSessions) =>
@@ -433,18 +494,115 @@ export default function StudentPage() {
             </Typography>
           </Box>
 
+          <Paper
+            variant="outlined"
+            sx={{
+              p: 2,
+              mb: 3,
+              borderRadius: 4,
+              bgcolor: "background.default",
+            }}
+          >
+            <Stack spacing={2}>
+              <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
+                <TextField
+                  label={t.sessionFilters.searchLabel}
+                  placeholder={t.sessionFilters.searchPlaceholder}
+                  fullWidth
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  slotProps={{
+                    input: {
+                      startAdornment: (
+                        <SearchOutlinedIcon
+                          sx={{ mr: 1, color: "text.secondary" }}
+                        />
+                      ),
+                    },
+                  }}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: 3,
+                    },
+                  }}
+                />
+
+                <TextField
+                  select
+                  label={t.sessionFilters.sortLabel}
+                  value={sortOption}
+                  onChange={(event) =>
+                    setSortOption(event.target.value as SortOption)
+                  }
+                  sx={{
+                    minWidth: { xs: "100%", md: 240 },
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: 3,
+                    },
+                  }}
+                >
+                  <MenuItem value="dateAsc">
+                    {t.sessionFilters.sortDateAsc}
+                  </MenuItem>
+                  <MenuItem value="dateDesc">
+                    {t.sessionFilters.sortDateDesc}
+                  </MenuItem>
+                  <MenuItem value="availableFirst">
+                    {t.sessionFilters.sortAvailableFirst}
+                  </MenuItem>
+                </TextField>
+              </Stack>
+
+              <Stack
+                direction={{ xs: "column", sm: "row" }}
+                spacing={2}
+                sx={{
+                  justifyContent: "space-between",
+                  alignItems: { xs: "flex-start", sm: "center" },
+                }}
+              >
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={showOnlyAvailable}
+                      onChange={(event) =>
+                        setShowOnlyAvailable(event.target.checked)
+                      }
+                    />
+                  }
+                  label={t.sessionFilters.onlyAvailable}
+                />
+
+                <Typography variant="body2" color="text.secondary">
+                  {t.sessionFilters.showing}{" "}
+                  <Box component="span" sx={{ fontWeight: 800 }}>
+                    {filteredSessions.length}
+                  </Box>{" "}
+                  {t.sessionFilters.of}{" "}
+                  <Box component="span" sx={{ fontWeight: 800 }}>
+                    {sessions.length}
+                  </Box>
+                </Typography>
+              </Stack>
+            </Stack>
+          </Paper>
+
           {isLoading ? (
             <Typography color="text.secondary">
               {t.student.loadingSessions}
             </Typography>
           ) : (
             <BookingSessionList
-              sessions={sessions}
+              sessions={filteredSessions}
               showBookingButton
               showCancelButton
               onBookSession={handleBookSession}
               onCancelSession={handleCancelBooking}
-              emptyMessage={t.student.emptySessions}
+              emptyMessage={
+                sessions.length === 0
+                  ? t.student.emptySessions
+                  : t.sessionFilters.noMatchingSessions
+              }
             />
           )}
         </Paper>
