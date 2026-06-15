@@ -11,10 +11,6 @@ import {
   Snackbar,
   Stack,
   Typography,
-  FormControlLabel,
-  MenuItem,
-  Switch,
-  TextField,
 } from "@mui/material";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import EventAvailableOutlinedIcon from "@mui/icons-material/EventAvailableOutlined";
@@ -25,6 +21,7 @@ import BookingSessionList from "@/components/booking/BookingSessionList";
 import BookSessionDialog from "@/components/booking/BookSessionDialog";
 import CancelBookingDialog from "@/components/booking/CancelBookingDialog";
 import MyBookingsDialog from "@/components/booking/MyBookingsDialog";
+import SessionFilterControls from "@/components/booking/SessionFilterControls";
 import type { BookingSession } from "@/types/booking";
 import { useTranslations } from "@/i18n/useTranslations";
 
@@ -494,98 +491,36 @@ export default function StudentPage() {
             </Typography>
           </Box>
 
-          <Paper
-            variant="outlined"
-            sx={{
-              p: 2,
-              mb: 3,
-              borderRadius: 4,
-              bgcolor: "background.default",
-            }}
-          >
-            <Stack spacing={2}>
-              <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
-                <TextField
-                  label={t.sessionFilters.searchLabel}
-                  placeholder={t.sessionFilters.searchPlaceholder}
-                  fullWidth
-                  value={searchQuery}
-                  onChange={(event) => setSearchQuery(event.target.value)}
-                  slotProps={{
-                    input: {
-                      startAdornment: (
-                        <SearchOutlinedIcon
-                          sx={{ mr: 1, color: "text.secondary" }}
-                        />
-                      ),
-                    },
-                  }}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: 3,
-                    },
-                  }}
-                />
-
-                <TextField
-                  select
-                  label={t.sessionFilters.sortLabel}
-                  value={sortOption}
-                  onChange={(event) =>
-                    setSortOption(event.target.value as SortOption)
-                  }
-                  sx={{
-                    minWidth: { xs: "100%", md: 240 },
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: 3,
-                    },
-                  }}
-                >
-                  <MenuItem value="dateAsc">
-                    {t.sessionFilters.sortDateAsc}
-                  </MenuItem>
-                  <MenuItem value="dateDesc">
-                    {t.sessionFilters.sortDateDesc}
-                  </MenuItem>
-                  <MenuItem value="availableFirst">
-                    {t.sessionFilters.sortAvailableFirst}
-                  </MenuItem>
-                </TextField>
-              </Stack>
-
-              <Stack
-                direction={{ xs: "column", sm: "row" }}
-                spacing={2}
-                sx={{
-                  justifyContent: "space-between",
-                  alignItems: { xs: "flex-start", sm: "center" },
-                }}
-              >
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={showOnlyAvailable}
-                      onChange={(event) =>
-                        setShowOnlyAvailable(event.target.checked)
-                      }
-                    />
-                  }
-                  label={t.sessionFilters.onlyAvailable}
-                />
-
-                <Typography variant="body2" color="text.secondary">
-                  {t.sessionFilters.showing}{" "}
-                  <Box component="span" sx={{ fontWeight: 800 }}>
-                    {filteredSessions.length}
-                  </Box>{" "}
-                  {t.sessionFilters.of}{" "}
-                  <Box component="span" sx={{ fontWeight: 800 }}>
-                    {sessions.length}
-                  </Box>
-                </Typography>
-              </Stack>
-            </Stack>
-          </Paper>
+          <SessionFilterControls
+            searchQuery={searchQuery}
+            onSearchQueryChange={setSearchQuery}
+            sortOption={sortOption}
+            onSortOptionChange={(value) => setSortOption(value as SortOption)}
+            sortOptions={[
+              {
+                value: "dateAsc",
+                label: t.sessionFilters.sortDateAsc,
+              },
+              {
+                value: "dateDesc",
+                label: t.sessionFilters.sortDateDesc,
+              },
+              {
+                value: "availableFirst",
+                label: t.sessionFilters.sortAvailableFirst,
+              },
+            ]}
+            switches={[
+              {
+                key: "onlyAvailable",
+                label: t.sessionFilters.onlyAvailable,
+                checked: showOnlyAvailable,
+                onChange: setShowOnlyAvailable,
+              },
+            ]}
+            visibleCount={filteredSessions.length}
+            totalCount={sessions.length}
+          />
 
           {isLoading ? (
             <Typography color="text.secondary">

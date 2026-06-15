@@ -13,12 +13,7 @@ import {
   Snackbar,
   Stack,
   Typography,
-  FormControlLabel,
-  MenuItem,
-  Switch,
-  TextField,
 } from "@mui/material";
-import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import EditCalendarOutlinedIcon from "@mui/icons-material/EditCalendarOutlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
@@ -30,6 +25,7 @@ import EditBookingSessionDialog, {
   type EditFormValues,
 } from "@/components/booking/EditBookingSessionDialog";
 import BookingSessionList from "@/components/booking/BookingSessionList";
+import SessionFilterControls from "@/components/booking/SessionFilterControls";
 import { useTranslations } from "@/i18n/useTranslations";
 import type {
   BookingSession,
@@ -514,117 +510,47 @@ export default function TeacherPage() {
               {t.teacher.sessionsTitle}
             </Typography>
 
-            <Paper
-              variant="outlined"
-              sx={{
-                p: 2,
-                mb: 3,
-                borderRadius: 4,
-                bgcolor: "background.default",
-              }}
-            >
-              <Stack spacing={2}>
-                <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
-                  <TextField
-                    label={t.sessionFilters.searchLabel}
-                    placeholder={t.sessionFilters.searchPlaceholder}
-                    fullWidth
-                    value={searchQuery}
-                    onChange={(event) => setSearchQuery(event.target.value)}
-                    slotProps={{
-                      input: {
-                        startAdornment: (
-                          <SearchOutlinedIcon
-                            sx={{ mr: 1, color: "text.secondary" }}
-                          />
-                        ),
-                      },
-                    }}
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: 3,
-                      },
-                    }}
-                  />
-
-                  <TextField
-                    select
-                    label={t.sessionFilters.sortLabel}
-                    value={sortOption}
-                    onChange={(event) =>
-                      setSortOption(event.target.value as SortOption)
-                    }
-                    sx={{
-                      minWidth: { xs: "100%", md: 260 },
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: 3,
-                      },
-                    }}
-                  >
-                    <MenuItem value="dateAsc">
-                      {t.sessionFilters.sortDateAsc}
-                    </MenuItem>
-                    <MenuItem value="dateDesc">
-                      {t.sessionFilters.sortDateDesc}
-                    </MenuItem>
-                    <MenuItem value="bookedFirst">
-                      {t.sessionFilters.sortBookedFirst}
-                    </MenuItem>
-                  </TextField>
-                </Stack>
-
-                <Stack
-                  direction={{ xs: "column", sm: "row" }}
-                  spacing={2}
-                  sx={{
-                    justifyContent: "space-between",
-                    alignItems: { xs: "flex-start", sm: "center" },
-                  }}
-                >
-                  <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
-                    <FormControlLabel
-                      control={
-                        <Switch
-                          checked={showOnlyFull}
-                          onChange={(event) =>
-                            setShowOnlyFull(event.target.checked)
-                          }
-                        />
-                      }
-                      label={t.sessionFilters.onlyFull}
-                    />
-
-                    <FormControlLabel
-                      control={
-                        <Switch
-                          checked={showOnlyWithBookings}
-                          onChange={(event) =>
-                            setShowOnlyWithBookings(event.target.checked)
-                          }
-                        />
-                      }
-                      label={t.sessionFilters.onlyWithBookings}
-                    />
-                  </Stack>
-
-                  <Typography variant="body2" color="text.secondary">
-                    {t.sessionFilters.showing}{" "}
-                    <Box component="span" sx={{ fontWeight: 800 }}>
-                      {filteredSessions.length}
-                    </Box>{" "}
-                    {t.sessionFilters.of}{" "}
-                    <Box component="span" sx={{ fontWeight: 800 }}>
-                      {sessions.length}
-                    </Box>
-                  </Typography>
-                </Stack>
-              </Stack>
-            </Paper>
-
             <Typography color="text.secondary" sx={{ maxWidth: 720 }}>
               {t.teacher.sessionsDescription}
             </Typography>
           </Box>
+
+          <SessionFilterControls
+            searchQuery={searchQuery}
+            onSearchQueryChange={setSearchQuery}
+            sortOption={sortOption}
+            onSortOptionChange={(value) => setSortOption(value as SortOption)}
+            sortOptions={[
+              {
+                value: "dateAsc",
+                label: t.sessionFilters.sortDateAsc,
+              },
+              {
+                value: "dateDesc",
+                label: t.sessionFilters.sortDateDesc,
+              },
+              {
+                value: "bookedFirst",
+                label: t.sessionFilters.sortBookedFirst,
+              },
+            ]}
+            switches={[
+              {
+                key: "onlyFull",
+                label: t.sessionFilters.onlyFull,
+                checked: showOnlyFull,
+                onChange: setShowOnlyFull,
+              },
+              {
+                key: "onlyWithBookings",
+                label: t.sessionFilters.onlyWithBookings,
+                checked: showOnlyWithBookings,
+                onChange: setShowOnlyWithBookings,
+              },
+            ]}
+            visibleCount={filteredSessions.length}
+            totalCount={sessions.length}
+          />
 
           {isLoading ? (
             <Typography color="text.secondary">
