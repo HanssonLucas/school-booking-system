@@ -8,6 +8,7 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
+  MenuItem,
   Paper,
   Stack,
   TextField,
@@ -21,7 +22,7 @@ import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
 import TimerOutlinedIcon from "@mui/icons-material/TimerOutlined";
 import type { BookingSession } from "@/types/booking";
 import { useTranslations } from "@/i18n/useTranslations";
-import { getSlotCount } from "@/lib/bookingSlots";
+import { getSlotCount, SLOT_DURATION_OPTIONS } from "@/lib/bookingSlots";
 
 export type EditFormValues = {
   title: string;
@@ -29,6 +30,7 @@ export type EditFormValues = {
   date: string;
   startTime: string;
   endTime: string;
+  slotDurationMinutes: string;
   maxParticipants: string;
 };
 
@@ -45,6 +47,7 @@ const initialFormValues: EditFormValues = {
   date: "",
   startTime: "",
   endTime: "",
+  slotDurationMinutes: "15",
   maxParticipants: "",
 };
 
@@ -61,7 +64,11 @@ export default function EditBookingSessionDialog({
 
   const calculatedSlotCount =
     formValues.startTime && formValues.endTime
-      ? getSlotCount(formValues.startTime, formValues.endTime)
+      ? getSlotCount(
+          formValues.startTime,
+          formValues.endTime,
+          Number(formValues.slotDurationMinutes),
+        )
       : 0;
 
   useEffect(() => {
@@ -76,6 +83,7 @@ export default function EditBookingSessionDialog({
       date: session.date,
       startTime: session.startTime,
       endTime: session.endTime,
+      slotDurationMinutes: String(session.slotDurationMinutes),
       maxParticipants: String(session.maxParticipants),
     });
   }, [session]);
@@ -303,6 +311,32 @@ export default function EditBookingSessionDialog({
                   sx={textFieldSx}
                 />
               </Stack>
+
+              <TextField
+                select
+                label={t.bookingSession.slotDuration}
+                fullWidth
+                value={formValues.slotDurationMinutes}
+                onChange={(event) =>
+                  handleChange("slotDurationMinutes", event.target.value)
+                }
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <TimerOutlinedIcon
+                        sx={{ mr: 1, color: "text.secondary" }}
+                      />
+                    ),
+                  },
+                }}
+                sx={textFieldSx}
+              >
+                {SLOT_DURATION_OPTIONS.map((duration) => (
+                  <MenuItem key={duration} value={String(duration)}>
+                    {duration} minuter
+                  </MenuItem>
+                ))}
+              </TextField>
 
               <Alert
                 severity={calculatedSlotCount > 0 ? "info" : "warning"}

@@ -15,6 +15,7 @@ db.exec(`
     date TEXT NOT NULL,
     start_time TEXT NOT NULL,
     end_time TEXT NOT NULL,
+    slot_duration_minutes INTEGER NOT NULL DEFAULT 15,
     max_participants INTEGER NOT NULL,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
   );
@@ -44,4 +45,19 @@ if (!hasColumn("slot_start_time")) {
 
 if (!hasColumn("slot_end_time")) {
   db.prepare(`ALTER TABLE bookings ADD COLUMN slot_end_time TEXT`).run();
+}
+
+const sessionColumns = db
+  .prepare(`PRAGMA table_info(booking_sessions)`)
+  .all() as {
+  name: string;
+}[];
+
+const hasSessionColumn = (columnName: string) =>
+  sessionColumns.some((column) => column.name === columnName);
+
+if (!hasSessionColumn("slot_duration_minutes")) {
+  db.prepare(
+    `ALTER TABLE booking_sessions ADD COLUMN slot_duration_minutes INTEGER NOT NULL DEFAULT 15`,
+  ).run();
 }

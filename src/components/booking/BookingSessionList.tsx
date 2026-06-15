@@ -48,6 +48,7 @@ export default function BookingSessionList({
           date={session.date}
           startTime={session.startTime}
           endTime={session.endTime}
+          slotDurationMinutes={session.slotDurationMinutes}
           maxParticipants={session.maxParticipants}
           bookedParticipants={session.bookedParticipants}
           showBookingButton={showBookingButton}

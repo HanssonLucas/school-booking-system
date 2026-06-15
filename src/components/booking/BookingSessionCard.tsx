@@ -25,6 +25,7 @@ type BookingSessionCardProps = {
   date: string;
   startTime: string;
   endTime: string;
+  slotDurationMinutes: number;
   maxParticipants: number;
   bookedParticipants: number;
   showBookingButton?: boolean;
@@ -68,6 +69,7 @@ export default function BookingSessionCard({
   onViewBookings,
   showDeleteButton = false,
   onDelete,
+  slotDurationMinutes,
 }: BookingSessionCardProps) {
   const { t } = useTranslations();
 
@@ -180,7 +182,7 @@ export default function BookingSessionCard({
 
             <Chip
               icon={<TimerOutlinedIcon />}
-              label={t.bookingSession.slotDuration}
+              label={`${slotDurationMinutes} min`}
               variant="outlined"
               sx={metaChipSx}
             />

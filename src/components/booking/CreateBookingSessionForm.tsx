@@ -5,6 +5,7 @@ import {
   Alert,
   Box,
   Button,
+  MenuItem,
   Paper,
   Stack,
   TextField,
@@ -18,7 +19,7 @@ import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
 import TimerOutlinedIcon from "@mui/icons-material/TimerOutlined";
 import type { CreateBookingSessionInput } from "@/types/booking";
 import { useTranslations } from "@/i18n/useTranslations";
-import { getSlotCount } from "@/lib/bookingSlots";
+import { getSlotCount, SLOT_DURATION_OPTIONS } from "@/lib/bookingSlots";
 
 type FormValues = {
   title: string;
@@ -26,7 +27,7 @@ type FormValues = {
   date: string;
   startTime: string;
   endTime: string;
-  maxParticipants: string;
+  slotDurationMinutes: string;
 };
 
 type FormErrors = Partial<Record<keyof FormValues, string>>;
@@ -41,7 +42,7 @@ const initialFormValues: FormValues = {
   date: "",
   startTime: "",
   endTime: "",
-  maxParticipants: "",
+  slotDurationMinutes: "15",
 };
 
 export default function CreateBookingSessionForm({
@@ -54,7 +55,11 @@ export default function CreateBookingSessionForm({
 
   const calculatedSlotCount =
     formValues.startTime && formValues.endTime
-      ? getSlotCount(formValues.startTime, formValues.endTime)
+      ? getSlotCount(
+          formValues.startTime,
+          formValues.endTime,
+          Number(formValues.slotDurationMinutes),
+        )
       : 0;
 
   const handleChange = (field: keyof FormValues, value: string) => {
@@ -116,7 +121,7 @@ export default function CreateBookingSessionForm({
       date: formValues.date,
       startTime: formValues.startTime,
       endTime: formValues.endTime,
-      maxParticipants: calculatedSlotCount,
+      slotDurationMinutes: Number(formValues.slotDurationMinutes),
     });
 
     setFormValues(initialFormValues);
@@ -316,6 +321,30 @@ export default function CreateBookingSessionForm({
               sx={textFieldSx}
             />
           </Stack>
+
+          <TextField
+            select
+            label={t.bookingSession.slotDuration}
+            fullWidth
+            value={formValues.slotDurationMinutes}
+            onChange={(event) =>
+              handleChange("slotDurationMinutes", event.target.value)
+            }
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <TimerOutlinedIcon sx={{ mr: 1, color: "text.secondary" }} />
+                ),
+              },
+            }}
+            sx={textFieldSx}
+          >
+            {SLOT_DURATION_OPTIONS.map((duration) => (
+              <MenuItem key={duration} value={String(duration)}>
+                {duration} minuter
+              </MenuItem>
+            ))}
+          </TextField>
 
           <Alert
             severity={calculatedSlotCount > 0 ? "info" : "warning"}

@@ -5,6 +5,7 @@ export type BookingSession = {
   date: string;
   startTime: string;
   endTime: string;
+  slotDurationMinutes: number;
   maxParticipants: number;
   bookedParticipants: number;
 };
@@ -15,7 +16,7 @@ export type CreateBookingSessionInput = {
   date: string;
   startTime: string;
   endTime: string;
-  maxParticipants: number;
+  slotDurationMinutes: number;
 };
 
 export type BookingWithSlotTime = {

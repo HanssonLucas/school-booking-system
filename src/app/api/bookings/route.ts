@@ -58,7 +58,8 @@ export async function GET(request: Request) {
           booking_sessions.title AS sessionTitle,
           booking_sessions.date AS sessionDate,
           booking_sessions.start_time AS sessionStartTime,
-          booking_sessions.end_time AS sessionEndTime
+          booking_sessions.end_time AS sessionEndTime,
+          booking_sessions.slot_duration_minutes AS slotDurationMinutes
         FROM bookings
         INNER JOIN booking_sessions
           ON booking_sessions.id = bookings.session_id
@@ -90,12 +91,13 @@ export async function POST(request: Request) {
     .prepare(
       `
       SELECT
-  id,
-  start_time AS startTime,
-  end_time AS endTime,
-  max_participants AS maxParticipants
-FROM booking_sessions
-WHERE id = ?
+        id,
+        start_time AS startTime,
+        end_time AS endTime,
+        slot_duration_minutes AS slotDurationMinutes,
+        max_participants AS maxParticipants
+      FROM booking_sessions
+      WHERE id = ?
       `,
     )
     .get(sessionId) as
@@ -103,6 +105,7 @@ WHERE id = ?
         id: number;
         startTime: string;
         endTime: string;
+        slotDurationMinutes: number;
         maxParticipants: number;
       }
     | undefined;
@@ -146,19 +149,23 @@ WHERE id = ?
   const bookedSlots = db
     .prepare(
       `
-    SELECT
-      slot_start_time AS slotStartTime,
-      slot_end_time AS slotEndTime
-    FROM bookings
-    WHERE session_id = ?
-    `,
+      SELECT
+        slot_start_time AS slotStartTime,
+        slot_end_time AS slotEndTime
+      FROM bookings
+      WHERE session_id = ?
+      `,
     )
     .all(sessionId) as {
     slotStartTime: string;
     slotEndTime: string;
   }[];
 
-  const allSlots = getAllSlotTimes(session.startTime, session.endTime);
+  const allSlots = getAllSlotTimes(
+    session.startTime,
+    session.endTime,
+    session.slotDurationMinutes,
+  );
 
   const firstAvailableSlot = allSlots.find(
     (slot) =>

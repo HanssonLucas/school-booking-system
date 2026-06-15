@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { getSlotCount } from "@/lib/bookingSlots";
+import {
+  DEFAULT_SLOT_DURATION_MINUTES,
+  getSlotCount,
+} from "@/lib/bookingSlots";
 
 type RouteContext = {
   params: Promise<{
@@ -18,7 +21,14 @@ export async function PATCH(request: Request, context: RouteContext) {
 
   const body = await request.json();
 
-  const { title, description, date, startTime, endTime } = body;
+  const {
+    title,
+    description,
+    date,
+    startTime,
+    endTime,
+    slotDurationMinutes = DEFAULT_SLOT_DURATION_MINUTES,
+  } = body;
 
   if (!title || !date || !startTime || !endTime) {
     return NextResponse.json(
@@ -26,31 +36,16 @@ export async function PATCH(request: Request, context: RouteContext) {
       { status: 400 },
     );
   }
-  const maxParticipants = getSlotCount(startTime, endTime);
 
-  if (maxParticipants <= 0) {
+  const parsedSlotDurationMinutes = Number(slotDurationMinutes);
+
+  if (!parsedSlotDurationMinutes || parsedSlotDurationMinutes <= 0) {
     return NextResponse.json(
-      { code: "INVALID_SESSION_TIME_RANGE" },
+      { code: "INVALID_SLOT_DURATION" },
       { status: 400 },
     );
   }
 
-  const bookingCount = db
-    .prepare(
-      `
-    SELECT COUNT(*) AS count
-    FROM bookings
-    WHERE session_id = ?
-    `,
-    )
-    .get(sessionId) as { count: number };
-
-  if (maxParticipants < bookingCount.count) {
-    return NextResponse.json(
-      { code: "TOO_FEW_SLOTS_FOR_EXISTING_BOOKINGS" },
-      { status: 409 },
-    );
-  }
   const existingSession = db
     .prepare(
       `
@@ -65,6 +60,36 @@ export async function PATCH(request: Request, context: RouteContext) {
     return NextResponse.json({ code: "SESSION_NOT_FOUND" }, { status: 404 });
   }
 
+  const maxParticipants = getSlotCount(
+    startTime,
+    endTime,
+    parsedSlotDurationMinutes,
+  );
+
+  if (maxParticipants <= 0) {
+    return NextResponse.json(
+      { code: "INVALID_SESSION_TIME_RANGE" },
+      { status: 400 },
+    );
+  }
+
+  const bookingCount = db
+    .prepare(
+      `
+      SELECT COUNT(*) AS count
+      FROM bookings
+      WHERE session_id = ?
+      `,
+    )
+    .get(sessionId) as { count: number };
+
+  if (maxParticipants < bookingCount.count) {
+    return NextResponse.json(
+      { code: "TOO_FEW_SLOTS_FOR_EXISTING_BOOKINGS" },
+      { status: 409 },
+    );
+  }
+
   db.prepare(
     `
     UPDATE booking_sessions
@@ -74,6 +99,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       date = ?,
       start_time = ?,
       end_time = ?,
+      slot_duration_minutes = ?,
       max_participants = ?
     WHERE id = ?
     `,
@@ -83,6 +109,7 @@ export async function PATCH(request: Request, context: RouteContext) {
     date,
     startTime,
     endTime,
+    parsedSlotDurationMinutes,
     maxParticipants,
     sessionId,
   );
@@ -97,6 +124,7 @@ export async function PATCH(request: Request, context: RouteContext) {
         booking_sessions.date,
         booking_sessions.start_time AS startTime,
         booking_sessions.end_time AS endTime,
+        booking_sessions.slot_duration_minutes AS slotDurationMinutes,
         booking_sessions.max_participants AS maxParticipants,
         COUNT(bookings.id) AS bookedParticipants
       FROM booking_sessions

@@ -1,4 +1,6 @@
-export const SLOT_LENGTH_MINUTES = 15;
+export const DEFAULT_SLOT_DURATION_MINUTES = 15;
+
+export const SLOT_DURATION_OPTIONS = [15, 20, 30, 45, 60];
 
 const timeToMinutes = (time: string) => {
   const [hours, minutes] = time.split(":").map(Number);
@@ -16,13 +18,17 @@ const minutesToTime = (totalMinutes: number) => {
   )}`;
 };
 
-export const getSlotTime = (startTime: string, bookingIndex: number) => {
+export const getSlotTime = (
+  startTime: string,
+  bookingIndex: number,
+  slotDurationMinutes = DEFAULT_SLOT_DURATION_MINUTES,
+) => {
   const sessionStartMinutes = timeToMinutes(startTime);
 
   const slotStartMinutes =
-    sessionStartMinutes + bookingIndex * SLOT_LENGTH_MINUTES;
+    sessionStartMinutes + bookingIndex * slotDurationMinutes;
 
-  const slotEndMinutes = slotStartMinutes + SLOT_LENGTH_MINUTES;
+  const slotEndMinutes = slotStartMinutes + slotDurationMinutes;
 
   return {
     slotStartTime: minutesToTime(slotStartMinutes),
@@ -30,19 +36,27 @@ export const getSlotTime = (startTime: string, bookingIndex: number) => {
   };
 };
 
-export const getSlotCount = (startTime: string, endTime: string) => {
+export const getSlotCount = (
+  startTime: string,
+  endTime: string,
+  slotDurationMinutes = DEFAULT_SLOT_DURATION_MINUTES,
+) => {
   const startMinutes = timeToMinutes(startTime);
   const endMinutes = timeToMinutes(endTime);
 
   const durationMinutes = endMinutes - startMinutes;
 
-  return Math.floor(durationMinutes / SLOT_LENGTH_MINUTES);
+  return Math.floor(durationMinutes / slotDurationMinutes);
 };
 
-export const getAllSlotTimes = (startTime: string, endTime: string) => {
-  const slotCount = getSlotCount(startTime, endTime);
+export const getAllSlotTimes = (
+  startTime: string,
+  endTime: string,
+  slotDurationMinutes = DEFAULT_SLOT_DURATION_MINUTES,
+) => {
+  const slotCount = getSlotCount(startTime, endTime, slotDurationMinutes);
 
   return Array.from({ length: slotCount }, (_, index) =>
-    getSlotTime(startTime, index),
+    getSlotTime(startTime, index, slotDurationMinutes),
   );
 };

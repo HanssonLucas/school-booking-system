@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { getSlotCount } from "@/lib/bookingSlots";
+import {
+  DEFAULT_SLOT_DURATION_MINUTES,
+  getSlotCount,
+} from "@/lib/bookingSlots";
+
 export async function GET() {
   const sessions = db
     .prepare(
@@ -12,6 +16,7 @@ export async function GET() {
         booking_sessions.date,
         booking_sessions.start_time AS startTime,
         booking_sessions.end_time AS endTime,
+        booking_sessions.slot_duration_minutes AS slotDurationMinutes,
         booking_sessions.max_participants AS maxParticipants,
         COUNT(bookings.id) AS bookedParticipants
       FROM booking_sessions
@@ -25,10 +30,18 @@ export async function GET() {
 
   return NextResponse.json(sessions);
 }
+
 export async function POST(request: Request) {
   const body = await request.json();
 
-  const { title, description, date, startTime, endTime } = body;
+  const {
+    title,
+    description,
+    date,
+    startTime,
+    endTime,
+    slotDurationMinutes = DEFAULT_SLOT_DURATION_MINUTES,
+  } = body;
 
   if (!title || !date || !startTime || !endTime) {
     return NextResponse.json(
@@ -37,7 +50,20 @@ export async function POST(request: Request) {
     );
   }
 
-  const maxParticipants = getSlotCount(startTime, endTime);
+  const parsedSlotDurationMinutes = Number(slotDurationMinutes);
+
+  if (!parsedSlotDurationMinutes || parsedSlotDurationMinutes <= 0) {
+    return NextResponse.json(
+      { code: "INVALID_SLOT_DURATION" },
+      { status: 400 },
+    );
+  }
+
+  const maxParticipants = getSlotCount(
+    startTime,
+    endTime,
+    parsedSlotDurationMinutes,
+  );
 
   if (maxParticipants <= 0) {
     return NextResponse.json(
@@ -55,12 +81,21 @@ export async function POST(request: Request) {
         date,
         start_time,
         end_time,
+        slot_duration_minutes,
         max_participants
       )
-      VALUES (?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
       `,
     )
-    .run(title, description ?? "", date, startTime, endTime, maxParticipants);
+    .run(
+      title,
+      description ?? "",
+      date,
+      startTime,
+      endTime,
+      parsedSlotDurationMinutes,
+      maxParticipants,
+    );
 
   const newSession = db
     .prepare(
@@ -72,6 +107,7 @@ export async function POST(request: Request) {
         date,
         start_time AS startTime,
         end_time AS endTime,
+        slot_duration_minutes AS slotDurationMinutes,
         max_participants AS maxParticipants,
         0 AS bookedParticipants
       FROM booking_sessions
