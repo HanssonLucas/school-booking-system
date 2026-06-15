@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { getSlotTime } from "@/lib/bookingSlots";
+import { getAllSlotTimes } from "@/lib/bookingSlots";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -90,17 +90,19 @@ export async function POST(request: Request) {
     .prepare(
       `
       SELECT
-        id,
-        start_time AS startTime,
-        max_participants AS maxParticipants
-      FROM booking_sessions
-      WHERE id = ?
+  id,
+  start_time AS startTime,
+  end_time AS endTime,
+  max_participants AS maxParticipants
+FROM booking_sessions
+WHERE id = ?
       `,
     )
     .get(sessionId) as
     | {
         id: number;
         startTime: string;
+        endTime: string;
         maxParticipants: number;
       }
     | undefined;
@@ -141,7 +143,35 @@ export async function POST(request: Request) {
     return NextResponse.json({ code: "SESSION_FULL" }, { status: 409 });
   }
 
-  const slotTime = getSlotTime(session.startTime, bookingCount.count);
+  const bookedSlots = db
+    .prepare(
+      `
+    SELECT
+      slot_start_time AS slotStartTime,
+      slot_end_time AS slotEndTime
+    FROM bookings
+    WHERE session_id = ?
+    `,
+    )
+    .all(sessionId) as {
+    slotStartTime: string;
+    slotEndTime: string;
+  }[];
+
+  const allSlots = getAllSlotTimes(session.startTime, session.endTime);
+
+  const firstAvailableSlot = allSlots.find(
+    (slot) =>
+      !bookedSlots.some(
+        (bookedSlot) =>
+          bookedSlot.slotStartTime === slot.slotStartTime &&
+          bookedSlot.slotEndTime === slot.slotEndTime,
+      ),
+  );
+
+  if (!firstAvailableSlot) {
+    return NextResponse.json({ code: "SESSION_FULL" }, { status: 409 });
+  }
 
   const result = db
     .prepare(
@@ -160,8 +190,8 @@ export async function POST(request: Request) {
       sessionId,
       studentName,
       studentEmail,
-      slotTime.slotStartTime,
-      slotTime.slotEndTime,
+      firstAvailableSlot.slotStartTime,
+      firstAvailableSlot.slotEndTime,
     );
 
   const booking = db

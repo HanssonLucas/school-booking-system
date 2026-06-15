@@ -38,3 +38,11 @@ export const getSlotCount = (startTime: string, endTime: string) => {
 
   return Math.floor(durationMinutes / SLOT_LENGTH_MINUTES);
 };
+
+export const getAllSlotTimes = (startTime: string, endTime: string) => {
+  const slotCount = getSlotCount(startTime, endTime);
+
+  return Array.from({ length: slotCount }, (_, index) =>
+    getSlotTime(startTime, index),
+  );
+};
