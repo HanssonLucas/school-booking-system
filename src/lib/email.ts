@@ -5,7 +5,7 @@ type EmailMessage = {
   html: string;
 };
 
-type BookingConfirmationEmailInput = {
+type BookingEmailInput = {
   to: string;
   studentName: string;
   sessionTitle: string;
@@ -40,7 +40,7 @@ export const sendBookingConfirmationEmail = async ({
   sessionDate,
   slotStartTime,
   slotEndTime,
-}: BookingConfirmationEmailInput) => {
+}: BookingEmailInput) => {
   const subject = "Bekräftelse på din bokning";
 
   const text = `
@@ -70,6 +70,54 @@ Du kan se och hantera din bokning i bokningssystemet.
   </ul>
 
   <p>Du kan se och hantera din bokning i bokningssystemet.</p>
+</div>
+`.trim();
+
+  await sendEmail({
+    to,
+    subject,
+    text,
+    html,
+  });
+};
+
+export const sendBookingCancellationEmail = async ({
+  to,
+  studentName,
+  sessionTitle,
+  sessionDate,
+  slotStartTime,
+  slotEndTime,
+}: BookingEmailInput) => {
+  const subject = "Bekräftelse på avbokning";
+
+  const text = `
+Hej ${studentName}!
+
+Din bokning har avbokats.
+
+Tillfälle: ${sessionTitle}
+Datum: ${sessionDate}
+Tid: ${slotStartTime}–${slotEndTime}
+
+Du kan boka en ny tid i bokningssystemet om du behöver.
+`.trim();
+
+  const html = `
+<div>
+  <h1>Din bokning har avbokats</h1>
+
+  <p>Hej ${studentName}!</p>
+
+  <p>Din bokning har avbokats.</p>
+
+  <ul>
+    <li><strong>Tillfälle:</strong> ${sessionTitle}</li>
+    <li><strong>Datum:</strong> ${sessionDate}</li>
+    <li><strong>Tid:</strong> ${slotStartTime}–${slotEndTime}</li>
+  </ul>
+
+  <p>Du kan boka en ny tid i bokningssystemet om du behöver.</p>
 </div>
 `.trim();
 

@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getAllSlotTimes } from "@/lib/bookingSlots";
-import { sendBookingConfirmationEmail } from "@/lib/email";
+import {
+  sendBookingCancellationEmail,
+  sendBookingConfirmationEmail,
+} from "@/lib/email";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -264,13 +267,34 @@ export async function DELETE(request: Request) {
   const existingBooking = db
     .prepare(
       `
-      SELECT id
+      SELECT
+        bookings.id,
+        bookings.session_id AS sessionId,
+        bookings.student_name AS studentName,
+        bookings.student_email AS studentEmail,
+        bookings.slot_start_time AS slotStartTime,
+        bookings.slot_end_time AS slotEndTime,
+        booking_sessions.title AS sessionTitle,
+        booking_sessions.date AS sessionDate
       FROM bookings
-      WHERE session_id = ?
-        AND student_email = ?
+      INNER JOIN booking_sessions
+        ON booking_sessions.id = bookings.session_id
+      WHERE bookings.session_id = ?
+        AND bookings.student_email = ?
       `,
     )
-    .get(sessionId, studentEmail) as { id: number } | undefined;
+    .get(sessionId, studentEmail) as
+    | {
+        id: number;
+        sessionId: number;
+        studentName: string;
+        studentEmail: string;
+        slotStartTime: string;
+        slotEndTime: string;
+        sessionTitle: string;
+        sessionDate: string;
+      }
+    | undefined;
 
   if (!existingBooking) {
     return NextResponse.json({ code: "BOOKING_NOT_FOUND" }, { status: 404 });
@@ -282,6 +306,15 @@ export async function DELETE(request: Request) {
     WHERE id = ?
     `,
   ).run(existingBooking.id);
+
+  await sendBookingCancellationEmail({
+    to: existingBooking.studentEmail,
+    studentName: existingBooking.studentName,
+    sessionTitle: existingBooking.sessionTitle,
+    sessionDate: existingBooking.sessionDate,
+    slotStartTime: existingBooking.slotStartTime,
+    slotEndTime: existingBooking.slotEndTime,
+  });
 
   return NextResponse.json({
     bookingId: existingBooking.id,
