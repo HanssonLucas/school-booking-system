@@ -1,4 +1,6 @@
-type EmailProvider = "console";
+import { Resend } from "resend";
+
+type EmailProvider = "console" | "resend";
 
 type EmailMessage = {
   to: string;
@@ -19,7 +21,7 @@ type BookingEmailInput = {
 const getEmailProvider = (): EmailProvider => {
   const emailProvider = process.env.EMAIL_PROVIDER;
 
-  if (emailProvider === "console") {
+  if (emailProvider === "console" || emailProvider === "resend") {
     return emailProvider;
   }
 
@@ -50,11 +52,62 @@ const sendConsoleEmail = async ({ to, subject, text, html }: EmailMessage) => {
   console.log("");
 };
 
+const sendResendEmail = async ({ to, subject, text, html }: EmailMessage) => {
+  const apiKey = process.env.RESEND_API_KEY;
+  const from = process.env.EMAIL_FROM;
+
+  if (!apiKey) {
+    console.warn("RESEND_API_KEY saknas. Mailet loggas i terminalen istället.");
+
+    await sendConsoleEmail({
+      to,
+      subject,
+      text,
+      html,
+    });
+
+    return;
+  }
+
+  if (!from) {
+    console.warn("EMAIL_FROM saknas. Mailet loggas i terminalen istället.");
+
+    await sendConsoleEmail({
+      to,
+      subject,
+      text,
+      html,
+    });
+
+    return;
+  }
+
+  const resend = new Resend(apiKey);
+
+  const { error } = await resend.emails.send({
+    from,
+    to,
+    subject,
+    html,
+    text,
+  });
+
+  if (error) {
+    console.error("Kunde inte skicka mail med Resend:", error);
+    throw new Error("Kunde inte skicka mail med Resend.");
+  }
+};
+
 const sendEmail = async (message: EmailMessage) => {
   const emailProvider = getEmailProvider();
 
   if (emailProvider === "console") {
     await sendConsoleEmail(message);
+    return;
+  }
+
+  if (emailProvider === "resend") {
+    await sendResendEmail(message);
     return;
   }
 };
