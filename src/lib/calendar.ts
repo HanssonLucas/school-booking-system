@@ -22,6 +22,14 @@ const formatCurrentDateTimeForIcs = () => {
   return new Date().toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
 };
 
+const createLocalDateTime = (date: string, time: string) => {
+  return `${date}T${time}:00`;
+};
+
+const formatDateTimeForGoogleCalendar = (date: string, time: string) => {
+  return `${date.replaceAll("-", "")}T${time.replace(":", "")}00`;
+};
+
 export const createIcsFileContent = ({
   title,
   description = "",
@@ -74,4 +82,50 @@ export const createCalendarFileName = (title: string, date: string) => {
     .replace(/^-+|-+$/g, "");
 
   return `${safeTitle || "bokning"}-${date}.ics`;
+};
+
+export const createGoogleCalendarUrl = ({
+  title,
+  description = "",
+  date,
+  startTime,
+  endTime,
+}: CalendarEventInput) => {
+  const url = new URL("https://calendar.google.com/calendar/render");
+
+  url.searchParams.set("action", "TEMPLATE");
+  url.searchParams.set("text", title);
+  url.searchParams.set(
+    "dates",
+    `${formatDateTimeForGoogleCalendar(
+      date,
+      startTime,
+    )}/${formatDateTimeForGoogleCalendar(date, endTime)}`,
+  );
+  url.searchParams.set("details", description);
+
+  return url.toString();
+};
+
+export const createOutlookCalendarUrl = ({
+  title,
+  description = "",
+  date,
+  startTime,
+  endTime,
+}: CalendarEventInput) => {
+  const url = new URL("https://outlook.live.com/calendar/0/deeplink/compose");
+
+  url.searchParams.set("path", "/calendar/action/compose");
+  url.searchParams.set("rru", "addevent");
+  url.searchParams.set("subject", title);
+  url.searchParams.set("body", description);
+  url.searchParams.set("startdt", createLocalDateTime(date, startTime));
+  url.searchParams.set("enddt", createLocalDateTime(date, endTime));
+
+  return url.toString();
+};
+
+export const openCalendarUrl = (url: string) => {
+  window.open(url, "_blank", "noopener,noreferrer");
 };

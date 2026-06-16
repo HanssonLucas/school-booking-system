@@ -13,7 +13,10 @@ import {
   Stack,
   TextField,
   Typography,
+  Menu,
+  MenuItem,
 } from "@mui/material";
+import ArrowDropDownRoundedIcon from "@mui/icons-material/ArrowDropDownRounded";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
@@ -24,8 +27,11 @@ import type { StudentBookingLookup } from "@/types/booking";
 import { useTranslations } from "@/i18n/useTranslations";
 import {
   createCalendarFileName,
+  createGoogleCalendarUrl,
   createIcsFileContent,
+  createOutlookCalendarUrl,
   downloadIcsFile,
+  openCalendarUrl,
 } from "@/lib/calendar";
 
 type MyBookingsDialogProps = {
@@ -58,6 +64,8 @@ export default function MyBookingsDialog({
     setErrorMessage("");
     setSuccessMessage("");
     setCancellingBookingId(null);
+    setCalendarMenuAnchor(null);
+    setSelectedCalendarBooking(null);
     onClose();
   };
 
@@ -136,22 +144,83 @@ export default function MyBookingsDialog({
     }
   };
 
-  const handleDownloadCalendarFile = (booking: StudentBookingLookup) => {
+  const createCalendarEventDescription = (booking: StudentBookingLookup) => {
+    return `${t.bookingsDialog.assignedTime}: ${booking.slotStartTime}–${booking.slotEndTime}`;
+  };
+
+  const handleOpenCalendarMenu = (
+    event: React.MouseEvent<HTMLButtonElement>,
+    booking: StudentBookingLookup,
+  ) => {
+    setCalendarMenuAnchor(event.currentTarget);
+    setSelectedCalendarBooking(booking);
+  };
+
+  const handleCloseCalendarMenu = () => {
+    setCalendarMenuAnchor(null);
+    setSelectedCalendarBooking(null);
+  };
+
+  const handleOpenGoogleCalendar = () => {
+    if (!selectedCalendarBooking) {
+      return;
+    }
+
+    const googleCalendarUrl = createGoogleCalendarUrl({
+      title: selectedCalendarBooking.sessionTitle,
+      description: createCalendarEventDescription(selectedCalendarBooking),
+      date: selectedCalendarBooking.sessionDate,
+      startTime: selectedCalendarBooking.slotStartTime,
+      endTime: selectedCalendarBooking.slotEndTime,
+    });
+
+    openCalendarUrl(googleCalendarUrl);
+    handleCloseCalendarMenu();
+  };
+
+  const handleOpenOutlookCalendar = () => {
+    if (!selectedCalendarBooking) {
+      return;
+    }
+
+    const outlookCalendarUrl = createOutlookCalendarUrl({
+      title: selectedCalendarBooking.sessionTitle,
+      description: createCalendarEventDescription(selectedCalendarBooking),
+      date: selectedCalendarBooking.sessionDate,
+      startTime: selectedCalendarBooking.slotStartTime,
+      endTime: selectedCalendarBooking.slotEndTime,
+    });
+
+    openCalendarUrl(outlookCalendarUrl);
+    handleCloseCalendarMenu();
+  };
+
+  const handleDownloadCalendarFile = () => {
+    if (!selectedCalendarBooking) {
+      return;
+    }
+
     const calendarContent = createIcsFileContent({
-      title: booking.sessionTitle,
-      description: `${t.bookingsDialog.assignedTime}: ${booking.slotStartTime}–${booking.slotEndTime}`,
-      date: booking.sessionDate,
-      startTime: booking.slotStartTime,
-      endTime: booking.slotEndTime,
+      title: selectedCalendarBooking.sessionTitle,
+      description: createCalendarEventDescription(selectedCalendarBooking),
+      date: selectedCalendarBooking.sessionDate,
+      startTime: selectedCalendarBooking.slotStartTime,
+      endTime: selectedCalendarBooking.slotEndTime,
     });
 
     const fileName = createCalendarFileName(
-      booking.sessionTitle,
-      booking.sessionDate,
+      selectedCalendarBooking.sessionTitle,
+      selectedCalendarBooking.sessionDate,
     );
 
     downloadIcsFile(fileName, calendarContent);
+    handleCloseCalendarMenu();
   };
+
+  const [calendarMenuAnchor, setCalendarMenuAnchor] =
+    useState<HTMLElement | null>(null);
+  const [selectedCalendarBooking, setSelectedCalendarBooking] =
+    useState<StudentBookingLookup | null>(null);
 
   return (
     <Dialog
@@ -218,6 +287,32 @@ export default function MyBookingsDialog({
           </Box>
         </Stack>
       </Box>
+
+      <Menu
+        anchorEl={calendarMenuAnchor}
+        open={Boolean(calendarMenuAnchor)}
+        onClose={handleCloseCalendarMenu}
+        slotProps={{
+          paper: {
+            sx: {
+              borderRadius: 3,
+              minWidth: 220,
+            },
+          },
+        }}
+      >
+        <MenuItem onClick={handleOpenGoogleCalendar}>
+          {t.myBookingsDialog.googleCalendarOption}
+        </MenuItem>
+
+        <MenuItem onClick={handleOpenOutlookCalendar}>
+          {t.myBookingsDialog.outlookCalendarOption}
+        </MenuItem>
+
+        <MenuItem onClick={handleDownloadCalendarFile}>
+          {t.myBookingsDialog.downloadCalendarFileOption}
+        </MenuItem>
+      </Menu>
 
       <DialogContent sx={{ p: { xs: 3, sm: 4 } }}>
         <Stack spacing={3} component="form" onSubmit={handleSearch}>
@@ -387,7 +482,10 @@ export default function MyBookingsDialog({
                           variant="outlined"
                           size="small"
                           startIcon={<FileDownloadOutlinedIcon />}
-                          onClick={() => handleDownloadCalendarFile(booking)}
+                          endIcon={<ArrowDropDownRoundedIcon />}
+                          onClick={(event) =>
+                            handleOpenCalendarMenu(event, booking)
+                          }
                           sx={{
                             borderRadius: 999,
                             textTransform: "none",
@@ -395,7 +493,7 @@ export default function MyBookingsDialog({
                             px: 1.5,
                           }}
                         >
-                          {t.myBookingsDialog.downloadCalendarButton}
+                          {t.myBookingsDialog.addToCalendarButton}
                         </Button>
 
                         <Button
