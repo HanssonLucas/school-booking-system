@@ -14,6 +14,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import EventAvailableOutlinedIcon from "@mui/icons-material/EventAvailableOutlined";
@@ -21,6 +22,11 @@ import EventBusyOutlinedIcon from "@mui/icons-material/EventBusyOutlined";
 import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
 import type { StudentBookingLookup } from "@/types/booking";
 import { useTranslations } from "@/i18n/useTranslations";
+import {
+  createCalendarFileName,
+  createIcsFileContent,
+  downloadIcsFile,
+} from "@/lib/calendar";
 
 type MyBookingsDialogProps = {
   open: boolean;
@@ -128,6 +134,23 @@ export default function MyBookingsDialog({
     } finally {
       setCancellingBookingId(null);
     }
+  };
+
+  const handleDownloadCalendarFile = (booking: StudentBookingLookup) => {
+    const calendarContent = createIcsFileContent({
+      title: booking.sessionTitle,
+      description: `${t.bookingsDialog.assignedTime}: ${booking.slotStartTime}–${booking.slotEndTime}`,
+      date: booking.sessionDate,
+      startTime: booking.slotStartTime,
+      endTime: booking.slotEndTime,
+    });
+
+    const fileName = createCalendarFileName(
+      booking.sessionTitle,
+      booking.sessionDate,
+    );
+
+    downloadIcsFile(fileName, calendarContent);
   };
 
   return (
@@ -355,24 +378,45 @@ export default function MyBookingsDialog({
                         }}
                       />
 
-                      <Button
-                        variant="text"
-                        color="error"
-                        size="small"
-                        startIcon={<EventBusyOutlinedIcon />}
-                        disabled={cancellingBookingId === booking.id}
-                        onClick={() => handleCancelBooking(booking)}
-                        sx={{
-                          borderRadius: 999,
-                          textTransform: "none",
-                          fontWeight: 800,
-                          px: 1.5,
-                        }}
+                      <Stack
+                        direction="row"
+                        spacing={1}
+                        sx={{ flexWrap: "wrap" }}
                       >
-                        {cancellingBookingId === booking.id
-                          ? t.cancelBookingDialog.submittingButton
-                          : t.bookingSession.cancelButton}
-                      </Button>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          startIcon={<FileDownloadOutlinedIcon />}
+                          onClick={() => handleDownloadCalendarFile(booking)}
+                          sx={{
+                            borderRadius: 999,
+                            textTransform: "none",
+                            fontWeight: 800,
+                            px: 1.5,
+                          }}
+                        >
+                          {t.myBookingsDialog.downloadCalendarButton}
+                        </Button>
+
+                        <Button
+                          variant="text"
+                          color="error"
+                          size="small"
+                          startIcon={<EventBusyOutlinedIcon />}
+                          disabled={cancellingBookingId === booking.id}
+                          onClick={() => handleCancelBooking(booking)}
+                          sx={{
+                            borderRadius: 999,
+                            textTransform: "none",
+                            fontWeight: 800,
+                            px: 1.5,
+                          }}
+                        >
+                          {cancellingBookingId === booking.id
+                            ? t.cancelBookingDialog.submittingButton
+                            : t.bookingSession.cancelButton}
+                        </Button>
+                      </Stack>
                     </Box>
                   </Stack>
                 </Paper>

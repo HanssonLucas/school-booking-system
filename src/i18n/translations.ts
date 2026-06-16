@@ -152,6 +152,7 @@ export const translations = {
       empty: "Inga bokningar hittades för den emailen.",
       assignedTime: "Tilldelad tid",
       date: "Datum",
+      downloadCalendarButton: "Lägg till i kalender",
     },
     deleteSessionDialog: {
       title: "Ta bort bokningstillfälle?",
@@ -344,6 +345,7 @@ export const translations = {
       empty: "No bookings were found for that email.",
       assignedTime: "Assigned time",
       date: "Date",
+      downloadCalendarButton: "Add to calendar",
     },
     deleteSessionDialog: {
       title: "Delete booking session?",
