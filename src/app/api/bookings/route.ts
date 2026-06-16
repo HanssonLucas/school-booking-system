@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getAllSlotTimes } from "@/lib/bookingSlots";
+import { sendBookingConfirmationEmail } from "@/lib/email";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -92,6 +93,8 @@ export async function POST(request: Request) {
       `
       SELECT
         id,
+        title,
+        date,
         start_time AS startTime,
         end_time AS endTime,
         slot_duration_minutes AS slotDurationMinutes,
@@ -103,6 +106,8 @@ export async function POST(request: Request) {
     .get(sessionId) as
     | {
         id: number;
+        title: string;
+        date: string;
         startTime: string;
         endTime: string;
         slotDurationMinutes: number;
@@ -216,7 +221,30 @@ export async function POST(request: Request) {
       WHERE id = ?
       `,
     )
-    .get(result.lastInsertRowid);
+    .get(result.lastInsertRowid) as
+    | {
+        id: number;
+        sessionId: number;
+        studentName: string;
+        studentEmail: string;
+        slotStartTime: string;
+        slotEndTime: string;
+        createdAt: string;
+      }
+    | undefined;
+
+  if (!booking) {
+    return NextResponse.json({ code: "BOOKING_NOT_FOUND" }, { status: 500 });
+  }
+
+  await sendBookingConfirmationEmail({
+    to: booking.studentEmail,
+    studentName: booking.studentName,
+    sessionTitle: session.title,
+    sessionDate: session.date,
+    slotStartTime: booking.slotStartTime,
+    slotEndTime: booking.slotEndTime,
+  });
 
   return NextResponse.json(booking, { status: 201 });
 }

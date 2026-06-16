@@ -15,10 +15,22 @@ export const sendBookingConfirmationEmail = async ({
   slotStartTime,
   slotEndTime,
 }: BookingConfirmationEmailInput) => {
-  console.log("📧 Booking confirmation email");
-  console.log("To:", to);
-  console.log("Student:", studentName);
-  console.log("Session:", sessionTitle);
-  console.log("Date:", sessionDate);
-  console.log("Time:", `${slotStartTime}–${slotEndTime}`);
+  console.log("");
+  console.log("====================================");
+  console.log("📧 DEV EMAIL: Booking confirmation");
+  console.log("====================================");
+  console.log(`To: ${to}`);
+  console.log(`Subject: Bekräftelse på din bokning`);
+  console.log("");
+  console.log(`Hej ${studentName}!`);
+  console.log("");
+  console.log("Din bokning är bekräftad.");
+  console.log("");
+  console.log(`Tillfälle: ${sessionTitle}`);
+  console.log(`Datum: ${sessionDate}`);
+  console.log(`Tid: ${slotStartTime}–${slotEndTime}`);
+  console.log("");
+  console.log("Du kan se och hantera din bokning i bokningssystemet.");
+  console.log("====================================");
+  console.log("");
 };
