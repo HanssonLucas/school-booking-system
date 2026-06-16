@@ -2,9 +2,9 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getAllSlotTimes } from "@/lib/bookingSlots";
 import {
-  sendBookingCancellationEmail,
-  sendBookingConfirmationEmail,
-} from "@/lib/email";
+  notifyBookingCancelled,
+  notifyBookingConfirmed,
+} from "@/lib/emailNotifications";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -240,7 +240,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ code: "BOOKING_NOT_FOUND" }, { status: 500 });
   }
 
-  await sendBookingConfirmationEmail({
+  await notifyBookingConfirmed({
     to: booking.studentEmail,
     studentName: booking.studentName,
     sessionTitle: session.title,
@@ -307,7 +307,7 @@ export async function DELETE(request: Request) {
     `,
   ).run(existingBooking.id);
 
-  await sendBookingCancellationEmail({
+  await notifyBookingCancelled({
     to: existingBooking.studentEmail,
     studentName: existingBooking.studentName,
     sessionTitle: existingBooking.sessionTitle,
