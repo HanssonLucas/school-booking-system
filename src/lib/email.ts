@@ -1,3 +1,10 @@
+type EmailMessage = {
+  to: string;
+  subject: string;
+  text: string;
+  html: string;
+};
+
 type BookingConfirmationEmailInput = {
   to: string;
   studentName: string;
@@ -5,6 +12,25 @@ type BookingConfirmationEmailInput = {
   sessionDate: string;
   slotStartTime: string;
   slotEndTime: string;
+};
+
+const sendEmail = async ({ to, subject, text, html }: EmailMessage) => {
+  console.log("");
+  console.log("====================================");
+  console.log("📧 DEV EMAIL");
+  console.log("====================================");
+  console.log(`To: ${to}`);
+  console.log(`Subject: ${subject}`);
+  console.log("");
+  console.log("Text version:");
+  console.log("------------------------------------");
+  console.log(text);
+  console.log("");
+  console.log("HTML version:");
+  console.log("------------------------------------");
+  console.log(html);
+  console.log("====================================");
+  console.log("");
 };
 
 export const sendBookingConfirmationEmail = async ({
@@ -15,22 +41,42 @@ export const sendBookingConfirmationEmail = async ({
   slotStartTime,
   slotEndTime,
 }: BookingConfirmationEmailInput) => {
-  console.log("");
-  console.log("====================================");
-  console.log("📧 DEV EMAIL: Booking confirmation");
-  console.log("====================================");
-  console.log(`To: ${to}`);
-  console.log(`Subject: Bekräftelse på din bokning`);
-  console.log("");
-  console.log(`Hej ${studentName}!`);
-  console.log("");
-  console.log("Din bokning är bekräftad.");
-  console.log("");
-  console.log(`Tillfälle: ${sessionTitle}`);
-  console.log(`Datum: ${sessionDate}`);
-  console.log(`Tid: ${slotStartTime}–${slotEndTime}`);
-  console.log("");
-  console.log("Du kan se och hantera din bokning i bokningssystemet.");
-  console.log("====================================");
-  console.log("");
+  const subject = "Bekräftelse på din bokning";
+
+  const text = `
+Hej ${studentName}!
+
+Din bokning är bekräftad.
+
+Tillfälle: ${sessionTitle}
+Datum: ${sessionDate}
+Tid: ${slotStartTime}–${slotEndTime}
+
+Du kan se och hantera din bokning i bokningssystemet.
+`.trim();
+
+  const html = `
+<div>
+  <h1>Din bokning är bekräftad</h1>
+
+  <p>Hej ${studentName}!</p>
+
+  <p>Din bokning är bekräftad.</p>
+
+  <ul>
+    <li><strong>Tillfälle:</strong> ${sessionTitle}</li>
+    <li><strong>Datum:</strong> ${sessionDate}</li>
+    <li><strong>Tid:</strong> ${slotStartTime}–${slotEndTime}</li>
+  </ul>
+
+  <p>Du kan se och hantera din bokning i bokningssystemet.</p>
+</div>
+`.trim();
+
+  await sendEmail({
+    to,
+    subject,
+    text,
+    html,
+  });
 };
