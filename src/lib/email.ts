@@ -1,3 +1,5 @@
+type EmailProvider = "console";
+
 type EmailMessage = {
   to: string;
   subject: string;
@@ -14,11 +16,26 @@ type BookingEmailInput = {
   slotEndTime: string;
 };
 
-const sendEmail = async ({ to, subject, text, html }: EmailMessage) => {
+const getEmailProvider = (): EmailProvider => {
+  const emailProvider = process.env.EMAIL_PROVIDER;
+
+  if (emailProvider === "console") {
+    return emailProvider;
+  }
+
+  console.warn(
+    `Unknown EMAIL_PROVIDER "${emailProvider}". Falling back to "console".`,
+  );
+
+  return "console";
+};
+
+const sendConsoleEmail = async ({ to, subject, text, html }: EmailMessage) => {
   console.log("");
   console.log("====================================");
   console.log("📧 DEV EMAIL");
   console.log("====================================");
+  console.log(`Provider: console`);
   console.log(`To: ${to}`);
   console.log(`Subject: ${subject}`);
   console.log("");
@@ -31,6 +48,15 @@ const sendEmail = async ({ to, subject, text, html }: EmailMessage) => {
   console.log(html);
   console.log("====================================");
   console.log("");
+};
+
+const sendEmail = async (message: EmailMessage) => {
+  const emailProvider = getEmailProvider();
+
+  if (emailProvider === "console") {
+    await sendConsoleEmail(message);
+    return;
+  }
 };
 
 export const sendBookingConfirmationEmail = async ({
