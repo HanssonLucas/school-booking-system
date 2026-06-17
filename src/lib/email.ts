@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import type { BookingLanguage } from "@/types/booking";
 
 type EmailProvider = "console" | "resend";
 
@@ -16,21 +17,122 @@ type BookingEmailInput = {
   sessionDate: string;
   slotStartTime: string;
   slotEndTime: string;
+  language: BookingLanguage;
 };
 
 type BookingEmailTemplateInput = {
   studentName: string;
   heading: string;
   introText: string;
+  greeting: string;
   statusLabel: string;
   statusTone: "success" | "neutral";
   sessionTitle: string;
   sessionDate: string;
   slotStartTime: string;
   slotEndTime: string;
+  labels: {
+    session: string;
+    date: string;
+    time: string;
+  };
   footerText: string;
+  automaticMessageText: string;
+  htmlLanguage: BookingLanguage;
   actionUrl?: string;
   actionLabel?: string;
+};
+
+type BookingEmailContent = {
+  subject: string;
+  heading: string;
+  introText: string;
+  greeting: string;
+  statusLabel: string;
+  footerText: string;
+  actionLabel: string;
+  automaticMessageText: string;
+  textDetailsLabels: {
+    session: string;
+    date: string;
+    time: string;
+  };
+};
+
+const bookingConfirmationEmailContent: Record<
+  BookingLanguage,
+  BookingEmailContent
+> = {
+  sv: {
+    subject: "Bekräftelse på din bokning",
+    heading: "Din bokning är bekräftad",
+    introText: "Din bokning är bekräftad.",
+    greeting: "Hej",
+    statusLabel: "Bokad",
+    footerText: "Du kan se och hantera din bokning i bokningssystemet.",
+    actionLabel: "Öppna bokningssystemet",
+    automaticMessageText:
+      "Detta är ett automatiskt meddelande från Bokningssystem.",
+    textDetailsLabels: {
+      session: "Tillfälle",
+      date: "Datum",
+      time: "Tid",
+    },
+  },
+  en: {
+    subject: "Booking confirmation",
+    heading: "Your booking is confirmed",
+    introText: "Your booking has been confirmed.",
+    greeting: "Hi",
+    statusLabel: "Booked",
+    footerText: "You can view and manage your booking in the booking system.",
+    actionLabel: "Open booking system",
+    automaticMessageText:
+      "This is an automatic message from the Booking System.",
+    textDetailsLabels: {
+      session: "Session",
+      date: "Date",
+      time: "Time",
+    },
+  },
+};
+
+const bookingCancellationEmailContent: Record<
+  BookingLanguage,
+  BookingEmailContent
+> = {
+  sv: {
+    subject: "Bekräftelse på avbokning",
+    heading: "Din bokning har avbokats",
+    introText: "Din bokning har avbokats.",
+    greeting: "Hej",
+    statusLabel: "Avbokad",
+    footerText: "Du kan boka en ny tid i bokningssystemet om du behöver.",
+    actionLabel: "Öppna bokningssystemet",
+    automaticMessageText:
+      "Detta är ett automatiskt meddelande från Bokningssystem.",
+    textDetailsLabels: {
+      session: "Tillfälle",
+      date: "Datum",
+      time: "Tid",
+    },
+  },
+  en: {
+    subject: "Booking cancellation confirmation",
+    heading: "Your booking has been cancelled",
+    introText: "Your booking has been cancelled.",
+    greeting: "Hi",
+    statusLabel: "Cancelled",
+    footerText: "You can book a new time in the booking system if needed.",
+    actionLabel: "Open booking system",
+    automaticMessageText:
+      "This is an automatic message from the Booking System.",
+    textDetailsLabels: {
+      session: "Session",
+      date: "Date",
+      time: "Time",
+    },
+  },
 };
 
 const getEmailProvider = (): EmailProvider => {
@@ -136,14 +238,15 @@ const createBookingDetailsText = ({
   sessionDate,
   slotStartTime,
   slotEndTime,
+  labels,
 }: Pick<
   BookingEmailTemplateInput,
-  "sessionTitle" | "sessionDate" | "slotStartTime" | "slotEndTime"
+  "sessionTitle" | "sessionDate" | "slotStartTime" | "slotEndTime" | "labels"
 >) => {
   return `
-Tillfälle: ${sessionTitle}
-Datum: ${sessionDate}
-Tid: ${slotStartTime}–${slotEndTime}
+${labels.session}: ${sessionTitle}
+${labels.date}: ${sessionDate}
+${labels.time}: ${slotStartTime}–${slotEndTime}
 `.trim();
 };
 
@@ -151,13 +254,17 @@ const createEmailLayout = ({
   studentName,
   heading,
   introText,
+  greeting,
   statusLabel,
   statusTone,
   sessionTitle,
   sessionDate,
   slotStartTime,
   slotEndTime,
+  labels,
   footerText,
+  automaticMessageText,
+  htmlLanguage,
   actionUrl,
   actionLabel,
 }: BookingEmailTemplateInput) => {
@@ -181,7 +288,7 @@ const createEmailLayout = ({
 
   return `
 <!DOCTYPE html>
-<html lang="sv">
+<html lang="${htmlLanguage}">
   <head>
     <meta charset="UTF-8" />
     <title>${heading}</title>
@@ -209,7 +316,7 @@ const createEmailLayout = ({
                 </span>
 
                 <p style="margin:24px 0 0; font-size:16px; line-height:1.6;">
-                  Hej ${studentName}!
+                  ${greeting} ${studentName}!
                 </p>
 
                 <p style="margin:12px 0 24px; font-size:16px; line-height:1.6; color:#374151;">
@@ -219,7 +326,7 @@ const createEmailLayout = ({
                 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border:1px solid #e5e7eb; border-radius:16px; overflow:hidden;">
                   <tr>
                     <td style="padding:14px 16px; background-color:#f9fafb; color:#6b7280; font-size:14px; width:35%;">
-                      Tillfälle
+                      ${labels.session}
                     </td>
                     <td style="padding:14px 16px; background-color:#f9fafb; font-size:14px; font-weight:700;">
                       ${sessionTitle}
@@ -227,7 +334,7 @@ const createEmailLayout = ({
                   </tr>
                   <tr>
                     <td style="padding:14px 16px; color:#6b7280; font-size:14px; width:35%; border-top:1px solid #e5e7eb;">
-                      Datum
+                      ${labels.date}
                     </td>
                     <td style="padding:14px 16px; font-size:14px; font-weight:700; border-top:1px solid #e5e7eb;">
                       ${sessionDate}
@@ -235,7 +342,7 @@ const createEmailLayout = ({
                   </tr>
                   <tr>
                     <td style="padding:14px 16px; background-color:#f9fafb; color:#6b7280; font-size:14px; width:35%; border-top:1px solid #e5e7eb;">
-                      Tid
+                      ${labels.time}
                     </td>
                     <td style="padding:14px 16px; background-color:#f9fafb; font-size:14px; font-weight:700; border-top:1px solid #e5e7eb;">
                       ${slotStartTime}–${slotEndTime}
@@ -254,7 +361,7 @@ ${actionButtonHtml}
             <tr>
               <td style="padding:20px 32px; background-color:#f9fafb; border-top:1px solid #e5e7eb;">
                 <p style="margin:0; font-size:12px; line-height:1.6; color:#6b7280;">
-                  Detta är ett automatiskt meddelande från Bokningssystem.
+                  ${automaticMessageText}
                 </p>
               </td>
             </tr>
@@ -274,46 +381,52 @@ export const sendBookingConfirmationEmail = async ({
   sessionDate,
   slotStartTime,
   slotEndTime,
+  language,
 }: BookingEmailInput) => {
-  const subject = "Bekräftelse på din bokning";
   const appUrl = getAppUrl();
+  const content = bookingConfirmationEmailContent[language];
 
   const bookingDetailsText = createBookingDetailsText({
     sessionTitle,
     sessionDate,
     slotStartTime,
     slotEndTime,
+    labels: content.textDetailsLabels,
   });
 
   const text = `
-Hej ${studentName}!
+${content.greeting} ${studentName}!
 
-Din bokning är bekräftad.
+${content.introText}
 
 ${bookingDetailsText}
 
-Du kan se och hantera din bokning i bokningssystemet:
+${content.footerText}
 ${appUrl}
 `.trim();
 
   const html = createEmailLayout({
     studentName,
-    heading: "Din bokning är bekräftad",
-    introText: "Din bokning är bekräftad.",
-    statusLabel: "Bokad",
+    heading: content.heading,
+    introText: content.introText,
+    greeting: content.greeting,
+    statusLabel: content.statusLabel,
     statusTone: "success",
     sessionTitle,
     sessionDate,
     slotStartTime,
     slotEndTime,
-    footerText: "Du kan se och hantera din bokning i bokningssystemet.",
+    labels: content.textDetailsLabels,
+    footerText: content.footerText,
+    automaticMessageText: content.automaticMessageText,
+    htmlLanguage: language,
     actionUrl: appUrl,
-    actionLabel: "Öppna bokningssystemet",
+    actionLabel: content.actionLabel,
   });
 
   await sendEmail({
     to,
-    subject,
+    subject: content.subject,
     text,
     html,
   });
@@ -326,46 +439,52 @@ export const sendBookingCancellationEmail = async ({
   sessionDate,
   slotStartTime,
   slotEndTime,
+  language,
 }: BookingEmailInput) => {
-  const subject = "Bekräftelse på avbokning";
   const appUrl = getAppUrl();
+  const content = bookingCancellationEmailContent[language];
 
   const bookingDetailsText = createBookingDetailsText({
     sessionTitle,
     sessionDate,
     slotStartTime,
     slotEndTime,
+    labels: content.textDetailsLabels,
   });
 
   const text = `
-Hej ${studentName}!
+${content.greeting} ${studentName}!
 
-Din bokning har avbokats.
+${content.introText}
 
 ${bookingDetailsText}
 
-Du kan boka en ny tid i bokningssystemet om du behöver:
+${content.footerText}
 ${appUrl}
 `.trim();
 
   const html = createEmailLayout({
     studentName,
-    heading: "Din bokning har avbokats",
-    introText: "Din bokning har avbokats.",
-    statusLabel: "Avbokad",
+    heading: content.heading,
+    introText: content.introText,
+    greeting: content.greeting,
+    statusLabel: content.statusLabel,
     statusTone: "neutral",
     sessionTitle,
     sessionDate,
     slotStartTime,
     slotEndTime,
-    footerText: "Du kan boka en ny tid i bokningssystemet om du behöver.",
+    labels: content.textDetailsLabels,
+    footerText: content.footerText,
+    automaticMessageText: content.automaticMessageText,
+    htmlLanguage: language,
     actionUrl: appUrl,
-    actionLabel: "Öppna bokningssystemet",
+    actionLabel: content.actionLabel,
   });
 
   await sendEmail({
     to,
-    subject,
+    subject: content.subject,
     text,
     html,
   });

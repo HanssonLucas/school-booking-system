@@ -5,6 +5,11 @@ import {
   notifyBookingCancelled,
   notifyBookingConfirmed,
 } from "@/lib/emailNotifications";
+import type { BookingLanguage } from "@/types/booking";
+
+const getValidBookingLanguage = (language: unknown): BookingLanguage => {
+  return language === "en" ? "en" : "sv";
+};
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -36,6 +41,7 @@ export async function GET(request: Request) {
           student_email AS studentEmail,
           slot_start_time AS slotStartTime,
           slot_end_time AS slotEndTime,
+          language,
           created_at AS createdAt
         FROM bookings
         WHERE session_id = ?
@@ -58,6 +64,7 @@ export async function GET(request: Request) {
           bookings.student_email AS studentEmail,
           bookings.slot_start_time AS slotStartTime,
           bookings.slot_end_time AS slotEndTime,
+          bookings.language,
           bookings.created_at AS createdAt,
           booking_sessions.title AS sessionTitle,
           booking_sessions.date AS sessionDate,
@@ -83,6 +90,7 @@ export async function POST(request: Request) {
   const body = await request.json();
 
   const { sessionId, studentName, studentEmail } = body;
+  const language = getValidBookingLanguage(body.language);
 
   if (!sessionId || !studentName || !studentEmail) {
     return NextResponse.json(
@@ -196,9 +204,10 @@ export async function POST(request: Request) {
         student_name,
         student_email,
         slot_start_time,
-        slot_end_time
+        slot_end_time,
+        language
       )
-      VALUES (?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?)
       `,
     )
     .run(
@@ -207,6 +216,7 @@ export async function POST(request: Request) {
       studentEmail,
       firstAvailableSlot.slotStartTime,
       firstAvailableSlot.slotEndTime,
+      language,
     );
 
   const booking = db
@@ -219,6 +229,7 @@ export async function POST(request: Request) {
         student_email AS studentEmail,
         slot_start_time AS slotStartTime,
         slot_end_time AS slotEndTime,
+        language,
         created_at AS createdAt
       FROM bookings
       WHERE id = ?
@@ -232,6 +243,7 @@ export async function POST(request: Request) {
         studentEmail: string;
         slotStartTime: string;
         slotEndTime: string;
+        language: BookingLanguage;
         createdAt: string;
       }
     | undefined;
@@ -247,6 +259,7 @@ export async function POST(request: Request) {
     sessionDate: session.date,
     slotStartTime: booking.slotStartTime,
     slotEndTime: booking.slotEndTime,
+    language: booking.language,
   });
 
   return NextResponse.json(booking, { status: 201 });
@@ -274,6 +287,7 @@ export async function DELETE(request: Request) {
         bookings.student_email AS studentEmail,
         bookings.slot_start_time AS slotStartTime,
         bookings.slot_end_time AS slotEndTime,
+        bookings.language,
         booking_sessions.title AS sessionTitle,
         booking_sessions.date AS sessionDate
       FROM bookings
@@ -291,6 +305,7 @@ export async function DELETE(request: Request) {
         studentEmail: string;
         slotStartTime: string;
         slotEndTime: string;
+        language: BookingLanguage;
         sessionTitle: string;
         sessionDate: string;
       }
@@ -314,6 +329,7 @@ export async function DELETE(request: Request) {
     sessionDate: existingBooking.sessionDate,
     slotStartTime: existingBooking.slotStartTime,
     slotEndTime: existingBooking.slotEndTime,
+    language: existingBooking.language,
   });
 
   return NextResponse.json({

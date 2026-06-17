@@ -2,6 +2,7 @@ import {
   sendBookingCancellationEmail,
   sendBookingConfirmationEmail,
 } from "@/lib/email";
+import type { BookingLanguage } from "@/types/booking";
 
 type BookingEmailNotificationInput = {
   to: string;
@@ -10,6 +11,7 @@ type BookingEmailNotificationInput = {
   sessionDate: string;
   slotStartTime: string;
   slotEndTime: string;
+  language: BookingLanguage;
 };
 
 export const notifyBookingConfirmed = async (
