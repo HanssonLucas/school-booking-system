@@ -18,6 +18,19 @@ type BookingEmailInput = {
   slotEndTime: string;
 };
 
+type BookingEmailTemplateInput = {
+  studentName: string;
+  heading: string;
+  introText: string;
+  statusLabel: string;
+  statusTone: "success" | "neutral";
+  sessionTitle: string;
+  sessionDate: string;
+  slotStartTime: string;
+  slotEndTime: string;
+  footerText: string;
+};
+
 const getEmailProvider = (): EmailProvider => {
   const emailProvider = process.env.EMAIL_PROVIDER;
 
@@ -112,6 +125,123 @@ const sendEmail = async (message: EmailMessage) => {
   }
 };
 
+const createBookingDetailsText = ({
+  sessionTitle,
+  sessionDate,
+  slotStartTime,
+  slotEndTime,
+}: Pick<
+  BookingEmailTemplateInput,
+  "sessionTitle" | "sessionDate" | "slotStartTime" | "slotEndTime"
+>) => {
+  return `
+Tillfälle: ${sessionTitle}
+Datum: ${sessionDate}
+Tid: ${slotStartTime}–${slotEndTime}
+`.trim();
+};
+
+const createEmailLayout = ({
+  studentName,
+  heading,
+  introText,
+  statusLabel,
+  statusTone,
+  sessionTitle,
+  sessionDate,
+  slotStartTime,
+  slotEndTime,
+  footerText,
+}: BookingEmailTemplateInput) => {
+  const statusColor = statusTone === "success" ? "#15803d" : "#475569";
+  const statusBackground = statusTone === "success" ? "#dcfce7" : "#e2e8f0";
+
+  return `
+<!DOCTYPE html>
+<html lang="sv">
+  <head>
+    <meta charset="UTF-8" />
+    <title>${heading}</title>
+  </head>
+  <body style="margin:0; padding:0; background-color:#f4f6f8; font-family:Arial, sans-serif; color:#111827;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#f4f6f8; padding:32px 16px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px; background-color:#ffffff; border-radius:20px; overflow:hidden; border:1px solid #e5e7eb;">
+            <tr>
+              <td style="padding:28px 32px; background:linear-gradient(135deg, #1976d2, #4caf50); color:#ffffff;">
+                <div style="font-size:14px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase;">
+                  Bokningssystem
+                </div>
+                <h1 style="margin:12px 0 0; font-size:28px; line-height:1.2;">
+                  ${heading}
+                </h1>
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding:32px;">
+                <span style="display:inline-block; padding:8px 12px; border-radius:999px; font-size:13px; font-weight:700; color:${statusColor}; background-color:${statusBackground};">
+                  ${statusLabel}
+                </span>
+
+                <p style="margin:24px 0 0; font-size:16px; line-height:1.6;">
+                  Hej ${studentName}!
+                </p>
+
+                <p style="margin:12px 0 24px; font-size:16px; line-height:1.6; color:#374151;">
+                  ${introText}
+                </p>
+
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border:1px solid #e5e7eb; border-radius:16px; overflow:hidden;">
+                  <tr>
+                    <td style="padding:14px 16px; background-color:#f9fafb; color:#6b7280; font-size:14px; width:35%;">
+                      Tillfälle
+                    </td>
+                    <td style="padding:14px 16px; background-color:#f9fafb; font-size:14px; font-weight:700;">
+                      ${sessionTitle}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:14px 16px; color:#6b7280; font-size:14px; width:35%; border-top:1px solid #e5e7eb;">
+                      Datum
+                    </td>
+                    <td style="padding:14px 16px; font-size:14px; font-weight:700; border-top:1px solid #e5e7eb;">
+                      ${sessionDate}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:14px 16px; background-color:#f9fafb; color:#6b7280; font-size:14px; width:35%; border-top:1px solid #e5e7eb;">
+                      Tid
+                    </td>
+                    <td style="padding:14px 16px; background-color:#f9fafb; font-size:14px; font-weight:700; border-top:1px solid #e5e7eb;">
+                      ${slotStartTime}–${slotEndTime}
+                    </td>
+                  </tr>
+                </table>
+
+                <p style="margin:24px 0 0; font-size:15px; line-height:1.6; color:#4b5563;">
+                  ${footerText}
+                </p>
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding:20px 32px; background-color:#f9fafb; border-top:1px solid #e5e7eb;">
+                <p style="margin:0; font-size:12px; line-height:1.6; color:#6b7280;">
+                  Detta är ett automatiskt meddelande från Bokningssystem.
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
+`.trim();
+};
+
 export const sendBookingConfirmationEmail = async ({
   to,
   studentName,
@@ -122,35 +252,35 @@ export const sendBookingConfirmationEmail = async ({
 }: BookingEmailInput) => {
   const subject = "Bekräftelse på din bokning";
 
+  const bookingDetailsText = createBookingDetailsText({
+    sessionTitle,
+    sessionDate,
+    slotStartTime,
+    slotEndTime,
+  });
+
   const text = `
 Hej ${studentName}!
 
 Din bokning är bekräftad.
 
-Tillfälle: ${sessionTitle}
-Datum: ${sessionDate}
-Tid: ${slotStartTime}–${slotEndTime}
+${bookingDetailsText}
 
 Du kan se och hantera din bokning i bokningssystemet.
 `.trim();
 
-  const html = `
-<div>
-  <h1>Din bokning är bekräftad</h1>
-
-  <p>Hej ${studentName}!</p>
-
-  <p>Din bokning är bekräftad.</p>
-
-  <ul>
-    <li><strong>Tillfälle:</strong> ${sessionTitle}</li>
-    <li><strong>Datum:</strong> ${sessionDate}</li>
-    <li><strong>Tid:</strong> ${slotStartTime}–${slotEndTime}</li>
-  </ul>
-
-  <p>Du kan se och hantera din bokning i bokningssystemet.</p>
-</div>
-`.trim();
+  const html = createEmailLayout({
+    studentName,
+    heading: "Din bokning är bekräftad",
+    introText: "Din bokning är bekräftad.",
+    statusLabel: "Bokad",
+    statusTone: "success",
+    sessionTitle,
+    sessionDate,
+    slotStartTime,
+    slotEndTime,
+    footerText: "Du kan se och hantera din bokning i bokningssystemet.",
+  });
 
   await sendEmail({
     to,
@@ -170,35 +300,35 @@ export const sendBookingCancellationEmail = async ({
 }: BookingEmailInput) => {
   const subject = "Bekräftelse på avbokning";
 
+  const bookingDetailsText = createBookingDetailsText({
+    sessionTitle,
+    sessionDate,
+    slotStartTime,
+    slotEndTime,
+  });
+
   const text = `
 Hej ${studentName}!
 
 Din bokning har avbokats.
 
-Tillfälle: ${sessionTitle}
-Datum: ${sessionDate}
-Tid: ${slotStartTime}–${slotEndTime}
+${bookingDetailsText}
 
 Du kan boka en ny tid i bokningssystemet om du behöver.
 `.trim();
 
-  const html = `
-<div>
-  <h1>Din bokning har avbokats</h1>
-
-  <p>Hej ${studentName}!</p>
-
-  <p>Din bokning har avbokats.</p>
-
-  <ul>
-    <li><strong>Tillfälle:</strong> ${sessionTitle}</li>
-    <li><strong>Datum:</strong> ${sessionDate}</li>
-    <li><strong>Tid:</strong> ${slotStartTime}–${slotEndTime}</li>
-  </ul>
-
-  <p>Du kan boka en ny tid i bokningssystemet om du behöver.</p>
-</div>
-`.trim();
+  const html = createEmailLayout({
+    studentName,
+    heading: "Din bokning har avbokats",
+    introText: "Din bokning har avbokats.",
+    statusLabel: "Avbokad",
+    statusTone: "neutral",
+    sessionTitle,
+    sessionDate,
+    slotStartTime,
+    slotEndTime,
+    footerText: "Du kan boka en ny tid i bokningssystemet om du behöver.",
+  });
 
   await sendEmail({
     to,
