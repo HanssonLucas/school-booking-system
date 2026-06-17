@@ -1,3 +1,5 @@
+export type BookingLanguage = "sv" | "en";
+
 export type BookingSession = {
   id: number;
   title: string;
@@ -27,6 +29,7 @@ export type BookingWithSlotTime = {
   createdAt: string;
   slotStartTime: string;
   slotEndTime: string;
+  language: BookingLanguage;
 };
 
 export type StudentBookingLookup = {
@@ -41,4 +44,5 @@ export type StudentBookingLookup = {
   sessionEndTime: string;
   slotStartTime: string;
   slotEndTime: string;
+  language: BookingLanguage;
 };

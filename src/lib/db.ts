@@ -27,6 +27,7 @@ db.exec(`
     student_email TEXT NOT NULL,
     slot_start_time TEXT,
     slot_end_time TEXT,
+    language TEXT NOT NULL DEFAULT 'sv',
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (session_id) REFERENCES booking_sessions(id) ON DELETE CASCADE
   );
@@ -36,15 +37,21 @@ const bookingColumns = db.prepare(`PRAGMA table_info(bookings)`).all() as {
   name: string;
 }[];
 
-const hasColumn = (columnName: string) =>
+const hasBookingColumn = (columnName: string) =>
   bookingColumns.some((column) => column.name === columnName);
 
-if (!hasColumn("slot_start_time")) {
+if (!hasBookingColumn("slot_start_time")) {
   db.prepare(`ALTER TABLE bookings ADD COLUMN slot_start_time TEXT`).run();
 }
 
-if (!hasColumn("slot_end_time")) {
+if (!hasBookingColumn("slot_end_time")) {
   db.prepare(`ALTER TABLE bookings ADD COLUMN slot_end_time TEXT`).run();
+}
+
+if (!hasBookingColumn("language")) {
+  db.prepare(
+    `ALTER TABLE bookings ADD COLUMN language TEXT NOT NULL DEFAULT 'sv'`,
+  ).run();
 }
 
 const sessionColumns = db
