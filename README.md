@@ -10,7 +10,7 @@ This project was originally built as my final school project, and I am now conti
 
 The goal of this project is to provide a clearer and more structured alternative to shared documents or manual booking lists.
 
-Teachers can create booking sessions, and students can book available time slots, cancel bookings and add booked times to their calendar.
+Teachers can create booking sessions, and students can book available time slots, cancel bookings, receive email notifications and add booked times to their calendar.
 
 ## Tech Stack
 
@@ -37,13 +37,14 @@ Teachers can create booking sessions, and students can book available time slots
   - Google Calendar
   - Outlook Calendar
   - `.ics` file download
-
 - Email notifications:
   - Booking confirmation
   - Cancellation confirmation
   - Console provider for local development
   - Resend provider for real email delivery
-
+  - Non-blocking notification handling
+  - Styled HTML email templates
+  - App link button in emails
 - Swedish and English translations
 - Light and dark theme support
 
@@ -53,7 +54,6 @@ Teachers can create booking sessions, and students can book available time slots
 - User roles for students and teachers
 - Improved admin/teacher workflows
 - More advanced filtering
-- Better email templates
 - Deployment
 - Improved accessibility and UX polish
 
@@ -62,35 +62,17 @@ Teachers can create booking sessions, and students can book available time slots
 Create a `.env.local` file based on `.env.example`.
 
 ```env
+# Email provider
+# Use "console" for local development.
+# Use "resend" when sending real emails through Resend.
 EMAIL_PROVIDER=console
+
+# Required when EMAIL_PROVIDER=resend
 RESEND_API_KEY=
+
+# Sender address used for outgoing emails
 EMAIL_FROM="Bokningssystem <onboarding@resend.dev>"
+
+# App URL used in email links
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
-
-Use `EMAIL_PROVIDER=console` for local development.
-
-Use `EMAIL_PROVIDER=resend` when sending real emails through Resend.
-
-## Getting Started
-
-Install dependencies:
-
-```bash
-yarn install
-```
-
-Start the development server:
-
-```bash
-yarn dev
-```
-
-Open the app in your browser:
-
-```txt
-http://localhost:3000
-```
-
-## Notes
-
-This project is still in active development. The current focus is to continue improving the project with more production-like features, cleaner architecture and a better user experience.
