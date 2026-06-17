@@ -16,6 +16,7 @@ import EventAvailableOutlinedIcon from "@mui/icons-material/EventAvailableOutlin
 import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import { useTranslations } from "@/i18n/useTranslations";
+import type { BookingLanguage } from "@/types/booking";
 
 type BookSessionDialogProps = {
   open: boolean;
@@ -24,6 +25,7 @@ type BookSessionDialogProps = {
   onSubmit: (
     studentName: string,
     studentEmail: string,
+    language: BookingLanguage,
   ) => Promise<{ success: boolean; message?: string }>;
 };
 
@@ -38,7 +40,7 @@ export default function BookSessionDialog({
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { t } = useTranslations();
+  const { t, language } = useTranslations();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -51,7 +53,7 @@ export default function BookSessionDialog({
     setIsSubmitting(true);
     setErrorMessage("");
 
-    const result = await onSubmit(studentName, studentEmail);
+    const result = await onSubmit(studentName, studentEmail, language);
 
     setIsSubmitting(false);
 
