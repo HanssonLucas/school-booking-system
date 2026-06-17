@@ -29,6 +29,8 @@ type BookingEmailTemplateInput = {
   slotStartTime: string;
   slotEndTime: string;
   footerText: string;
+  actionUrl?: string;
+  actionLabel?: string;
 };
 
 const getEmailProvider = (): EmailProvider => {
@@ -43,6 +45,10 @@ const getEmailProvider = (): EmailProvider => {
   );
 
   return "console";
+};
+
+const getAppUrl = () => {
+  return process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 };
 
 const sendConsoleEmail = async ({ to, subject, text, html }: EmailMessage) => {
@@ -152,9 +158,26 @@ const createEmailLayout = ({
   slotStartTime,
   slotEndTime,
   footerText,
+  actionUrl,
+  actionLabel,
 }: BookingEmailTemplateInput) => {
   const statusColor = statusTone === "success" ? "#15803d" : "#475569";
   const statusBackground = statusTone === "success" ? "#dcfce7" : "#e2e8f0";
+
+  const actionButtonHtml =
+    actionUrl && actionLabel
+      ? `
+                <table role="presentation" cellspacing="0" cellpadding="0" style="margin:28px 0 0;">
+                  <tr>
+                    <td>
+                      <a href="${actionUrl}" style="display:inline-block; padding:13px 20px; border-radius:999px; background-color:#1976d2; color:#ffffff; text-decoration:none; font-size:14px; font-weight:700;">
+                        ${actionLabel}
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+`
+      : "";
 
   return `
 <!DOCTYPE html>
@@ -223,6 +246,8 @@ const createEmailLayout = ({
                 <p style="margin:24px 0 0; font-size:15px; line-height:1.6; color:#4b5563;">
                   ${footerText}
                 </p>
+
+${actionButtonHtml}
               </td>
             </tr>
 
@@ -251,6 +276,7 @@ export const sendBookingConfirmationEmail = async ({
   slotEndTime,
 }: BookingEmailInput) => {
   const subject = "Bekräftelse på din bokning";
+  const appUrl = getAppUrl();
 
   const bookingDetailsText = createBookingDetailsText({
     sessionTitle,
@@ -266,7 +292,8 @@ Din bokning är bekräftad.
 
 ${bookingDetailsText}
 
-Du kan se och hantera din bokning i bokningssystemet.
+Du kan se och hantera din bokning i bokningssystemet:
+${appUrl}
 `.trim();
 
   const html = createEmailLayout({
@@ -280,6 +307,8 @@ Du kan se och hantera din bokning i bokningssystemet.
     slotStartTime,
     slotEndTime,
     footerText: "Du kan se och hantera din bokning i bokningssystemet.",
+    actionUrl: appUrl,
+    actionLabel: "Öppna bokningssystemet",
   });
 
   await sendEmail({
@@ -299,6 +328,7 @@ export const sendBookingCancellationEmail = async ({
   slotEndTime,
 }: BookingEmailInput) => {
   const subject = "Bekräftelse på avbokning";
+  const appUrl = getAppUrl();
 
   const bookingDetailsText = createBookingDetailsText({
     sessionTitle,
@@ -314,7 +344,8 @@ Din bokning har avbokats.
 
 ${bookingDetailsText}
 
-Du kan boka en ny tid i bokningssystemet om du behöver.
+Du kan boka en ny tid i bokningssystemet om du behöver:
+${appUrl}
 `.trim();
 
   const html = createEmailLayout({
@@ -328,6 +359,8 @@ Du kan boka en ny tid i bokningssystemet om du behöver.
     slotStartTime,
     slotEndTime,
     footerText: "Du kan boka en ny tid i bokningssystemet om du behöver.",
+    actionUrl: appUrl,
+    actionLabel: "Öppna bokningssystemet",
   });
 
   await sendEmail({
