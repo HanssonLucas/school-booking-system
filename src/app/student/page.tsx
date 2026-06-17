@@ -22,7 +22,7 @@ import BookSessionDialog from "@/components/booking/BookSessionDialog";
 import CancelBookingDialog from "@/components/booking/CancelBookingDialog";
 import MyBookingsDialog from "@/components/booking/MyBookingsDialog";
 import SessionFilterControls from "@/components/booking/SessionFilterControls";
-import type { BookingSession } from "@/types/booking";
+import type { BookingLanguage, BookingSession } from "@/types/booking";
 import { useTranslations } from "@/i18n/useTranslations";
 
 type SortOption = "dateAsc" | "dateDesc" | "availableFirst";
@@ -144,6 +144,7 @@ export default function StudentPage() {
   const handleSubmitBooking = async (
     studentName: string,
     studentEmail: string,
+    language: BookingLanguage,
   ) => {
     if (!selectedSessionId) {
       return {
@@ -161,6 +162,7 @@ export default function StudentPage() {
         sessionId: selectedSessionId,
         studentName,
         studentEmail,
+        language,
       }),
     });
 
