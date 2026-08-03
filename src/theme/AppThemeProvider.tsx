@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 
 type ColorMode = "light" | "dark";
@@ -8,16 +8,6 @@ type ColorMode = "light" | "dark";
 type AppThemeContextValue = {
   mode: ColorMode;
   toggleColorMode: () => void;
-};
-
-const getInitialColorMode = (): ColorMode => {
-  if (typeof window === "undefined") {
-    return "light";
-  }
-
-  const storedMode = window.localStorage.getItem("colorMode");
-
-  return storedMode && isColorMode(storedMode) ? storedMode : "light";
 };
 
 const AppThemeContext = createContext<AppThemeContextValue | null>(null);
@@ -31,7 +21,17 @@ const isColorMode = (value: string): value is ColorMode => {
 };
 
 export default function AppThemeProvider({ children }: AppThemeProviderProps) {
-  const [mode, setMode] = useState<ColorMode>(getInitialColorMode);
+  const [mode, setMode] = useState<ColorMode>("light");
+
+  useEffect(() => {
+    const storedMode = window.localStorage.getItem("colorMode");
+
+    if (storedMode && isColorMode(storedMode)) {
+      queueMicrotask(() => {
+        setMode(storedMode);
+      });
+    }
+  }, []);
 
   const toggleColorMode = () => {
     setMode((currentMode) => {

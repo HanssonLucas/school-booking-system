@@ -1,18 +1,8 @@
 "use client";
 
-import { createContext, useMemo, useState } from "react";
+import { createContext, useEffect, useMemo, useState } from "react";
 import type { Language } from "@/i18n/translations";
 import { translations } from "@/i18n/translations";
-
-const getInitialLanguage = (): Language => {
-  if (typeof window === "undefined") {
-    return "sv";
-  }
-
-  const storedLanguage = window.localStorage.getItem("language");
-
-  return storedLanguage && isLanguage(storedLanguage) ? storedLanguage : "sv";
-};
 
 type LanguageContextValue = {
   language: Language;
@@ -31,7 +21,17 @@ const isLanguage = (value: string): value is Language => {
 };
 
 export default function LanguageProvider({ children }: LanguageProviderProps) {
-  const [language, setLanguageState] = useState<Language>(getInitialLanguage);
+  const [language, setLanguageState] = useState<Language>("sv");
+
+  useEffect(() => {
+    const storedLanguage = window.localStorage.getItem("language");
+
+    if (storedLanguage && isLanguage(storedLanguage)) {
+      queueMicrotask(() => {
+        setLanguageState(storedLanguage);
+      });
+    }
+  }, []);
 
   const setLanguage = (newLanguage: Language) => {
     setLanguageState(newLanguage);
