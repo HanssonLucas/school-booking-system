@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Alert,
   Box,
@@ -51,14 +51,44 @@ const initialFormValues: EditFormValues = {
   maxParticipants: "",
 };
 
-export default function EditBookingSessionDialog({
+const getInitialFormValues = (
+  session: BookingSession | null,
+): EditFormValues => {
+  if (!session) {
+    return initialFormValues;
+  }
+
+  return {
+    title: session.title,
+    description: session.description,
+    date: session.date,
+    startTime: session.startTime,
+    endTime: session.endTime,
+    slotDurationMinutes: String(session.slotDurationMinutes),
+    maxParticipants: String(session.maxParticipants),
+  };
+};
+
+export default function EditBookingSessionDialog(
+  props: EditBookingSessionDialogProps,
+) {
+  return (
+    <EditBookingSessionDialogContent
+      key={props.session?.id ?? "empty-session"}
+      {...props}
+    />
+  );
+}
+
+function EditBookingSessionDialogContent({
   open,
   session,
   onClose,
   onSave,
 }: EditBookingSessionDialogProps) {
-  const [formValues, setFormValues] =
-    useState<EditFormValues>(initialFormValues);
+  const [formValues, setFormValues] = useState<EditFormValues>(() =>
+    getInitialFormValues(session),
+  );
 
   const { t } = useTranslations();
 
@@ -70,23 +100,6 @@ export default function EditBookingSessionDialog({
           Number(formValues.slotDurationMinutes),
         )
       : 0;
-
-  useEffect(() => {
-    if (!session) {
-      setFormValues(initialFormValues);
-      return;
-    }
-
-    setFormValues({
-      title: session.title,
-      description: session.description,
-      date: session.date,
-      startTime: session.startTime,
-      endTime: session.endTime,
-      slotDurationMinutes: String(session.slotDurationMinutes),
-      maxParticipants: String(session.maxParticipants),
-    });
-  }, [session]);
 
   const handleChange = (field: keyof EditFormValues, value: string) => {
     setFormValues((currentValues) => ({
