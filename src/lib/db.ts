@@ -8,6 +8,23 @@ export const db = new Database(dbPath);
 db.pragma("foreign_keys = ON");
 
 db.exec(`
+  CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    role TEXT NOT NULL CHECK(role IN ('student', 'teacher')),
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  );
+
+  CREATE TABLE IF NOT EXISTS sessions (
+    id TEXT PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    expires_at TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  );
+
   CREATE TABLE IF NOT EXISTS booking_sessions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL,
@@ -23,13 +40,15 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS bookings (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     session_id INTEGER NOT NULL,
+    user_id INTEGER,
     student_name TEXT NOT NULL,
     student_email TEXT NOT NULL,
     slot_start_time TEXT,
     slot_end_time TEXT,
     language TEXT NOT NULL DEFAULT 'sv',
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (session_id) REFERENCES booking_sessions(id) ON DELETE CASCADE
+    FOREIGN KEY (session_id) REFERENCES booking_sessions(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
   );
 `);
 
@@ -52,6 +71,10 @@ if (!hasBookingColumn("language")) {
   db.prepare(
     `ALTER TABLE bookings ADD COLUMN language TEXT NOT NULL DEFAULT 'sv'`,
   ).run();
+}
+
+if (!hasBookingColumn("user_id")) {
+  db.prepare(`ALTER TABLE bookings ADD COLUMN user_id INTEGER`).run();
 }
 
 const sessionColumns = db
