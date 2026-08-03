@@ -15,6 +15,7 @@ import DarkModeIcon from "@mui/icons-material/DarkMode";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "@/i18n/useTranslations";
 import { useAppTheme } from "@/theme/AppThemeProvider";
+import HeaderAuthActions from "@/components/auth/HeaderAuthActions";
 
 export default function AppHeader() {
   const router = useRouter();
@@ -140,6 +141,8 @@ export default function AppHeader() {
           >
             {t.common.teacher}
           </Button>
+
+          <HeaderAuthActions />
 
           <IconButton
             onClick={toggleColorMode}
