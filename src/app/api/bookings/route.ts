@@ -6,6 +6,7 @@ import {
   notifyBookingConfirmed,
 } from "@/lib/emailNotifications";
 import type { BookingLanguage } from "@/types/booking";
+import { requireTeacherOrResponse } from "@/lib/apiAuth";
 
 const getValidBookingLanguage = (language: unknown): BookingLanguage => {
   return language === "en" ? "en" : "sv";
@@ -17,6 +18,12 @@ export async function GET(request: Request) {
   const studentEmail = searchParams.get("studentEmail");
 
   if (sessionId) {
+    const authResponse = await requireTeacherOrResponse();
+
+    if (authResponse) {
+      return authResponse;
+    }
+
     const session = db
       .prepare(
         `
