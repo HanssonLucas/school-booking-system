@@ -70,6 +70,13 @@ export const translations = {
       invalidPassword: "Lösenordet behöver vara minst 8 tecken.",
       missingFields: "Fyll i alla obligatoriska fält.",
       fallbackError: "Något gick fel. Försök igen.",
+      checkingAccess: "Kontrollerar behörighet...",
+      teacherAccessTitle: "Lärarbehörighet krävs",
+      teacherLoginRequiredDescription:
+        "Du behöver vara inloggad som lärare för att kunna skapa och hantera bokningstillfällen.",
+      teacherForbiddenDescription:
+        "Du är inloggad, men ditt konto har inte lärarbehörighet.",
+      goToHome: "Gå till startsidan",
     },
     student: {
       title: "Studentvy",
@@ -295,6 +302,13 @@ export const translations = {
       invalidPassword: "The password must be at least 8 characters.",
       missingFields: "Fill in all required fields.",
       fallbackError: "Something went wrong. Please try again.",
+      checkingAccess: "Checking access...",
+      teacherAccessTitle: "Teacher access required",
+      teacherLoginRequiredDescription:
+        "You need to be logged in as a teacher to create and manage booking sessions.",
+      teacherForbiddenDescription:
+        "You are logged in, but your account does not have teacher access.",
+      goToHome: "Go to home page",
     },
     student: {
       title: "Student view",

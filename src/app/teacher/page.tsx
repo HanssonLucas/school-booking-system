@@ -33,10 +33,23 @@ import type {
 } from "@/types/booking";
 import ViewBookingsDialog from "@/components/booking/ViewBookingsDialog";
 import DeleteBookingSessionDialog from "@/components/booking/DeleteBookingSessionDialog";
+import TeacherRouteGuard from "@/components/auth/TeacherRouteGuard";
 
 type SortOption = "dateAsc" | "dateDesc" | "bookedFirst";
 
 export default function TeacherPage() {
+  return (
+    <>
+      <AppHeader />
+
+      <TeacherRouteGuard>
+        <TeacherPageContent />
+      </TeacherRouteGuard>
+    </>
+  );
+}
+
+function TeacherPageContent() {
   const [sessions, setSessions] = useState<BookingSession[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [successMessage, setSuccessMessage] = useState("");
@@ -270,8 +283,6 @@ export default function TeacherPage() {
 
   return (
     <>
-      <AppHeader />
-
       <Dialog
         open={isCreateDialogOpen}
         onClose={() => setIsCreateDialogOpen(false)}
