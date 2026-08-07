@@ -186,7 +186,9 @@ export const translations = {
     myBookingsDialog: {
       openButton: "Hitta mina bokningar",
       title: "Hitta mina bokningar",
-      description: "Skriv in den email du använde när du bokade.",
+      description:
+        "Här visas bokningarna som hör till ditt inloggade studentkonto.",
+      refreshButton: "Uppdatera",
       emailLabel: "Email",
       searchButton: "Sök",
       searchingButton: "Söker...",
@@ -425,7 +427,9 @@ export const translations = {
     myBookingsDialog: {
       openButton: "Find my bookings",
       title: "Find my bookings",
-      description: "Enter the email you used when booking.",
+      description:
+        "Here you can see the bookings linked to your signed-in student account.",
+      refreshButton: "Refresh",
       emailLabel: "Email",
       searchButton: "Search",
       searchingButton: "Searching...",

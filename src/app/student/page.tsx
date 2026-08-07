@@ -360,6 +360,8 @@ export default function StudentPage() {
 
       <MyBookingsDialog
         open={isMyBookingsDialogOpen}
+        currentUser={currentUser}
+        isAuthLoading={isAuthLoading}
         onClose={() => setIsMyBookingsDialogOpen(false)}
         onBookingCancelled={handleBookingCancelledFromLookup}
       />
