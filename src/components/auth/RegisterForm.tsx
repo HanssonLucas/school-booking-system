@@ -37,6 +37,7 @@ export default function RegisterForm() {
   const [password, setPassword] = useState("");
 
   const [role, setRole] = useState<UserRole>("student");
+  const [teacherSignupCode, setTeacherSignupCode] = useState("");
 
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -55,12 +56,14 @@ export default function RegisterForm() {
         return t.auth.invalidPassword;
       case "EMAIL_ALREADY_EXISTS":
         return t.auth.emailAlreadyExists;
+      case "INVALID_TEACHER_SIGNUP_CODE":
+        return t.auth.invalidTeacherSignupCode;
       default:
         return t.auth.fallbackError;
     }
   };
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
     setError(null);
@@ -77,6 +80,7 @@ export default function RegisterForm() {
           email,
           password,
           role,
+          teacherSignupCode: role === "teacher" ? teacherSignupCode : undefined,
         }),
       });
 
@@ -162,13 +166,33 @@ export default function RegisterForm() {
               select
               label={t.auth.roleLabel}
               value={role}
-              onChange={(event) => setRole(event.target.value as UserRole)}
+              onChange={(event) => {
+                const newRole = event.target.value as UserRole;
+
+                setRole(newRole);
+
+                if (newRole === "student") {
+                  setTeacherSignupCode("");
+                }
+              }}
               fullWidth
               required
             >
               <MenuItem value="student">{t.auth.studentRole}</MenuItem>
               <MenuItem value="teacher">{t.auth.teacherRole}</MenuItem>
             </TextField>
+
+            {role === "teacher" && (
+              <TextField
+                label={t.auth.teacherSignupCodeLabel}
+                type="password"
+                value={teacherSignupCode}
+                onChange={(event) => setTeacherSignupCode(event.target.value)}
+                helperText={t.auth.teacherSignupCodeHelper}
+                fullWidth
+                required
+              />
+            )}
 
             <Button
               type="submit"

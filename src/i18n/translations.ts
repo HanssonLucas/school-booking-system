@@ -83,6 +83,9 @@ export const translations = {
       bookingAs: "Du bokar som",
       cancellingAs: "Du avbokar som",
       loadingUser: "Hämtar inloggad användare...",
+      teacherSignupCodeLabel: "Lärarkod",
+      teacherSignupCodeHelper: "Krävs endast för att skapa ett lärarkonto.",
+      invalidTeacherSignupCode: "Lärarkoden är fel eller saknas.",
     },
     student: {
       title: "Studentvy",
@@ -323,6 +326,10 @@ export const translations = {
       bookingAs: "You are booking as",
       cancellingAs: "You are cancelling as",
       loadingUser: "Loading signed-in user...",
+      teacherSignupCodeLabel: "Teacher signup code",
+      teacherSignupCodeHelper: "Only required when creating a teacher account.",
+      invalidTeacherSignupCode:
+        "The teacher signup code is missing or incorrect.",
     },
     student: {
       title: "Student view",

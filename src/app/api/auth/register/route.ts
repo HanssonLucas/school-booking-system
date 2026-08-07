@@ -15,6 +15,21 @@ type RegisterRequestBody = {
   email?: unknown;
   password?: unknown;
   role?: unknown;
+  teacherSignupCode?: unknown;
+};
+
+const isValidTeacherSignupCode = (teacherSignupCode: unknown) => {
+  const configuredCode = process.env.TEACHER_SIGNUP_CODE?.trim();
+
+  if (!configuredCode) {
+    return false;
+  }
+
+  if (typeof teacherSignupCode !== "string") {
+    return false;
+  }
+
+  return teacherSignupCode.trim() === configuredCode;
 };
 
 export async function POST(request: Request) {
@@ -31,6 +46,16 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: "MISSING_REGISTER_FIELDS" },
         { status: 400 },
+      );
+    }
+
+    if (
+      role === "teacher" &&
+      !isValidTeacherSignupCode(body.teacherSignupCode)
+    ) {
+      return NextResponse.json(
+        { error: "INVALID_TEACHER_SIGNUP_CODE" },
+        { status: 403 },
       );
     }
 
