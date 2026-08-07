@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Alert,
   Box,
@@ -9,21 +10,23 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  Paper,
-  Stack,
-  TextField,
-  Typography,
   Menu,
   MenuItem,
+  Paper,
+  Stack,
+  Typography,
 } from "@mui/material";
 import ArrowDropDownRoundedIcon from "@mui/icons-material/ArrowDropDownRounded";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
-import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
+import LoginOutlinedIcon from "@mui/icons-material/LoginOutlined";
+import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
+import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
 import EventAvailableOutlinedIcon from "@mui/icons-material/EventAvailableOutlined";
 import EventBusyOutlinedIcon from "@mui/icons-material/EventBusyOutlined";
 import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
 import type { StudentBookingLookup } from "@/types/booking";
+import type { AuthUser } from "@/types/auth";
 import { useTranslations } from "@/i18n/useTranslations";
 import {
   createCalendarFileName,
@@ -36,69 +39,106 @@ import {
 
 type MyBookingsDialogProps = {
   open: boolean;
+  currentUser: AuthUser | null;
+  isAuthLoading: boolean;
   onClose: () => void;
   onBookingCancelled?: (sessionId: number) => void;
 };
 
 export default function MyBookingsDialog({
   open,
+  currentUser,
+  isAuthLoading,
   onClose,
   onBookingCancelled,
 }: MyBookingsDialogProps) {
-  const [studentEmail, setStudentEmail] = useState("");
   const [bookings, setBookings] = useState<StudentBookingLookup[]>([]);
-  const [hasSearched, setHasSearched] = useState(false);
+  const [hasLoaded, setHasLoaded] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-  const [isSearching, setIsSearching] = useState(false);
+  const [isLoadingBookings, setIsLoadingBookings] = useState(false);
   const [cancellingBookingId, setCancellingBookingId] = useState<number | null>(
     null,
   );
+  const [calendarMenuAnchor, setCalendarMenuAnchor] =
+    useState<HTMLElement | null>(null);
+  const [selectedCalendarBooking, setSelectedCalendarBooking] =
+    useState<StudentBookingLookup | null>(null);
 
+  const router = useRouter();
   const { t } = useTranslations();
 
+  const isStudent = currentUser?.role === "student";
+
+  const fetchMyBookings = useCallback(async () => {
+    if (isAuthLoading) {
+      return;
+    }
+
+    setErrorMessage("");
+    setSuccessMessage("");
+    setHasLoaded(false);
+
+    if (!currentUser || currentUser.role !== "student") {
+      setBookings([]);
+      setHasLoaded(true);
+      return;
+    }
+
+    setIsLoadingBookings(true);
+
+    try {
+      const response = await fetch("/api/bookings/me");
+
+      if (!response.ok) {
+        const errorData = (await response.json()) as { code?: string };
+
+        const errorMessages: Record<string, string> = {
+          UNAUTHORIZED: t.auth.studentLoginRequired,
+          FORBIDDEN: t.auth.studentActionForbidden,
+        };
+
+        setErrorMessage(
+          errorMessages[errorData.code ?? ""] ?? t.errors.unknown,
+        );
+        setBookings([]);
+        return;
+      }
+
+      const data = (await response.json()) as StudentBookingLookup[];
+
+      setBookings(data);
+      setHasLoaded(true);
+    } finally {
+      setIsLoadingBookings(false);
+    }
+  }, [
+    currentUser,
+    isAuthLoading,
+    t.auth.studentActionForbidden,
+    t.auth.studentLoginRequired,
+    t.errors.unknown,
+  ]);
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    queueMicrotask(() => {
+      void fetchMyBookings();
+    });
+  }, [open, fetchMyBookings]);
+
   const handleClose = () => {
-    setStudentEmail("");
     setBookings([]);
-    setHasSearched(false);
+    setHasLoaded(false);
     setErrorMessage("");
     setSuccessMessage("");
     setCancellingBookingId(null);
     setCalendarMenuAnchor(null);
     setSelectedCalendarBooking(null);
     onClose();
-  };
-
-  const handleSearch = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    if (!studentEmail.trim()) {
-      setErrorMessage(t.myBookingsDialog.requiredError);
-      return;
-    }
-
-    setIsSearching(true);
-    setErrorMessage("");
-    setSuccessMessage("");
-    setHasSearched(false);
-
-    try {
-      const response = await fetch(
-        `/api/bookings?studentEmail=${encodeURIComponent(studentEmail)}`,
-      );
-
-      if (!response.ok) {
-        setErrorMessage(t.errors.unknown);
-        return;
-      }
-
-      const data: StudentBookingLookup[] = await response.json();
-
-      setBookings(data);
-      setHasSearched(true);
-    } finally {
-      setIsSearching(false);
-    }
   };
 
   const handleCancelBooking = async (booking: StudentBookingLookup) => {
@@ -114,19 +154,22 @@ export default function MyBookingsDialog({
         },
         body: JSON.stringify({
           sessionId: booking.sessionId,
-          studentEmail: booking.studentEmail,
         }),
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = (await response.json()) as { code?: string };
 
         const errorMessages: Record<string, string> = {
+          UNAUTHORIZED: t.auth.studentLoginRequired,
+          FORBIDDEN: t.auth.studentActionForbidden,
           MISSING_CANCELLATION_FIELDS: t.errors.missingCancellationFields,
           BOOKING_NOT_FOUND: t.errors.bookingNotFound,
         };
 
-        setErrorMessage(errorMessages[errorData.code] ?? t.errors.unknown);
+        setErrorMessage(
+          errorMessages[errorData.code ?? ""] ?? t.errors.unknown,
+        );
 
         return;
       }
@@ -217,11 +260,6 @@ export default function MyBookingsDialog({
     handleCloseCalendarMenu();
   };
 
-  const [calendarMenuAnchor, setCalendarMenuAnchor] =
-    useState<HTMLElement | null>(null);
-  const [selectedCalendarBooking, setSelectedCalendarBooking] =
-    useState<StudentBookingLookup | null>(null);
-
   return (
     <Dialog
       open={open}
@@ -249,13 +287,7 @@ export default function MyBookingsDialog({
           borderColor: "divider",
         }}
       >
-        <Stack
-          direction="row"
-          spacing={2}
-          sx={{
-            alignItems: "center",
-          }}
-        >
+        <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
           <Box
             sx={{
               width: 48,
@@ -315,7 +347,45 @@ export default function MyBookingsDialog({
       </Menu>
 
       <DialogContent sx={{ p: { xs: 3, sm: 4 } }}>
-        <Stack spacing={3} component="form" onSubmit={handleSearch}>
+        <Stack spacing={3}>
+          {isAuthLoading && (
+            <Alert severity="info" sx={{ borderRadius: 3 }}>
+              {t.auth.loadingUser}
+            </Alert>
+          )}
+
+          {!isAuthLoading && !currentUser && (
+            <Alert severity="warning" sx={{ borderRadius: 3 }}>
+              {t.auth.studentLoginRequired}
+            </Alert>
+          )}
+
+          {!isAuthLoading && currentUser && !isStudent && (
+            <Alert severity="warning" sx={{ borderRadius: 3 }}>
+              {t.auth.studentActionForbidden}
+            </Alert>
+          )}
+
+          {!isAuthLoading && currentUser && isStudent && (
+            <Alert
+              severity="info"
+              icon={<PersonOutlineOutlinedIcon />}
+              sx={{ borderRadius: 3 }}
+            >
+              {t.auth.loggedInAs}{" "}
+              <Box component="span" sx={{ fontWeight: 900 }}>
+                {currentUser.name}
+              </Box>{" "}
+              ({currentUser.email})
+            </Alert>
+          )}
+
+          {isLoadingBookings && (
+            <Alert severity="info" sx={{ borderRadius: 3 }}>
+              {t.bookingsDialog.loading}
+            </Alert>
+          )}
+
           {errorMessage && (
             <Alert severity="error" sx={{ borderRadius: 3 }}>
               {errorMessage}
@@ -337,70 +407,14 @@ export default function MyBookingsDialog({
             </Alert>
           )}
 
-          <TextField
-            label={t.myBookingsDialog.emailLabel}
-            type="email"
-            fullWidth
-            value={studentEmail}
-            onChange={(event) => setStudentEmail(event.target.value)}
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <EmailOutlinedIcon sx={{ mr: 1, color: "text.secondary" }} />
-                ),
-              },
-            }}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                borderRadius: 3,
-              },
-            }}
-          />
-
-          <DialogActions
-            sx={{
-              px: 0,
-              pt: 1,
-              gap: 1,
-              flexWrap: "wrap",
-            }}
-          >
-            <Button
-              onClick={handleClose}
-              disabled={isSearching || cancellingBookingId !== null}
-              sx={{
-                borderRadius: 999,
-                textTransform: "none",
-                fontWeight: 800,
-                px: 2.5,
-              }}
-            >
-              {t.myBookingsDialog.closeButton}
-            </Button>
-
-            <Button
-              variant="contained"
-              type="submit"
-              disabled={isSearching || cancellingBookingId !== null}
-              startIcon={<SearchOutlinedIcon />}
-              sx={{
-                borderRadius: 999,
-                textTransform: "none",
-                fontWeight: 800,
-                px: 2.5,
-              }}
-            >
-              {isSearching
-                ? t.myBookingsDialog.searchingButton
-                : t.myBookingsDialog.searchButton}
-            </Button>
-          </DialogActions>
-
-          {hasSearched && bookings.length === 0 && (
-            <Alert severity="info" sx={{ borderRadius: 3 }}>
-              {t.myBookingsDialog.empty}
-            </Alert>
-          )}
+          {hasLoaded &&
+            !isLoadingBookings &&
+            currentUser?.role === "student" &&
+            bookings.length === 0 && (
+              <Alert severity="info" sx={{ borderRadius: 3 }}>
+                {t.myBookingsDialog.empty}
+              </Alert>
+            )}
 
           {bookings.length > 0 && (
             <Stack spacing={1.5}>
@@ -521,6 +535,62 @@ export default function MyBookingsDialog({
               ))}
             </Stack>
           )}
+          <DialogActions
+            sx={{
+              px: 0,
+              pt: 1,
+              gap: 1,
+              flexWrap: "wrap",
+            }}
+          >
+            <Button
+              onClick={handleClose}
+              disabled={isLoadingBookings || cancellingBookingId !== null}
+              sx={{
+                borderRadius: 999,
+                textTransform: "none",
+                fontWeight: 800,
+                px: 2.5,
+              }}
+            >
+              {t.myBookingsDialog.closeButton}
+            </Button>
+
+            {!currentUser && !isAuthLoading && (
+              <Button
+                variant="contained"
+                startIcon={<LoginOutlinedIcon />}
+                onClick={() => router.push("/login")}
+                sx={{
+                  borderRadius: 999,
+                  textTransform: "none",
+                  fontWeight: 800,
+                  px: 2.5,
+                }}
+              >
+                {t.auth.loginButton}
+              </Button>
+            )}
+
+            {currentUser && isStudent && (
+              <Button
+                variant="contained"
+                startIcon={<RefreshOutlinedIcon />}
+                disabled={isLoadingBookings || cancellingBookingId !== null}
+                onClick={() => {
+                  void fetchMyBookings();
+                }}
+                sx={{
+                  borderRadius: 999,
+                  textTransform: "none",
+                  fontWeight: 800,
+                  px: 2.5,
+                }}
+              >
+                {t.myBookingsDialog.refreshButton}
+              </Button>
+            )}
+          </DialogActions>
         </Stack>
       </DialogContent>
     </Dialog>

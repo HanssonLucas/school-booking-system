@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Alert,
   Box,
@@ -9,22 +10,22 @@ import {
   DialogActions,
   DialogContent,
   Stack,
-  TextField,
   Typography,
 } from "@mui/material";
 import EventAvailableOutlinedIcon from "@mui/icons-material/EventAvailableOutlined";
+import LoginOutlinedIcon from "@mui/icons-material/LoginOutlined";
 import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
-import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import { useTranslations } from "@/i18n/useTranslations";
 import type { BookingLanguage } from "@/types/booking";
+import type { AuthUser } from "@/types/auth";
 
 type BookSessionDialogProps = {
   open: boolean;
   sessionTitle?: string;
+  currentUser: AuthUser | null;
+  isAuthLoading: boolean;
   onClose: () => void;
   onSubmit: (
-    studentName: string,
-    studentEmail: string,
     language: BookingLanguage,
   ) => Promise<{ success: boolean; message?: string }>;
 };
@@ -32,44 +33,57 @@ type BookSessionDialogProps = {
 export default function BookSessionDialog({
   open,
   sessionTitle,
+  currentUser,
+  isAuthLoading,
   onClose,
   onSubmit,
 }: BookSessionDialogProps) {
-  const [studentName, setStudentName] = useState("");
-  const [studentEmail, setStudentEmail] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const router = useRouter();
   const { t, language } = useTranslations();
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const isStudent = currentUser?.role === "student";
+
+  const handleClose = () => {
+    setErrorMessage("");
+    onClose();
+  };
+
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    if (!studentName.trim() || !studentEmail.trim()) {
-      setErrorMessage(t.bookSessionDialog.requiredError);
+    if (isAuthLoading) {
+      return;
+    }
+
+    if (!currentUser) {
+      setErrorMessage(t.auth.studentLoginRequired);
+      return;
+    }
+
+    if (!isStudent) {
+      setErrorMessage(t.auth.studentActionForbidden);
       return;
     }
 
     setIsSubmitting(true);
     setErrorMessage("");
 
-    const result = await onSubmit(studentName, studentEmail, language);
+    const result = await onSubmit(language);
 
     setIsSubmitting(false);
 
     if (!result.success) {
       setErrorMessage(result.message ?? t.bookSessionDialog.fallbackError);
-      return;
     }
-
-    setStudentName("");
-    setStudentEmail("");
   };
 
   return (
     <Dialog
       open={open}
-      onClose={onClose}
+      onClose={handleClose}
       maxWidth="sm"
       fullWidth
       slotProps={{
@@ -142,52 +156,43 @@ export default function BookSessionDialog({
 
       <DialogContent sx={{ p: { xs: 3, sm: 4 } }}>
         <Stack spacing={3} component="form" onSubmit={handleSubmit}>
+          {isAuthLoading && (
+            <Alert severity="info" sx={{ borderRadius: 3 }}>
+              {t.auth.loadingUser}
+            </Alert>
+          )}
+
+          {!isAuthLoading && !currentUser && (
+            <Alert severity="warning" sx={{ borderRadius: 3 }}>
+              {t.auth.studentLoginRequired}
+            </Alert>
+          )}
+
+          {!isAuthLoading && currentUser && !isStudent && (
+            <Alert severity="warning" sx={{ borderRadius: 3 }}>
+              {t.auth.studentActionForbidden}
+            </Alert>
+          )}
+
+          {!isAuthLoading && currentUser && isStudent && (
+            <Alert
+              severity="info"
+              icon={<PersonOutlineOutlinedIcon />}
+              sx={{ borderRadius: 3 }}
+            >
+              {t.auth.bookingAs}{" "}
+              <Box component="span" sx={{ fontWeight: 900 }}>
+                {currentUser.name}
+              </Box>{" "}
+              ({currentUser.email})
+            </Alert>
+          )}
+
           {errorMessage && (
             <Alert severity="error" sx={{ borderRadius: 3 }}>
               {errorMessage}
             </Alert>
           )}
-
-          <TextField
-            label={t.bookSessionDialog.nameLabel}
-            fullWidth
-            value={studentName}
-            onChange={(event) => setStudentName(event.target.value)}
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <PersonOutlineOutlinedIcon
-                    sx={{ mr: 1, color: "text.secondary" }}
-                  />
-                ),
-              },
-            }}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                borderRadius: 3,
-              },
-            }}
-          />
-
-          <TextField
-            label={t.bookSessionDialog.emailLabel}
-            type="email"
-            fullWidth
-            value={studentEmail}
-            onChange={(event) => setStudentEmail(event.target.value)}
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <EmailOutlinedIcon sx={{ mr: 1, color: "text.secondary" }} />
-                ),
-              },
-            }}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                borderRadius: 3,
-              },
-            }}
-          />
 
           <DialogActions
             sx={{
@@ -198,7 +203,7 @@ export default function BookSessionDialog({
             }}
           >
             <Button
-              onClick={onClose}
+              onClick={handleClose}
               disabled={isSubmitting}
               sx={{
                 borderRadius: 999,
@@ -210,22 +215,38 @@ export default function BookSessionDialog({
               {t.bookSessionDialog.cancelButton}
             </Button>
 
-            <Button
-              variant="contained"
-              type="submit"
-              disabled={isSubmitting}
-              startIcon={<EventAvailableOutlinedIcon />}
-              sx={{
-                borderRadius: 999,
-                textTransform: "none",
-                fontWeight: 800,
-                px: 2.5,
-              }}
-            >
-              {isSubmitting
-                ? t.bookSessionDialog.submittingButton
-                : t.bookSessionDialog.submitButton}
-            </Button>
+            {!currentUser && !isAuthLoading ? (
+              <Button
+                variant="contained"
+                startIcon={<LoginOutlinedIcon />}
+                onClick={() => router.push("/login")}
+                sx={{
+                  borderRadius: 999,
+                  textTransform: "none",
+                  fontWeight: 800,
+                  px: 2.5,
+                }}
+              >
+                {t.auth.loginButton}
+              </Button>
+            ) : (
+              <Button
+                variant="contained"
+                type="submit"
+                disabled={isSubmitting || isAuthLoading || !isStudent}
+                startIcon={<EventAvailableOutlinedIcon />}
+                sx={{
+                  borderRadius: 999,
+                  textTransform: "none",
+                  fontWeight: 800,
+                  px: 2.5,
+                }}
+              >
+                {isSubmitting
+                  ? t.bookSessionDialog.submittingButton
+                  : t.bookSessionDialog.submitButton}
+              </Button>
+            )}
           </DialogActions>
         </Stack>
       </DialogContent>

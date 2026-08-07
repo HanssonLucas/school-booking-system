@@ -24,6 +24,7 @@ export type CreateBookingSessionInput = {
 export type BookingWithSlotTime = {
   id: number;
   sessionId: number;
+  userId: number | null;
   studentName: string;
   studentEmail: string;
   createdAt: string;
@@ -35,6 +36,7 @@ export type BookingWithSlotTime = {
 export type StudentBookingLookup = {
   id: number;
   sessionId: number;
+  userId: number | null;
   studentName: string;
   studentEmail: string;
   createdAt: string;

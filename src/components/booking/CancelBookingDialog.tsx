@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Alert,
   Box,
@@ -9,62 +10,72 @@ import {
   DialogActions,
   DialogContent,
   Stack,
-  TextField,
   Typography,
 } from "@mui/material";
 import EventBusyOutlinedIcon from "@mui/icons-material/EventBusyOutlined";
-import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
+import LoginOutlinedIcon from "@mui/icons-material/LoginOutlined";
+import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
 import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
 import { useTranslations } from "@/i18n/useTranslations";
+import type { AuthUser } from "@/types/auth";
 
 type CancelBookingDialogProps = {
   open: boolean;
   sessionTitle?: string;
+  currentUser: AuthUser | null;
+  isAuthLoading: boolean;
   onClose: () => void;
-  onSubmit: (
-    studentEmail: string,
-  ) => Promise<{ success: boolean; message?: string }>;
+  onSubmit: () => Promise<{ success: boolean; message?: string }>;
 };
 
 export default function CancelBookingDialog({
   open,
   sessionTitle,
+  currentUser,
+  isAuthLoading,
   onClose,
   onSubmit,
 }: CancelBookingDialogProps) {
-  const [studentEmail, setStudentEmail] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const router = useRouter();
   const { t } = useTranslations();
 
+  const isStudent = currentUser?.role === "student";
+
   const handleClose = () => {
-    setStudentEmail("");
     setErrorMessage("");
     onClose();
   };
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    if (!studentEmail.trim()) {
-      setErrorMessage(t.cancelBookingDialog.requiredError);
+    if (isAuthLoading) {
+      return;
+    }
+
+    if (!currentUser) {
+      setErrorMessage(t.auth.studentLoginRequired);
+      return;
+    }
+
+    if (!isStudent) {
+      setErrorMessage(t.auth.studentActionForbidden);
       return;
     }
 
     setIsSubmitting(true);
     setErrorMessage("");
 
-    const result = await onSubmit(studentEmail);
+    const result = await onSubmit();
 
     setIsSubmitting(false);
 
     if (!result.success) {
       setErrorMessage(result.message ?? t.cancelBookingDialog.fallbackError);
-      return;
     }
-
-    setStudentEmail("");
   };
 
   return (
@@ -151,31 +162,43 @@ export default function CancelBookingDialog({
             {t.cancelBookingDialog.description}
           </Alert>
 
+          {isAuthLoading && (
+            <Alert severity="info" sx={{ borderRadius: 3 }}>
+              {t.auth.loadingUser}
+            </Alert>
+          )}
+
+          {!isAuthLoading && !currentUser && (
+            <Alert severity="warning" sx={{ borderRadius: 3 }}>
+              {t.auth.studentLoginRequired}
+            </Alert>
+          )}
+
+          {!isAuthLoading && currentUser && !isStudent && (
+            <Alert severity="warning" sx={{ borderRadius: 3 }}>
+              {t.auth.studentActionForbidden}
+            </Alert>
+          )}
+
+          {!isAuthLoading && currentUser && isStudent && (
+            <Alert
+              severity="info"
+              icon={<PersonOutlineOutlinedIcon />}
+              sx={{ borderRadius: 3 }}
+            >
+              {t.auth.cancellingAs}{" "}
+              <Box component="span" sx={{ fontWeight: 900 }}>
+                {currentUser.name}
+              </Box>{" "}
+              ({currentUser.email})
+            </Alert>
+          )}
+
           {errorMessage && (
             <Alert severity="error" sx={{ borderRadius: 3 }}>
               {errorMessage}
             </Alert>
           )}
-
-          <TextField
-            label={t.cancelBookingDialog.emailLabel}
-            type="email"
-            fullWidth
-            value={studentEmail}
-            onChange={(event) => setStudentEmail(event.target.value)}
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <EmailOutlinedIcon sx={{ mr: 1, color: "text.secondary" }} />
-                ),
-              },
-            }}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                borderRadius: 3,
-              },
-            }}
-          />
 
           <DialogActions
             sx={{
@@ -198,23 +221,39 @@ export default function CancelBookingDialog({
               {t.cancelBookingDialog.cancelButton}
             </Button>
 
-            <Button
-              variant="contained"
-              color="error"
-              type="submit"
-              disabled={isSubmitting}
-              startIcon={<EventBusyOutlinedIcon />}
-              sx={{
-                borderRadius: 999,
-                textTransform: "none",
-                fontWeight: 800,
-                px: 2.5,
-              }}
-            >
-              {isSubmitting
-                ? t.cancelBookingDialog.submittingButton
-                : t.cancelBookingDialog.submitButton}
-            </Button>
+            {!currentUser && !isAuthLoading ? (
+              <Button
+                variant="contained"
+                startIcon={<LoginOutlinedIcon />}
+                onClick={() => router.push("/login")}
+                sx={{
+                  borderRadius: 999,
+                  textTransform: "none",
+                  fontWeight: 800,
+                  px: 2.5,
+                }}
+              >
+                {t.auth.loginButton}
+              </Button>
+            ) : (
+              <Button
+                variant="contained"
+                color="error"
+                type="submit"
+                disabled={isSubmitting || isAuthLoading || !isStudent}
+                startIcon={<EventBusyOutlinedIcon />}
+                sx={{
+                  borderRadius: 999,
+                  textTransform: "none",
+                  fontWeight: 800,
+                  px: 2.5,
+                }}
+              >
+                {isSubmitting
+                  ? t.cancelBookingDialog.submittingButton
+                  : t.cancelBookingDialog.submitButton}
+              </Button>
+            )}
           </DialogActions>
         </Stack>
       </DialogContent>

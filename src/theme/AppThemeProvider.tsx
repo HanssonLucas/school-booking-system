@@ -27,7 +27,9 @@ export default function AppThemeProvider({ children }: AppThemeProviderProps) {
     const storedMode = window.localStorage.getItem("colorMode");
 
     if (storedMode && isColorMode(storedMode)) {
-      setMode(storedMode);
+      queueMicrotask(() => {
+        setMode(storedMode);
+      });
     }
   }, []);
 

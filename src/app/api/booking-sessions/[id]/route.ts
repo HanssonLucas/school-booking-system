@@ -4,6 +4,7 @@ import {
   DEFAULT_SLOT_DURATION_MINUTES,
   getSlotCount,
 } from "@/lib/bookingSlots";
+import { requireTeacherOrResponse } from "@/lib/apiAuth";
 
 type RouteContext = {
   params: Promise<{
@@ -12,6 +13,11 @@ type RouteContext = {
 };
 
 export async function PATCH(request: Request, context: RouteContext) {
+  const authResponse = await requireTeacherOrResponse();
+
+  if (authResponse) {
+    return authResponse;
+  }
   const { id } = await context.params;
   const sessionId = Number(id);
 
@@ -165,6 +171,11 @@ export async function PATCH(request: Request, context: RouteContext) {
 }
 
 export async function DELETE(request: Request, context: RouteContext) {
+  const authResponse = await requireTeacherOrResponse();
+
+  if (authResponse) {
+    return authResponse;
+  }
   const { id } = await context.params;
   const sessionId = Number(id);
 

@@ -27,7 +27,9 @@ export default function LanguageProvider({ children }: LanguageProviderProps) {
     const storedLanguage = window.localStorage.getItem("language");
 
     if (storedLanguage && isLanguage(storedLanguage)) {
-      setLanguageState(storedLanguage);
+      queueMicrotask(() => {
+        setLanguageState(storedLanguage);
+      });
     }
   }, []);
 
