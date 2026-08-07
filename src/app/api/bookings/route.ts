@@ -18,7 +18,6 @@ const getValidBookingLanguage = (language: unknown): BookingLanguage => {
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const sessionId = Number(searchParams.get("sessionId"));
-  const studentEmail = searchParams.get("studentEmail");
 
   if (sessionId) {
     const authResponse = await requireTeacherOrResponse();
@@ -47,6 +46,7 @@ export async function GET(request: Request) {
         SELECT
           id,
           session_id AS sessionId,
+          user_id AS userId,
           student_name AS studentName,
           student_email AS studentEmail,
           slot_start_time AS slotStartTime,
@@ -59,36 +59,6 @@ export async function GET(request: Request) {
         `,
       )
       .all(sessionId);
-
-    return NextResponse.json(bookings);
-  }
-
-  if (studentEmail) {
-    const bookings = db
-      .prepare(
-        `
-        SELECT
-          bookings.id,
-          bookings.session_id AS sessionId,
-          bookings.student_name AS studentName,
-          bookings.student_email AS studentEmail,
-          bookings.slot_start_time AS slotStartTime,
-          bookings.slot_end_time AS slotEndTime,
-          bookings.language,
-          bookings.created_at AS createdAt,
-          booking_sessions.title AS sessionTitle,
-          booking_sessions.date AS sessionDate,
-          booking_sessions.start_time AS sessionStartTime,
-          booking_sessions.end_time AS sessionEndTime,
-          booking_sessions.slot_duration_minutes AS slotDurationMinutes
-        FROM bookings
-        INNER JOIN booking_sessions
-          ON booking_sessions.id = bookings.session_id
-        WHERE bookings.student_email = ?
-        ORDER BY booking_sessions.date ASC, bookings.slot_start_time ASC
-        `,
-      )
-      .all(studentEmail);
 
     return NextResponse.json(bookings);
   }
