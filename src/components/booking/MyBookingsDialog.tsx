@@ -407,63 +407,6 @@ export default function MyBookingsDialog({
             </Alert>
           )}
 
-          <DialogActions
-            sx={{
-              px: 0,
-              pt: 1,
-              gap: 1,
-              flexWrap: "wrap",
-            }}
-          >
-            <Button
-              onClick={handleClose}
-              disabled={isLoadingBookings || cancellingBookingId !== null}
-              sx={{
-                borderRadius: 999,
-                textTransform: "none",
-                fontWeight: 800,
-                px: 2.5,
-              }}
-            >
-              {t.myBookingsDialog.closeButton}
-            </Button>
-
-            {!currentUser && !isAuthLoading && (
-              <Button
-                variant="contained"
-                startIcon={<LoginOutlinedIcon />}
-                onClick={() => router.push("/login")}
-                sx={{
-                  borderRadius: 999,
-                  textTransform: "none",
-                  fontWeight: 800,
-                  px: 2.5,
-                }}
-              >
-                {t.auth.loginButton}
-              </Button>
-            )}
-
-            {currentUser && isStudent && (
-              <Button
-                variant="contained"
-                startIcon={<RefreshOutlinedIcon />}
-                disabled={isLoadingBookings || cancellingBookingId !== null}
-                onClick={() => {
-                  void fetchMyBookings();
-                }}
-                sx={{
-                  borderRadius: 999,
-                  textTransform: "none",
-                  fontWeight: 800,
-                  px: 2.5,
-                }}
-              >
-                {t.myBookingsDialog.refreshButton}
-              </Button>
-            )}
-          </DialogActions>
-
           {hasLoaded &&
             !isLoadingBookings &&
             currentUser?.role === "student" &&
@@ -592,6 +535,62 @@ export default function MyBookingsDialog({
               ))}
             </Stack>
           )}
+          <DialogActions
+            sx={{
+              px: 0,
+              pt: 1,
+              gap: 1,
+              flexWrap: "wrap",
+            }}
+          >
+            <Button
+              onClick={handleClose}
+              disabled={isLoadingBookings || cancellingBookingId !== null}
+              sx={{
+                borderRadius: 999,
+                textTransform: "none",
+                fontWeight: 800,
+                px: 2.5,
+              }}
+            >
+              {t.myBookingsDialog.closeButton}
+            </Button>
+
+            {!currentUser && !isAuthLoading && (
+              <Button
+                variant="contained"
+                startIcon={<LoginOutlinedIcon />}
+                onClick={() => router.push("/login")}
+                sx={{
+                  borderRadius: 999,
+                  textTransform: "none",
+                  fontWeight: 800,
+                  px: 2.5,
+                }}
+              >
+                {t.auth.loginButton}
+              </Button>
+            )}
+
+            {currentUser && isStudent && (
+              <Button
+                variant="contained"
+                startIcon={<RefreshOutlinedIcon />}
+                disabled={isLoadingBookings || cancellingBookingId !== null}
+                onClick={() => {
+                  void fetchMyBookings();
+                }}
+                sx={{
+                  borderRadius: 999,
+                  textTransform: "none",
+                  fontWeight: 800,
+                  px: 2.5,
+                }}
+              >
+                {t.myBookingsDialog.refreshButton}
+              </Button>
+            )}
+          </DialogActions>
         </Stack>
       </DialogContent>
     </Dialog>
