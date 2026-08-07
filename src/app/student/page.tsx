@@ -23,6 +23,7 @@ import CancelBookingDialog from "@/components/booking/CancelBookingDialog";
 import MyBookingsDialog from "@/components/booking/MyBookingsDialog";
 import SessionFilterControls from "@/components/booking/SessionFilterControls";
 import type { BookingLanguage, BookingSession } from "@/types/booking";
+import type { AuthUser } from "@/types/auth";
 import { useTranslations } from "@/i18n/useTranslations";
 
 type SortOption = "dateAsc" | "dateDesc" | "availableFirst";
@@ -30,6 +31,8 @@ type SortOption = "dateAsc" | "dateDesc" | "availableFirst";
 export default function StudentPage() {
   const [sessions, setSessions] = useState<BookingSession[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [successMessage, setSuccessMessage] = useState("");
   const [selectedSessionId, setSelectedSessionId] = useState<number | null>(
     null,
@@ -137,19 +140,58 @@ export default function StudentPage() {
     fetchSessions();
   }, []);
 
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchCurrentUser = async () => {
+      try {
+        const response = await fetch("/api/auth/me");
+        const data = (await response.json()) as { user: AuthUser | null };
+
+        if (isMounted) {
+          setCurrentUser(data.user);
+        }
+      } catch {
+        if (isMounted) {
+          setCurrentUser(null);
+        }
+      } finally {
+        if (isMounted) {
+          setIsAuthLoading(false);
+        }
+      }
+    };
+
+    fetchCurrentUser();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const handleBookSession = (sessionId: number) => {
     setSelectedSessionId(sessionId);
   };
 
-  const handleSubmitBooking = async (
-    studentName: string,
-    studentEmail: string,
-    language: BookingLanguage,
-  ) => {
+  const handleSubmitBooking = async (language: BookingLanguage) => {
     if (!selectedSessionId) {
       return {
         success: false,
         message: t.student.noSelectedSession,
+      };
+    }
+
+    if (!currentUser) {
+      return {
+        success: false,
+        message: t.auth.studentLoginRequired,
+      };
+    }
+
+    if (currentUser.role !== "student") {
+      return {
+        success: false,
+        message: t.auth.studentActionForbidden,
       };
     }
 
@@ -160,8 +202,6 @@ export default function StudentPage() {
       },
       body: JSON.stringify({
         sessionId: selectedSessionId,
-        studentName,
-        studentEmail,
         language,
       }),
     });
@@ -170,6 +210,8 @@ export default function StudentPage() {
       const errorData = await response.json();
 
       const errorMessages: Record<string, string> = {
+        UNAUTHORIZED: t.auth.studentLoginRequired,
+        FORBIDDEN: t.auth.studentActionForbidden,
         MISSING_BOOKING_FIELDS: t.errors.missingBookingFields,
         SESSION_NOT_FOUND: t.errors.sessionNotFound,
         BOOKING_ALREADY_EXISTS: t.errors.bookingAlreadyExists,
@@ -222,11 +264,25 @@ export default function StudentPage() {
     setCancelSessionId(sessionId);
   };
 
-  const handleSubmitCancellation = async (studentEmail: string) => {
+  const handleSubmitCancellation = async () => {
     if (!cancelSessionId) {
       return {
         success: false,
         message: t.student.noSelectedSession,
+      };
+    }
+
+    if (!currentUser) {
+      return {
+        success: false,
+        message: t.auth.studentLoginRequired,
+      };
+    }
+
+    if (currentUser.role !== "student") {
+      return {
+        success: false,
+        message: t.auth.studentActionForbidden,
       };
     }
 
@@ -237,7 +293,6 @@ export default function StudentPage() {
       },
       body: JSON.stringify({
         sessionId: cancelSessionId,
-        studentEmail,
       }),
     });
 
@@ -245,6 +300,8 @@ export default function StudentPage() {
       const errorData = await response.json();
 
       const errorMessages: Record<string, string> = {
+        UNAUTHORIZED: t.auth.studentLoginRequired,
+        FORBIDDEN: t.auth.studentActionForbidden,
         MISSING_CANCELLATION_FIELDS: t.errors.missingCancellationFields,
         BOOKING_NOT_FOUND: t.errors.bookingNotFound,
       };
@@ -286,6 +343,8 @@ export default function StudentPage() {
       <BookSessionDialog
         open={selectedSessionId !== null}
         sessionTitle={selectedSession?.title}
+        currentUser={currentUser}
+        isAuthLoading={isAuthLoading}
         onClose={() => setSelectedSessionId(null)}
         onSubmit={handleSubmitBooking}
       />
@@ -293,6 +352,8 @@ export default function StudentPage() {
       <CancelBookingDialog
         open={cancelSessionId !== null}
         sessionTitle={cancelSession?.title}
+        currentUser={currentUser}
+        isAuthLoading={isAuthLoading}
         onClose={() => setCancelSessionId(null)}
         onSubmit={handleSubmitCancellation}
       />

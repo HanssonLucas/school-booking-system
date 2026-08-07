@@ -77,6 +77,12 @@ export const translations = {
       teacherForbiddenDescription:
         "Du är inloggad, men ditt konto har inte lärarbehörighet.",
       goToHome: "Gå till startsidan",
+      studentLoginRequired:
+        "Du behöver vara inloggad som student för att göra detta.",
+      studentActionForbidden: "Det här kan bara göras av ett studentkonto.",
+      bookingAs: "Du bokar som",
+      cancellingAs: "Du avbokar som",
+      loadingUser: "Hämtar inloggad användare...",
     },
     student: {
       title: "Studentvy",
@@ -309,6 +315,12 @@ export const translations = {
       teacherForbiddenDescription:
         "You are logged in, but your account does not have teacher access.",
       goToHome: "Go to home page",
+      studentLoginRequired: "You need to be logged in as a student to do this.",
+      studentActionForbidden:
+        "This action can only be done by a student account.",
+      bookingAs: "You are booking as",
+      cancellingAs: "You are cancelling as",
+      loadingUser: "Loading signed-in user...",
     },
     student: {
       title: "Student view",

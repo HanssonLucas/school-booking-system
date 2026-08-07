@@ -6,7 +6,10 @@ import {
   notifyBookingConfirmed,
 } from "@/lib/emailNotifications";
 import type { BookingLanguage } from "@/types/booking";
-import { requireTeacherOrResponse } from "@/lib/apiAuth";
+import {
+  requireStudentOrResponse,
+  requireTeacherOrResponse,
+} from "@/lib/apiAuth";
 
 const getValidBookingLanguage = (language: unknown): BookingLanguage => {
   return language === "en" ? "en" : "sv";
@@ -94,12 +97,19 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const authResult = await requireStudentOrResponse();
+
+  if (authResult.response) {
+    return authResult.response;
+  }
+
+  const student = authResult.user;
   const body = await request.json();
 
-  const { sessionId, studentName, studentEmail } = body;
+  const { sessionId } = body;
   const language = getValidBookingLanguage(body.language);
 
-  if (!sessionId || !studentName || !studentEmail) {
+  if (!sessionId) {
     return NextResponse.json(
       { code: "MISSING_BOOKING_FIELDS" },
       { status: 400 },
@@ -143,10 +153,10 @@ export async function POST(request: Request) {
       SELECT id
       FROM bookings
       WHERE session_id = ?
-        AND student_email = ?
+        AND (user_id = ? OR student_email = ?)
       `,
     )
-    .get(sessionId, studentEmail) as { id: number } | undefined;
+    .get(sessionId, student.id, student.email) as { id: number } | undefined;
 
   if (existingBooking) {
     return NextResponse.json(
@@ -208,19 +218,21 @@ export async function POST(request: Request) {
       `
       INSERT INTO bookings (
         session_id,
+        user_id,
         student_name,
         student_email,
         slot_start_time,
         slot_end_time,
         language
       )
-      VALUES (?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
       `,
     )
     .run(
       sessionId,
-      studentName,
-      studentEmail,
+      student.id,
+      student.name,
+      student.email,
       firstAvailableSlot.slotStartTime,
       firstAvailableSlot.slotEndTime,
       language,
@@ -232,6 +244,7 @@ export async function POST(request: Request) {
       SELECT
         id,
         session_id AS sessionId,
+        user_id AS userId,
         student_name AS studentName,
         student_email AS studentEmail,
         slot_start_time AS slotStartTime,
@@ -246,6 +259,7 @@ export async function POST(request: Request) {
     | {
         id: number;
         sessionId: number;
+        userId: number;
         studentName: string;
         studentEmail: string;
         slotStartTime: string;
@@ -273,11 +287,18 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
+  const authResult = await requireStudentOrResponse();
+
+  if (authResult.response) {
+    return authResult.response;
+  }
+
+  const student = authResult.user;
   const body = await request.json();
 
-  const { sessionId, studentEmail } = body;
+  const { sessionId } = body;
 
-  if (!sessionId || !studentEmail) {
+  if (!sessionId) {
     return NextResponse.json(
       { code: "MISSING_CANCELLATION_FIELDS" },
       { status: 400 },
@@ -301,10 +322,10 @@ export async function DELETE(request: Request) {
       INNER JOIN booking_sessions
         ON booking_sessions.id = bookings.session_id
       WHERE bookings.session_id = ?
-        AND bookings.student_email = ?
+        AND (bookings.user_id = ? OR bookings.student_email = ?)
       `,
     )
-    .get(sessionId, studentEmail) as
+    .get(sessionId, student.id, student.email) as
     | {
         id: number;
         sessionId: number;
