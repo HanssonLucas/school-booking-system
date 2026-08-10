@@ -1,64 +1,27 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Button, Chip, Stack } from "@mui/material";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
-import type { AuthUser } from "@/types/auth";
 import { useTranslations } from "@/i18n/useTranslations";
-
-type MeResponse = {
-  user: AuthUser | null;
-};
+import { useAuth } from "@/components/auth/useAuth";
 
 export default function HeaderAuthActions() {
   const router = useRouter();
   const pathname = usePathname();
   const { t } = useTranslations();
 
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { user, isLoading, logout } = useAuth();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const fetchCurrentUser = async () => {
-      try {
-        const response = await fetch("/api/auth/me");
-        const data = (await response.json()) as MeResponse;
-
-        if (isMounted) {
-          setUser(data.user);
-        }
-      } catch {
-        if (isMounted) {
-          setUser(null);
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    fetchCurrentUser();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [pathname]);
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
 
     try {
-      await fetch("/api/auth/logout", {
-        method: "POST",
-      });
+      await logout();
 
-      setUser(null);
       router.push("/");
       router.refresh();
     } finally {
