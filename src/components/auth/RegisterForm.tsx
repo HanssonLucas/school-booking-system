@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 import PersonAddAltOutlinedIcon from "@mui/icons-material/PersonAddAltOutlined";
 import type { AuthUser, UserRole } from "@/types/auth";
+import { useAuth } from "@/components/auth/useAuth";
 import { useTranslations } from "@/i18n/useTranslations";
 
 type RegisterResponse = {
@@ -31,6 +32,7 @@ const getRedirectPath = (user: AuthUser) => {
 export default function RegisterForm() {
   const router = useRouter();
   const { t } = useTranslations();
+  const { refreshUser } = useAuth();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -90,6 +92,8 @@ export default function RegisterForm() {
         setError(getErrorMessage(data.error, data.message));
         return;
       }
+
+      await refreshUser();
 
       router.push(getRedirectPath(data.user));
       router.refresh();
