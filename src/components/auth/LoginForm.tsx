@@ -16,6 +16,7 @@ import {
 import LoginOutlinedIcon from "@mui/icons-material/LoginOutlined";
 import type { AuthUser } from "@/types/auth";
 import { useTranslations } from "@/i18n/useTranslations";
+import { useAuth } from "@/components/auth/useAuth";
 
 type LoginResponse = {
   user?: AuthUser;
@@ -30,6 +31,7 @@ const getRedirectPath = (user: AuthUser) => {
 export default function LoginForm() {
   const router = useRouter();
   const { t } = useTranslations();
+  const { refreshUser } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -76,6 +78,8 @@ export default function LoginForm() {
         setError(getErrorMessage(data.error, data.message));
         return;
       }
+
+      await refreshUser();
 
       router.push(getRedirectPath(data.user));
       router.refresh();
