@@ -23,7 +23,7 @@ import CancelBookingDialog from "@/components/booking/CancelBookingDialog";
 import MyBookingsDialog from "@/components/booking/MyBookingsDialog";
 import SessionFilterControls from "@/components/booking/SessionFilterControls";
 import type { BookingLanguage, BookingSession } from "@/types/booking";
-import type { AuthUser } from "@/types/auth";
+import { useAuth } from "@/components/auth/useAuth";
 import { useTranslations } from "@/i18n/useTranslations";
 
 type SortOption = "dateAsc" | "dateDesc" | "availableFirst";
@@ -31,8 +31,6 @@ type SortOption = "dateAsc" | "dateDesc" | "availableFirst";
 export default function StudentPage() {
   const [sessions, setSessions] = useState<BookingSession[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
-  const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [successMessage, setSuccessMessage] = useState("");
   const [selectedSessionId, setSelectedSessionId] = useState<number | null>(
     null,
@@ -44,6 +42,7 @@ export default function StudentPage() {
   const [sortOption, setSortOption] = useState<SortOption>("dateAsc");
 
   const { t } = useTranslations();
+  const { user: currentUser, isLoading: isAuthLoading } = useAuth();
 
   const selectedSession = sessions.find(
     (session) => session.id === selectedSessionId,
@@ -138,35 +137,6 @@ export default function StudentPage() {
     };
 
     fetchSessions();
-  }, []);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const fetchCurrentUser = async () => {
-      try {
-        const response = await fetch("/api/auth/me");
-        const data = (await response.json()) as { user: AuthUser | null };
-
-        if (isMounted) {
-          setCurrentUser(data.user);
-        }
-      } catch {
-        if (isMounted) {
-          setCurrentUser(null);
-        }
-      } finally {
-        if (isMounted) {
-          setIsAuthLoading(false);
-        }
-      }
-    };
-
-    fetchCurrentUser();
-
-    return () => {
-      isMounted = false;
-    };
   }, []);
 
   const handleBookSession = (sessionId: number) => {
