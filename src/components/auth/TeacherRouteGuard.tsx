@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import {
   Alert,
@@ -16,15 +16,11 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import LoginOutlinedIcon from "@mui/icons-material/LoginOutlined";
-import type { AuthUser } from "@/types/auth";
+import { useAuth } from "@/components/auth/useAuth";
 import { useTranslations } from "@/i18n/useTranslations";
 
 type TeacherRouteGuardProps = {
   children: ReactNode;
-};
-
-type MeResponse = {
-  user: AuthUser | null;
 };
 
 export default function TeacherRouteGuard({
@@ -32,38 +28,7 @@ export default function TeacherRouteGuard({
 }: TeacherRouteGuardProps) {
   const router = useRouter();
   const { t } = useTranslations();
-
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const fetchCurrentUser = async () => {
-      try {
-        const response = await fetch("/api/auth/me");
-        const data = (await response.json()) as MeResponse;
-
-        if (isMounted) {
-          setUser(data.user);
-        }
-      } catch {
-        if (isMounted) {
-          setUser(null);
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    fetchCurrentUser();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  const { user, isLoading } = useAuth();
 
   if (isLoading) {
     return (
