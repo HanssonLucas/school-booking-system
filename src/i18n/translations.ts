@@ -116,6 +116,14 @@ export const translations = {
       deleteFallbackError: "Det gick inte att ta bort bokningstillfället.",
       createSessionButton: "Skapa nytt tillfälle",
     },
+    profile: {
+      title: "Profil",
+      description: "Dina kontouppgifter.",
+      loginRequired: "Du behöver vara inloggad för att se din profil.",
+      nameLabel: "Namn",
+      emailLabel: "Email",
+      roleLabel: "Roll",
+    },
     createSessionForm: {
       title: "Skapa bokningstillfälle",
       titleLabel: "Titel",
@@ -360,6 +368,14 @@ export const translations = {
       deleteSuccess: "The booking session has been deleted.",
       deleteFallbackError: "The booking session could not be deleted.",
       createSessionButton: "Create new session",
+    },
+    profile: {
+      title: "Profile",
+      description: "Your account information.",
+      loginRequired: "You need to be logged in to view your profile.",
+      nameLabel: "Name",
+      emailLabel: "Email",
+      roleLabel: "Role",
     },
     createSessionForm: {
       title: "Create booking session",
