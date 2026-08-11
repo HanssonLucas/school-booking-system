@@ -4,13 +4,14 @@ import {
   Alert,
   Box,
   Button,
+  Chip,
   CircularProgress,
   Container,
+  Divider,
   Paper,
   Stack,
   TextField,
   Typography,
-  Chip,
 } from "@mui/material";
 import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
 import { useAuth } from "@/components/auth/useAuth";
@@ -323,10 +324,36 @@ export default function ProfilePage() {
             <Alert severity={feedback.type}>{feedback.message}</Alert>
           )}
 
-          <Paper variant="outlined" sx={{ p: 3 }}>
-            <Stack spacing={2}>
+          <Paper
+            variant="outlined"
+            sx={{
+              p: { xs: 3, md: 4 },
+              borderRadius: 5,
+              borderColor: "divider",
+              boxShadow: 1,
+            }}
+          >
+            <Stack spacing={3}>
               <Box>
-                <Typography variant="body2" color="text.secondary">
+                <Typography
+                  variant="h5"
+                  sx={{
+                    fontWeight: 850,
+                    letterSpacing: -0.4,
+                  }}
+                >
+                  {t.profile.accountDetailsTitle}
+                </Typography>
+              </Box>
+
+              <Divider />
+
+              <Box>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mb: 0.5 }}
+                >
                   {t.profile.nameLabel}
                 </Typography>
 
@@ -351,6 +378,11 @@ export default function ProfilePage() {
                         type="submit"
                         variant="contained"
                         disabled={isSavingName}
+                        sx={{
+                          borderRadius: 999,
+                          textTransform: "none",
+                          fontWeight: 800,
+                        }}
                       >
                         {t.profile.save}
                       </Button>
@@ -359,6 +391,11 @@ export default function ProfilePage() {
                         type="button"
                         onClick={handleCancelNameEdit}
                         disabled={isSavingName}
+                        sx={{
+                          borderRadius: 999,
+                          textTransform: "none",
+                          fontWeight: 800,
+                        }}
                       >
                         {t.profile.cancel}
                       </Button>
@@ -366,35 +403,59 @@ export default function ProfilePage() {
                   </Stack>
                 ) : (
                   <Stack
-                    direction="row"
-                    spacing={2}
+                    direction={{ xs: "column", sm: "row" }}
+                    spacing={1}
                     sx={{
-                      alignItems: "center",
+                      alignItems: { xs: "flex-start", sm: "center" },
                       justifyContent: "space-between",
                     }}
                   >
-                    <Typography>{user.name}</Typography>
+                    <Typography sx={{ fontWeight: 700 }}>
+                      {user.name}
+                    </Typography>
 
-                    <Button size="small" onClick={handleEditName}>
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      onClick={handleEditName}
+                      sx={{
+                        borderRadius: 999,
+                        textTransform: "none",
+                        fontWeight: 800,
+                      }}
+                    >
                       {t.profile.editName}
                     </Button>
                   </Stack>
                 )}
               </Box>
 
-              <Box>
-                <Typography variant="body2" color="text.secondary">
-                  {t.profile.emailLabel}
-                </Typography>
-                <Typography>{user.email}</Typography>
-              </Box>
+              <Divider />
 
               <Box>
-                <Typography variant="body2" color="text.secondary">
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mb: 0.5 }}
+                >
+                  {t.profile.emailLabel}
+                </Typography>
+
+                <Typography sx={{ fontWeight: 700 }}>{user.email}</Typography>
+              </Box>
+
+              <Divider />
+
+              <Box>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mb: 0.5 }}
+                >
                   {t.profile.roleLabel}
                 </Typography>
 
-                <Typography>
+                <Typography sx={{ fontWeight: 700 }}>
                   {user.role === "teacher"
                     ? t.auth.teacherRole
                     : t.auth.studentRole}

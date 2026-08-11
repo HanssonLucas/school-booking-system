@@ -139,6 +139,7 @@ export const translations = {
       passwordMismatch: "De nya lösenorden matchar inte.",
       invalidPassword: "Det nya lösenordet måste vara minst 8 tecken.",
       passwordUpdateFailed: "Det gick inte att uppdatera lösenordet.",
+      accountDetailsTitle: "Kontouppgifter",
     },
     createSessionForm: {
       title: "Skapa bokningstillfälle",
@@ -408,6 +409,7 @@ export const translations = {
       passwordMismatch: "The new passwords do not match.",
       invalidPassword: "The new password must be at least 8 characters.",
       passwordUpdateFailed: "The password could not be updated.",
+      accountDetailsTitle: "Account details",
     },
     createSessionForm: {
       title: "Create booking session",
