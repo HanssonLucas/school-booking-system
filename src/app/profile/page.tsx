@@ -305,7 +305,12 @@ export default function ProfilePage() {
               <Typography variant="body2" color="text.secondary">
                 {t.profile.roleLabel}
               </Typography>
-              <Typography>{user.role}</Typography>
+
+              <Typography>
+                {user.role === "teacher"
+                  ? t.auth.teacherRole
+                  : t.auth.studentRole}
+              </Typography>
             </Box>
           </Stack>
         </Paper>
