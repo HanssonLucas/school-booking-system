@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireUserOrResponse } from "@/lib/apiAuth";
 import { hashPassword, validatePassword, verifyPassword } from "@/lib/password";
+import {
+  createSession,
+  deleteUserSessions,
+  setSessionCookie,
+} from "@/lib/session";
 
 type ChangePasswordBody = {
   currentPassword?: unknown;
@@ -81,6 +86,12 @@ export async function PATCH(request: Request) {
       WHERE id = ?
     `,
   ).run(newPasswordHash, auth.user.id);
+
+  deleteUserSessions(auth.user.id);
+
+  const { sessionId, expiresAt } = createSession(auth.user.id);
+
+  await setSessionCookie(sessionId, expiresAt);
 
   return NextResponse.json({
     success: true,
