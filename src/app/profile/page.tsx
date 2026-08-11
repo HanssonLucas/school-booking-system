@@ -339,15 +339,36 @@ export default function ProfilePage() {
           >
             <Stack spacing={3}>
               <Box>
-                <Typography
-                  variant="h5"
-                  sx={{
-                    fontWeight: 850,
-                    letterSpacing: -0.4,
-                  }}
+                <Stack
+                  direction="row"
+                  spacing={1.5}
+                  sx={{ alignItems: "center" }}
                 >
-                  {t.profile.accountDetailsTitle}
-                </Typography>
+                  <Box
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 3,
+                      display: "grid",
+                      placeItems: "center",
+                      bgcolor: "action.hover",
+                      color: "primary.main",
+                      flexShrink: 0,
+                    }}
+                  >
+                    <PersonOutlineOutlinedIcon />
+                  </Box>
+
+                  <Typography
+                    variant="h5"
+                    sx={{
+                      fontWeight: 850,
+                      letterSpacing: -0.4,
+                    }}
+                  >
+                    {t.profile.accountDetailsTitle}
+                  </Typography>
+                </Stack>
               </Box>
 
               <Divider />
