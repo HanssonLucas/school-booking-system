@@ -70,6 +70,10 @@ export const deleteSession = (sessionId: string) => {
   db.prepare(`DELETE FROM sessions WHERE id = ?`).run(sessionId);
 };
 
+export const deleteUserSessions = (userId: number) => {
+  db.prepare(`DELETE FROM sessions WHERE user_id = ?`).run(userId);
+};
+
 export const clearSessionCookie = async () => {
   const cookieStore = await cookies();
 
