@@ -140,6 +140,8 @@ export const translations = {
       invalidPassword: "Det nya lösenordet måste vara minst 8 tecken.",
       passwordUpdateFailed: "Det gick inte att uppdatera lösenordet.",
       accountDetailsTitle: "Kontouppgifter",
+      securityTitle: "Säkerhet",
+      securityDescription: "Hantera lösenord och säkerheten för ditt konto.",
     },
     createSessionForm: {
       title: "Skapa bokningstillfälle",
@@ -410,6 +412,8 @@ export const translations = {
       invalidPassword: "The new password must be at least 8 characters.",
       passwordUpdateFailed: "The password could not be updated.",
       accountDetailsTitle: "Account details",
+      securityTitle: "Security",
+      securityDescription: "Manage your password and account security.",
     },
     createSessionForm: {
       title: "Create booking session",
