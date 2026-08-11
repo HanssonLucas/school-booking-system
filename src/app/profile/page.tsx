@@ -14,6 +14,7 @@ import {
 import { useAuth } from "@/components/auth/useAuth";
 import { useTranslations } from "@/i18n/useTranslations";
 import { useState, type FormEvent } from "react";
+import AppHeader from "@/components/layout/AppHeader";
 
 export default function ProfilePage() {
   const { user, isLoading, refreshUser } = useAuth();
@@ -199,62 +200,179 @@ export default function ProfilePage() {
 
   if (isLoading) {
     return (
-      <Box
-        sx={{
-          minHeight: "60vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <CircularProgress />
-      </Box>
+      <>
+        <AppHeader />
+
+        <Box
+          sx={{
+            minHeight: "60vh",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <CircularProgress />
+        </Box>
+      </>
     );
   }
 
   if (!user) {
     return (
-      <Container maxWidth="sm" sx={{ py: 6 }}>
-        <Alert severity="info">{t.profile.loginRequired}</Alert>
-      </Container>
+      <>
+        <AppHeader />
+
+        <Container maxWidth="sm" sx={{ py: 6 }}>
+          <Alert severity="info">{t.profile.loginRequired}</Alert>
+        </Container>
+      </>
     );
   }
 
   return (
-    <Container maxWidth="sm" sx={{ py: 6 }}>
-      <Stack spacing={3}>
-        <Box>
-          <Typography variant="h4" component="h1" sx={{ fontWeight: 700 }}>
-            {t.profile.title}
-          </Typography>
+    <>
+      <AppHeader />
 
-          <Typography color="text.secondary">
-            {t.profile.description}
-          </Typography>
-        </Box>
+      <Container maxWidth="sm" sx={{ py: 6 }}>
+        <Stack spacing={3}>
+          <Box>
+            <Typography variant="h4" component="h1" sx={{ fontWeight: 700 }}>
+              {t.profile.title}
+            </Typography>
 
-        {feedback && <Alert severity={feedback.type}>{feedback.message}</Alert>}
+            <Typography color="text.secondary">
+              {t.profile.description}
+            </Typography>
+          </Box>
 
-        <Paper variant="outlined" sx={{ p: 3 }}>
-          <Stack spacing={2}>
-            <Box>
-              <Typography variant="body2" color="text.secondary">
-                {t.profile.nameLabel}
-              </Typography>
+          {feedback && (
+            <Alert severity={feedback.type}>{feedback.message}</Alert>
+          )}
 
-              {isEditingName ? (
+          <Paper variant="outlined" sx={{ p: 3 }}>
+            <Stack spacing={2}>
+              <Box>
+                <Typography variant="body2" color="text.secondary">
+                  {t.profile.nameLabel}
+                </Typography>
+
+                {isEditingName ? (
+                  <Stack
+                    component="form"
+                    onSubmit={handleNameSubmit}
+                    spacing={1.5}
+                    sx={{ mt: 1 }}
+                  >
+                    <TextField
+                      label={t.profile.nameInputLabel}
+                      value={name}
+                      onChange={(event) => setName(event.target.value)}
+                      disabled={isSavingName}
+                      autoFocus
+                      fullWidth
+                    />
+
+                    <Stack direction="row" spacing={1}>
+                      <Button
+                        type="submit"
+                        variant="contained"
+                        disabled={isSavingName}
+                      >
+                        {t.profile.save}
+                      </Button>
+
+                      <Button
+                        type="button"
+                        onClick={handleCancelNameEdit}
+                        disabled={isSavingName}
+                      >
+                        {t.profile.cancel}
+                      </Button>
+                    </Stack>
+                  </Stack>
+                ) : (
+                  <Stack
+                    direction="row"
+                    spacing={2}
+                    sx={{
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <Typography>{user.name}</Typography>
+
+                    <Button size="small" onClick={handleEditName}>
+                      {t.profile.editName}
+                    </Button>
+                  </Stack>
+                )}
+              </Box>
+
+              <Box>
+                <Typography variant="body2" color="text.secondary">
+                  {t.profile.emailLabel}
+                </Typography>
+                <Typography>{user.email}</Typography>
+              </Box>
+
+              <Box>
+                <Typography variant="body2" color="text.secondary">
+                  {t.profile.roleLabel}
+                </Typography>
+
+                <Typography>
+                  {user.role === "teacher"
+                    ? t.auth.teacherRole
+                    : t.auth.studentRole}
+                </Typography>
+              </Box>
+            </Stack>
+          </Paper>
+          <Paper variant="outlined" sx={{ p: 3 }}>
+            <Stack spacing={2}>
+              <Typography variant="h6">{t.profile.changePassword}</Typography>
+
+              {passwordFeedback && (
+                <Alert severity={passwordFeedback.type}>
+                  {passwordFeedback.message}
+                </Alert>
+              )}
+
+              {isEditingPassword ? (
                 <Stack
                   component="form"
-                  onSubmit={handleNameSubmit}
-                  spacing={1.5}
-                  sx={{ mt: 1 }}
+                  onSubmit={handlePasswordSubmit}
+                  spacing={2}
                 >
                   <TextField
-                    label={t.profile.nameInputLabel}
-                    value={name}
-                    onChange={(event) => setName(event.target.value)}
-                    disabled={isSavingName}
-                    autoFocus
+                    label={t.profile.currentPasswordLabel}
+                    type="password"
+                    value={currentPassword}
+                    onChange={(event) => setCurrentPassword(event.target.value)}
+                    disabled={isSavingPassword}
+                    autoComplete="current-password"
+                    fullWidth
+                  />
+
+                  <TextField
+                    label={t.profile.newPasswordLabel}
+                    type="password"
+                    value={newPassword}
+                    onChange={(event) => setNewPassword(event.target.value)}
+                    disabled={isSavingPassword}
+                    autoComplete="new-password"
+                    fullWidth
+                  />
+
+                  <TextField
+                    label={t.profile.confirmNewPasswordLabel}
+                    type="password"
+                    value={confirmNewPassword}
+                    onChange={(event) =>
+                      setConfirmNewPassword(event.target.value)
+                    }
+                    disabled={isSavingPassword}
+                    autoComplete="new-password"
                     fullWidth
                   />
 
@@ -262,139 +380,36 @@ export default function ProfilePage() {
                     <Button
                       type="submit"
                       variant="contained"
-                      disabled={isSavingName}
+                      disabled={isSavingPassword}
                     >
                       {t.profile.save}
                     </Button>
 
                     <Button
                       type="button"
-                      onClick={handleCancelNameEdit}
-                      disabled={isSavingName}
+                      onClick={handleCancelPasswordEdit}
+                      disabled={isSavingPassword}
                     >
                       {t.profile.cancel}
                     </Button>
                   </Stack>
                 </Stack>
               ) : (
-                <Stack
-                  direction="row"
-                  spacing={2}
-                  sx={{
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <Typography>{user.name}</Typography>
-
-                  <Button size="small" onClick={handleEditName}>
-                    {t.profile.editName}
+                <Box>
+                  <Button
+                    onClick={() => {
+                      setPasswordFeedback(null);
+                      setIsEditingPassword(true);
+                    }}
+                  >
+                    {t.profile.changePassword}
                   </Button>
-                </Stack>
+                </Box>
               )}
-            </Box>
-
-            <Box>
-              <Typography variant="body2" color="text.secondary">
-                {t.profile.emailLabel}
-              </Typography>
-              <Typography>{user.email}</Typography>
-            </Box>
-
-            <Box>
-              <Typography variant="body2" color="text.secondary">
-                {t.profile.roleLabel}
-              </Typography>
-
-              <Typography>
-                {user.role === "teacher"
-                  ? t.auth.teacherRole
-                  : t.auth.studentRole}
-              </Typography>
-            </Box>
-          </Stack>
-        </Paper>
-        <Paper variant="outlined" sx={{ p: 3 }}>
-          <Stack spacing={2}>
-            <Typography variant="h6">{t.profile.changePassword}</Typography>
-
-            {passwordFeedback && (
-              <Alert severity={passwordFeedback.type}>
-                {passwordFeedback.message}
-              </Alert>
-            )}
-
-            {isEditingPassword ? (
-              <Stack
-                component="form"
-                onSubmit={handlePasswordSubmit}
-                spacing={2}
-              >
-                <TextField
-                  label={t.profile.currentPasswordLabel}
-                  type="password"
-                  value={currentPassword}
-                  onChange={(event) => setCurrentPassword(event.target.value)}
-                  disabled={isSavingPassword}
-                  autoComplete="current-password"
-                  fullWidth
-                />
-
-                <TextField
-                  label={t.profile.newPasswordLabel}
-                  type="password"
-                  value={newPassword}
-                  onChange={(event) => setNewPassword(event.target.value)}
-                  disabled={isSavingPassword}
-                  autoComplete="new-password"
-                  fullWidth
-                />
-
-                <TextField
-                  label={t.profile.confirmNewPasswordLabel}
-                  type="password"
-                  value={confirmNewPassword}
-                  onChange={(event) =>
-                    setConfirmNewPassword(event.target.value)
-                  }
-                  disabled={isSavingPassword}
-                  autoComplete="new-password"
-                  fullWidth
-                />
-
-                <Stack direction="row" spacing={1}>
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    disabled={isSavingPassword}
-                  >
-                    {t.profile.save}
-                  </Button>
-
-                  <Button
-                    type="button"
-                    onClick={handleCancelPasswordEdit}
-                    disabled={isSavingPassword}
-                  >
-                    {t.profile.cancel}
-                  </Button>
-                </Stack>
-              </Stack>
-            ) : (
-              <Box>
-                <Button
-                  onClick={() => {
-                    setPasswordFeedback(null);
-                    setIsEditingPassword(true);
-                  }}
-                >
-                  {t.profile.changePassword}
-                </Button>
-              </Box>
-            )}
-          </Stack>
-        </Paper>
-      </Stack>
-    </Container>
+            </Stack>
+          </Paper>
+        </Stack>
+      </Container>
+    </>
   );
 }
