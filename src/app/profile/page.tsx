@@ -14,6 +14,7 @@ import {
   Typography,
 } from "@mui/material";
 import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { useAuth } from "@/components/auth/useAuth";
 import { useTranslations } from "@/i18n/useTranslations";
 import { useState, type FormEvent } from "react";
@@ -463,9 +464,54 @@ export default function ProfilePage() {
               </Box>
             </Stack>
           </Paper>
-          <Paper variant="outlined" sx={{ p: 3 }}>
-            <Stack spacing={2}>
-              <Typography variant="h6">{t.profile.changePassword}</Typography>
+          <Paper
+            variant="outlined"
+            sx={{
+              p: { xs: 3, md: 4 },
+              borderRadius: 5,
+              borderColor: "divider",
+              boxShadow: 1,
+            }}
+          >
+            <Stack spacing={3}>
+              <Box>
+                <Stack
+                  direction="row"
+                  spacing={1.5}
+                  sx={{ alignItems: "center", mb: 1 }}
+                >
+                  <Box
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 3,
+                      display: "grid",
+                      placeItems: "center",
+                      bgcolor: "action.hover",
+                      color: "primary.main",
+                      flexShrink: 0,
+                    }}
+                  >
+                    <LockOutlinedIcon />
+                  </Box>
+
+                  <Typography
+                    variant="h5"
+                    sx={{
+                      fontWeight: 850,
+                      letterSpacing: -0.4,
+                    }}
+                  >
+                    {t.profile.securityTitle}
+                  </Typography>
+                </Stack>
+
+                <Typography color="text.secondary">
+                  {t.profile.securityDescription}
+                </Typography>
+              </Box>
+
+              <Divider />
 
               {passwordFeedback && (
                 <Alert severity={passwordFeedback.type}>
@@ -516,6 +562,11 @@ export default function ProfilePage() {
                       type="submit"
                       variant="contained"
                       disabled={isSavingPassword}
+                      sx={{
+                        borderRadius: 999,
+                        textTransform: "none",
+                        fontWeight: 800,
+                      }}
                     >
                       {t.profile.save}
                     </Button>
@@ -524,6 +575,11 @@ export default function ProfilePage() {
                       type="button"
                       onClick={handleCancelPasswordEdit}
                       disabled={isSavingPassword}
+                      sx={{
+                        borderRadius: 999,
+                        textTransform: "none",
+                        fontWeight: 800,
+                      }}
                     >
                       {t.profile.cancel}
                     </Button>
@@ -532,9 +588,16 @@ export default function ProfilePage() {
               ) : (
                 <Box>
                   <Button
+                    variant="outlined"
+                    startIcon={<LockOutlinedIcon />}
                     onClick={() => {
                       setPasswordFeedback(null);
                       setIsEditingPassword(true);
+                    }}
+                    sx={{
+                      borderRadius: 999,
+                      textTransform: "none",
+                      fontWeight: 800,
                     }}
                   >
                     {t.profile.changePassword}
