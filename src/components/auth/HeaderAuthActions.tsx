@@ -73,10 +73,19 @@ export default function HeaderAuthActions() {
         label={`${user.name} · ${
           user.role === "teacher" ? t.auth.teacherRole : t.auth.studentRole
         }`}
+        onClick={() => router.push("/profile")}
         sx={{
           borderRadius: 999,
           fontWeight: 800,
-          bgcolor: "action.hover",
+          cursor: "pointer",
+          color:
+            pathname === "/profile" ? "primary.contrastText" : "text.primary",
+          bgcolor: pathname === "/profile" ? "primary.main" : "action.hover",
+          boxShadow: pathname === "/profile" ? 3 : 0,
+          "&:hover": {
+            bgcolor:
+              pathname === "/profile" ? "primary.dark" : "action.selected",
+          },
         }}
       />
 
