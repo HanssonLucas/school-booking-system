@@ -10,7 +10,9 @@ import {
   Stack,
   TextField,
   Typography,
+  Chip,
 } from "@mui/material";
+import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
 import { useAuth } from "@/components/auth/useAuth";
 import { useTranslations } from "@/i18n/useTranslations";
 import { useState, type FormEvent } from "react";
@@ -233,17 +235,89 @@ export default function ProfilePage() {
     <>
       <AppHeader />
 
-      <Container maxWidth="sm" sx={{ py: 6 }}>
+      <Container sx={{ py: { xs: 4, md: 7 } }}>
         <Stack spacing={3}>
-          <Box>
-            <Typography variant="h4" component="h1" sx={{ fontWeight: 700 }}>
-              {t.profile.title}
-            </Typography>
+          <Paper
+            sx={{
+              position: "relative",
+              overflow: "hidden",
+              borderRadius: 6,
+              p: { xs: 3, sm: 5 },
+              mb: 2,
+              border: 1,
+              borderColor: "divider",
+              background:
+                "linear-gradient(135deg, rgba(25, 118, 210, 0.14), rgba(156, 39, 176, 0.08))",
+            }}
+          >
+            <Box
+              sx={{
+                position: "absolute",
+                width: 220,
+                height: 220,
+                borderRadius: "50%",
+                bgcolor: "primary.main",
+                opacity: 0.12,
+                right: -70,
+                top: -80,
+              }}
+            />
 
-            <Typography color="text.secondary">
-              {t.profile.description}
-            </Typography>
-          </Box>
+            <Box
+              sx={{
+                position: "absolute",
+                width: 160,
+                height: 160,
+                borderRadius: "50%",
+                bgcolor: "secondary.main",
+                opacity: 0.1,
+                right: 120,
+                bottom: -80,
+              }}
+            />
+
+            <Box sx={{ position: "relative", maxWidth: 760 }}>
+              <Chip
+                icon={<PersonOutlineOutlinedIcon />}
+                label={`${user.name} · ${
+                  user.role === "teacher"
+                    ? t.auth.teacherRole
+                    : t.auth.studentRole
+                }`}
+                sx={{
+                  mb: 3,
+                  borderRadius: 999,
+                  fontWeight: 800,
+                  bgcolor: "background.paper",
+                }}
+              />
+
+              <Typography
+                variant="h2"
+                component="h1"
+                sx={{
+                  fontWeight: 900,
+                  letterSpacing: -1.3,
+                  lineHeight: 1.05,
+                  fontSize: { xs: "2.25rem", md: "3.5rem" },
+                  mb: 2,
+                }}
+              >
+                {t.profile.title}
+              </Typography>
+
+              <Typography
+                variant="h6"
+                color="text.secondary"
+                sx={{
+                  lineHeight: 1.7,
+                  maxWidth: 680,
+                }}
+              >
+                {t.profile.description}
+              </Typography>
+            </Box>
+          </Paper>
 
           {feedback && (
             <Alert severity={feedback.type}>{feedback.message}</Alert>
