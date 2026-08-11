@@ -26,6 +26,15 @@ export default function ProfilePage() {
     type: "success" | "error";
     message: string;
   } | null>(null);
+  const [isEditingPassword, setIsEditingPassword] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [isSavingPassword, setIsSavingPassword] = useState(false);
+  const [passwordFeedback, setPasswordFeedback] = useState<{
+    type: "success" | "error";
+    message: string;
+  } | null>(null);
 
   const handleEditName = () => {
     if (!user) {
@@ -41,6 +50,90 @@ export default function ProfilePage() {
     setName("");
     setFeedback(null);
     setIsEditingName(false);
+  };
+
+  const handleCancelPasswordEdit = () => {
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmNewPassword("");
+    setPasswordFeedback(null);
+    setIsEditingPassword(false);
+  };
+
+  const handlePasswordSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (newPassword !== confirmNewPassword) {
+      setPasswordFeedback({
+        type: "error",
+        message: t.profile.passwordMismatch,
+      });
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      setPasswordFeedback({
+        type: "error",
+        message: t.profile.invalidPassword,
+      });
+      return;
+    }
+
+    setIsSavingPassword(true);
+    setPasswordFeedback(null);
+
+    try {
+      const response = await fetch("/api/profile/password", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          currentPassword,
+          newPassword,
+        }),
+      });
+
+      if (!response.ok) {
+        const data = (await response.json()) as {
+          code?: string;
+        };
+
+        let message: string = t.profile.passwordUpdateFailed;
+
+        if (data.code === "CURRENT_PASSWORD_INCORRECT") {
+          message = t.profile.currentPasswordIncorrect;
+        }
+
+        if (data.code === "INVALID_PASSWORD") {
+          message = t.profile.invalidPassword;
+        }
+
+        setPasswordFeedback({
+          type: "error",
+          message,
+        });
+
+        return;
+      }
+
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmNewPassword("");
+      setIsEditingPassword(false);
+
+      setPasswordFeedback({
+        type: "success",
+        message: t.profile.passwordUpdated,
+      });
+    } catch {
+      setPasswordFeedback({
+        type: "error",
+        message: t.profile.passwordUpdateFailed,
+      });
+    } finally {
+      setIsSavingPassword(false);
+    }
   };
 
   const handleNameSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -214,6 +307,86 @@ export default function ProfilePage() {
               </Typography>
               <Typography>{user.role}</Typography>
             </Box>
+          </Stack>
+        </Paper>
+        <Paper variant="outlined" sx={{ p: 3 }}>
+          <Stack spacing={2}>
+            <Typography variant="h6">{t.profile.changePassword}</Typography>
+
+            {passwordFeedback && (
+              <Alert severity={passwordFeedback.type}>
+                {passwordFeedback.message}
+              </Alert>
+            )}
+
+            {isEditingPassword ? (
+              <Stack
+                component="form"
+                onSubmit={handlePasswordSubmit}
+                spacing={2}
+              >
+                <TextField
+                  label={t.profile.currentPasswordLabel}
+                  type="password"
+                  value={currentPassword}
+                  onChange={(event) => setCurrentPassword(event.target.value)}
+                  disabled={isSavingPassword}
+                  autoComplete="current-password"
+                  fullWidth
+                />
+
+                <TextField
+                  label={t.profile.newPasswordLabel}
+                  type="password"
+                  value={newPassword}
+                  onChange={(event) => setNewPassword(event.target.value)}
+                  disabled={isSavingPassword}
+                  autoComplete="new-password"
+                  fullWidth
+                />
+
+                <TextField
+                  label={t.profile.confirmNewPasswordLabel}
+                  type="password"
+                  value={confirmNewPassword}
+                  onChange={(event) =>
+                    setConfirmNewPassword(event.target.value)
+                  }
+                  disabled={isSavingPassword}
+                  autoComplete="new-password"
+                  fullWidth
+                />
+
+                <Stack direction="row" spacing={1}>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    disabled={isSavingPassword}
+                  >
+                    {t.profile.save}
+                  </Button>
+
+                  <Button
+                    type="button"
+                    onClick={handleCancelPasswordEdit}
+                    disabled={isSavingPassword}
+                  >
+                    {t.profile.cancel}
+                  </Button>
+                </Stack>
+              </Stack>
+            ) : (
+              <Box>
+                <Button
+                  onClick={() => {
+                    setPasswordFeedback(null);
+                    setIsEditingPassword(true);
+                  }}
+                >
+                  {t.profile.changePassword}
+                </Button>
+              </Box>
+            )}
           </Stack>
         </Paper>
       </Stack>
