@@ -12,6 +12,29 @@ type AuthCheckResult =
       response: NextResponse;
     };
 
+export const requireUserOrResponse = async (): Promise<AuthCheckResult> => {
+  try {
+    const user = await requireUser();
+
+    return {
+      user,
+      response: null,
+    };
+  } catch (error) {
+    if (error instanceof AuthError) {
+      return {
+        user: null,
+        response: NextResponse.json(
+          { code: error.code },
+          { status: error.status },
+        ),
+      };
+    }
+
+    throw error;
+  }
+};
+
 export const requireTeacherOrResponse = async () => {
   try {
     await requireTeacher();
