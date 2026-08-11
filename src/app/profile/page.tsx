@@ -15,14 +15,17 @@ import {
 } from "@mui/material";
 import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import { useAuth } from "@/components/auth/useAuth";
 import { useTranslations } from "@/i18n/useTranslations";
 import { useState, type FormEvent } from "react";
 import AppHeader from "@/components/layout/AppHeader";
+import { useAppTheme } from "@/theme/AppThemeProvider";
 
 export default function ProfilePage() {
   const { user, isLoading, refreshUser } = useAuth();
-  const { t } = useTranslations();
+  const { t, language, setLanguage } = useTranslations();
+  const { mode, toggleColorMode } = useAppTheme();
 
   const [isEditingName, setIsEditingName] = useState(false);
   const [name, setName] = useState("");
@@ -464,6 +467,175 @@ export default function ProfilePage() {
               </Box>
             </Stack>
           </Paper>
+          <Paper
+            variant="outlined"
+            sx={{
+              p: { xs: 3, md: 4 },
+              borderRadius: 5,
+              borderColor: "divider",
+              boxShadow: 1,
+            }}
+          >
+            <Stack spacing={3}>
+              <Box>
+                <Stack
+                  direction="row"
+                  spacing={1.5}
+                  sx={{ alignItems: "center", mb: 1 }}
+                >
+                  <Box
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 3,
+                      display: "grid",
+                      placeItems: "center",
+                      bgcolor: "action.hover",
+                      color: "primary.main",
+                      flexShrink: 0,
+                    }}
+                  >
+                    <SettingsOutlinedIcon />
+                  </Box>
+
+                  <Typography
+                    variant="h5"
+                    sx={{
+                      fontWeight: 850,
+                      letterSpacing: -0.4,
+                    }}
+                  >
+                    {t.profile.settingsTitle}
+                  </Typography>
+                </Stack>
+
+                <Typography color="text.secondary">
+                  {t.profile.settingsDescription}
+                </Typography>
+              </Box>
+
+              <Divider />
+
+              <Stack
+                direction={{ xs: "column", sm: "row" }}
+                spacing={2}
+                sx={{
+                  alignItems: { xs: "stretch", sm: "center" },
+                  justifyContent: "space-between",
+                }}
+              >
+                <Box>
+                  <Typography sx={{ fontWeight: 700 }}>
+                    {t.profile.languageSetting}
+                  </Typography>
+
+                  <Typography variant="body2" color="text.secondary">
+                    {language === "sv" ? "Svenska" : "English"}
+                  </Typography>
+                </Box>
+
+                <Box
+                  sx={{
+                    display: "flex",
+                    gap: 0.5,
+                    p: 0.5,
+                    borderRadius: 999,
+                    bgcolor: "action.hover",
+                    alignSelf: { xs: "flex-start", sm: "auto" },
+                  }}
+                >
+                  <Button
+                    size="small"
+                    onClick={() => setLanguage("sv")}
+                    sx={{
+                      minWidth: 42,
+                      borderRadius: 999,
+                      textTransform: "none",
+                      fontWeight: 900,
+                      px: 1.25,
+                      color:
+                        language === "sv"
+                          ? "primary.contrastText"
+                          : "text.primary",
+                      bgcolor:
+                        language === "sv" ? "primary.main" : "transparent",
+                      "&:hover": {
+                        bgcolor:
+                          language === "sv"
+                            ? "primary.dark"
+                            : "action.selected",
+                      },
+                    }}
+                  >
+                    SV
+                  </Button>
+
+                  <Button
+                    size="small"
+                    onClick={() => setLanguage("en")}
+                    sx={{
+                      minWidth: 42,
+                      borderRadius: 999,
+                      textTransform: "none",
+                      fontWeight: 900,
+                      px: 1.25,
+                      color:
+                        language === "en"
+                          ? "primary.contrastText"
+                          : "text.primary",
+                      bgcolor:
+                        language === "en" ? "primary.main" : "transparent",
+                      "&:hover": {
+                        bgcolor:
+                          language === "en"
+                            ? "primary.dark"
+                            : "action.selected",
+                      },
+                    }}
+                  >
+                    EN
+                  </Button>
+                </Box>
+              </Stack>
+
+              <Divider />
+
+              <Stack
+                direction={{ xs: "column", sm: "row" }}
+                spacing={2}
+                sx={{
+                  alignItems: { xs: "stretch", sm: "center" },
+                  justifyContent: "space-between",
+                }}
+              >
+                <Box>
+                  <Typography sx={{ fontWeight: 700 }}>
+                    {t.profile.appearanceSetting}
+                  </Typography>
+
+                  <Typography variant="body2" color="text.secondary">
+                    {mode === "light"
+                      ? t.profile.lightMode
+                      : t.profile.darkMode}
+                  </Typography>
+                </Box>
+
+                <Button
+                  variant="outlined"
+                  onClick={toggleColorMode}
+                  sx={{
+                    borderRadius: 999,
+                    textTransform: "none",
+                    fontWeight: 800,
+                    alignSelf: { xs: "flex-start", sm: "auto" },
+                  }}
+                >
+                  {mode === "light" ? t.profile.darkMode : t.profile.lightMode}
+                </Button>
+              </Stack>
+            </Stack>
+          </Paper>
+
           <Paper
             variant="outlined"
             sx={{
