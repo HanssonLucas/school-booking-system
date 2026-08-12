@@ -50,7 +50,35 @@ db.exec(`
     FOREIGN KEY (session_id) REFERENCES booking_sessions(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
   );
+  
+  CREATE TABLE IF NOT EXISTS users (
+   id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    role TEXT NOT NULL CHECK(role IN ('student', 'teacher')),
+    email_verified_at TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  );
 `);
+
+const userColumns = db.prepare(`PRAGMA table_info(users)`).all() as {
+  name: string;
+}[];
+
+const hasUserColumn = (columnName: string) =>
+  userColumns.some((column) => column.name === columnName);
+
+if (!hasUserColumn("email_verified_at")) {
+  db.prepare(`ALTER TABLE users ADD COLUMN email_verified_at TEXT`).run();
+
+  db.prepare(
+    `
+    UPDATE users
+    SET email_verified_at = CURRENT_TIMESTAMP
+  `,
+  ).run();
+}
 
 const bookingColumns = db.prepare(`PRAGMA table_info(bookings)`).all() as {
   name: string;
