@@ -20,6 +20,23 @@ type BookingEmailInput = {
   language: BookingLanguage;
 };
 
+type EmailVerificationInput = {
+  to: string;
+  userName: string;
+  token: string;
+  language: BookingLanguage;
+};
+
+type EmailVerificationContent = {
+  subject: string;
+  heading: string;
+  greeting: string;
+  introText: string;
+  actionLabel: string;
+  footerText: string;
+  automaticMessageText: string;
+};
+
 type BookingEmailTemplateInput = {
   studentName: string;
   heading: string;
@@ -132,6 +149,36 @@ const bookingCancellationEmailContent: Record<
       date: "Date",
       time: "Time",
     },
+  },
+};
+
+const emailVerificationContent: Record<
+  BookingLanguage,
+  EmailVerificationContent
+> = {
+  sv: {
+    subject: "Verifiera din e-postadress",
+    heading: "Verifiera din e-postadress",
+    greeting: "Hej",
+    introText:
+      "Tack för att du skapade ett konto. Verifiera din e-postadress genom att klicka på knappen nedan.",
+    actionLabel: "Verifiera e-postadress",
+    footerText:
+      "Om du inte skapade det här kontot kan du ignorera meddelandet.",
+    automaticMessageText:
+      "Detta är ett automatiskt meddelande från Bokningssystem.",
+  },
+  en: {
+    subject: "Verify your email address",
+    heading: "Verify your email address",
+    greeting: "Hi",
+    introText:
+      "Thanks for creating an account. Verify your email address by clicking the button below.",
+    actionLabel: "Verify email address",
+    footerText:
+      "If you did not create this account, you can ignore this message.",
+    automaticMessageText:
+      "This is an automatic message from the Booking System.",
   },
 };
 
@@ -374,6 +421,97 @@ ${actionButtonHtml}
 `.trim();
 };
 
+const createEmailVerificationLayout = ({
+  userName,
+  heading,
+  greeting,
+  introText,
+  actionUrl,
+  actionLabel,
+  footerText,
+  automaticMessageText,
+  htmlLanguage,
+}: {
+  userName: string;
+  heading: string;
+  greeting: string;
+  introText: string;
+  actionUrl: string;
+  actionLabel: string;
+  footerText: string;
+  automaticMessageText: string;
+  htmlLanguage: BookingLanguage;
+}) => {
+  return `
+<!DOCTYPE html>
+<html lang="${htmlLanguage}">
+  <head>
+    <meta charset="UTF-8" />
+    <title>${heading}</title>
+  </head>
+
+  <body style="margin:0; padding:0; background-color:#f4f6f8; font-family:Arial, sans-serif; color:#111827;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#f4f6f8; padding:32px 16px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px; background-color:#ffffff; border-radius:20px; overflow:hidden; border:1px solid #e5e7eb;">
+            <tr>
+              <td style="padding:28px 32px; background:linear-gradient(135deg, #1976d2, #4caf50); color:#ffffff;">
+                <div style="font-size:14px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase;">
+                  Bokningssystem
+                </div>
+
+                <h1 style="margin:12px 0 0; font-size:28px; line-height:1.2;">
+                  ${heading}
+                </h1>
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding:32px;">
+                <p style="margin:0; font-size:16px; line-height:1.6;">
+                  ${greeting} ${userName}!
+                </p>
+
+                <p style="margin:16px 0 0; font-size:16px; line-height:1.6; color:#374151;">
+                  ${introText}
+                </p>
+
+                <table role="presentation" cellspacing="0" cellpadding="0" style="margin:28px 0;">
+                  <tr>
+                    <td>
+                      <a
+                        href="${actionUrl}"
+                        style="display:inline-block; padding:13px 20px; border-radius:999px; background-color:#1976d2; color:#ffffff; text-decoration:none; font-size:14px; font-weight:700;"
+                      >
+                        ${actionLabel}
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+
+                <p style="margin:0; font-size:15px; line-height:1.6; color:#4b5563;">
+                  ${footerText}
+                </p>
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding:20px 32px; background-color:#f9fafb; border-top:1px solid #e5e7eb;">
+                <p style="margin:0; font-size:12px; line-height:1.6; color:#6b7280;">
+                  ${automaticMessageText}
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
+`.trim();
+};
+
 export const sendBookingConfirmationEmail = async ({
   to,
   studentName,
@@ -480,6 +618,49 @@ ${appUrl}
     htmlLanguage: language,
     actionUrl: appUrl,
     actionLabel: content.actionLabel,
+  });
+
+  await sendEmail({
+    to,
+    subject: content.subject,
+    text,
+    html,
+  });
+};
+
+export const sendEmailVerificationEmail = async ({
+  to,
+  userName,
+  token,
+  language,
+}: EmailVerificationInput) => {
+  const content = emailVerificationContent[language];
+
+  const verificationUrl = new URL("/verify-email", getAppUrl());
+  verificationUrl.searchParams.set("token", token);
+
+  const verificationUrlString = verificationUrl.toString();
+
+  const text = `
+${content.greeting} ${userName}!
+
+${content.introText}
+
+${verificationUrlString}
+
+${content.footerText}
+`.trim();
+
+  const html = createEmailVerificationLayout({
+    userName,
+    heading: content.heading,
+    greeting: content.greeting,
+    introText: content.introText,
+    actionUrl: verificationUrlString,
+    actionLabel: content.actionLabel,
+    footerText: content.footerText,
+    automaticMessageText: content.automaticMessageText,
+    htmlLanguage: language,
   });
 
   await sendEmail({
