@@ -13,6 +13,7 @@ export type DbUserRow = {
   email: string;
   password_hash: string;
   role: UserRole;
+  email_verified_at: string | null;
   created_at: string;
 };
 
