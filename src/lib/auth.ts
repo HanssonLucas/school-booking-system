@@ -26,15 +26,16 @@ export const findUserByEmail = (email: string) => {
   return db
     .prepare(
       `
-        SELECT
-          id,
-          name,
-          email,
-          password_hash,
-          role,
-          created_at
-        FROM users
-        WHERE email = ?
+      SELECT
+  id,
+  name,
+  email,
+  password_hash,
+  role,
+  email_verified_at,
+  created_at
+FROM users
+WHERE email = ?
       `,
     )
     .get(email) as DbUserRow | undefined;

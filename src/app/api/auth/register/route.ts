@@ -103,6 +103,7 @@ export async function POST(request: Request) {
             email,
             password_hash,
             role,
+            email_verified_at,
             created_at
           FROM users
           WHERE id = ?
