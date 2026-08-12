@@ -9,6 +9,8 @@ import { db } from "@/lib/db";
 import { hashPassword, validatePassword } from "@/lib/password";
 import { createSession, setSessionCookie } from "@/lib/session";
 import type { DbUserRow } from "@/types/auth";
+import { createEmailVerificationToken } from "@/lib/emailVerification";
+import { notifyEmailVerification } from "@/lib/emailNotifications";
 
 type RegisterRequestBody = {
   name?: unknown;
@@ -117,6 +119,15 @@ export async function POST(request: Request) {
         { status: 500 },
       );
     }
+
+    const { token } = createEmailVerificationToken(user.id);
+
+    await notifyEmailVerification({
+      to: user.email,
+      userName: user.name,
+      token,
+      language: "sv",
+    });
 
     const { sessionId, expiresAt } = createSession(user.id);
 
