@@ -93,13 +93,39 @@ function VerifyEmailContent() {
         >
           <Stack spacing={3} sx={{ alignItems: "center", textAlign: "center" }}>
             {displayStatus === "loading" && (
-              <>
-                <CircularProgress />
+              <Stack
+                spacing={2.5}
+                sx={{
+                  width: "100%",
+                  alignItems: "center",
+                  textAlign: "center",
+                  py: { xs: 2, sm: 3 },
+                }}
+              >
+                <Box
+                  sx={{
+                    width: 88,
+                    height: 88,
+                    borderRadius: "50%",
+                    display: "grid",
+                    placeItems: "center",
+                    bgcolor: "action.hover",
+                  }}
+                >
+                  <CircularProgress size={44} thickness={4.5} />
+                </Box>
 
-                <Typography variant="h5" sx={{ fontWeight: 850 }}>
+                <Typography
+                  variant="h5"
+                  component="h1"
+                  sx={{
+                    fontWeight: 850,
+                    letterSpacing: -0.4,
+                  }}
+                >
                   {t.verifyEmail.verifying}
                 </Typography>
-              </>
+              </Stack>
             )}
 
             {displayStatus === "success" && (
