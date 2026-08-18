@@ -63,6 +63,9 @@ function VerifyEmailContent() {
         }
 
         await refreshUser();
+
+        localStorage.setItem("auth-user-updated", Date.now().toString());
+
         setStatus("success");
       } catch {
         setError("fallbackError");
