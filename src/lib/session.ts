@@ -13,6 +13,7 @@ type AuthUserRow = {
   name: string;
   email: string;
   role: UserRole;
+  email_verified_at: string | null;
 };
 
 export class AuthError extends Error {
@@ -100,7 +101,8 @@ export const getCurrentUser = async (): Promise<AuthUser | null> => {
           users.id,
           users.name,
           users.email,
-          users.role
+          users.role,
+          users.email_verified_at
         FROM sessions
         JOIN users ON users.id = sessions.user_id
         WHERE sessions.id = ?
@@ -109,7 +111,17 @@ export const getCurrentUser = async (): Promise<AuthUser | null> => {
     )
     .get(sessionId, new Date().toISOString()) as AuthUserRow | undefined;
 
-  return user ?? null;
+  if (!user) {
+    return null;
+  }
+
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    emailVerified: user.email_verified_at !== null,
+  };
 };
 
 export const requireUser = async () => {

@@ -19,6 +19,7 @@ export const toAuthUser = (user: DbUserRow): AuthUser => {
     name: user.name,
     email: user.email,
     role: user.role,
+    emailVerified: user.email_verified_at !== null,
   };
 };
 
