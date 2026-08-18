@@ -31,7 +31,7 @@ const getRedirectPath = (user: AuthUser) => {
 
 export default function RegisterForm() {
   const router = useRouter();
-  const { t } = useTranslations();
+  const { t, language } = useTranslations();
   const { refreshUser } = useAuth();
 
   const [name, setName] = useState("");
@@ -83,6 +83,7 @@ export default function RegisterForm() {
           password,
           role,
           teacherSignupCode: role === "teacher" ? teacherSignupCode : undefined,
+          language,
         }),
       });
 
