@@ -158,6 +158,8 @@ export const translations = {
       appearanceSetting: "Utseende",
       lightMode: "Ljust läge",
       darkMode: "Mörkt läge",
+      emailVerified: "Verifierad",
+      emailNotVerified: "Ej verifierad",
     },
     createSessionForm: {
       title: "Skapa bokningstillfälle",
@@ -447,6 +449,8 @@ export const translations = {
       appearanceSetting: "Appearance",
       lightMode: "Light mode",
       darkMode: "Dark mode",
+      emailVerified: "Verified",
+      emailNotVerified: "Not verified",
     },
     createSessionForm: {
       title: "Create booking session",

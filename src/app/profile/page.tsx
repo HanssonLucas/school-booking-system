@@ -457,17 +457,41 @@ export default function ProfilePage() {
 
               <Divider />
 
-              <Box>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ mb: 0.5 }}
-                >
-                  {t.profile.emailLabel}
-                </Typography>
+              <Stack
+                direction={{ xs: "column", sm: "row" }}
+                spacing={1.5}
+                sx={{
+                  alignItems: { xs: "flex-start", sm: "center" },
+                  justifyContent: "space-between",
+                }}
+              >
+                <Box>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ mb: 0.5 }}
+                  >
+                    {t.profile.emailLabel}
+                  </Typography>
 
-                <Typography sx={{ fontWeight: 700 }}>{user.email}</Typography>
-              </Box>
+                  <Typography sx={{ fontWeight: 700 }}>{user.email}</Typography>
+                </Box>
+
+                <Chip
+                  size="small"
+                  label={
+                    user.emailVerified
+                      ? t.profile.emailVerified
+                      : t.profile.emailNotVerified
+                  }
+                  color={user.emailVerified ? "success" : "warning"}
+                  variant="outlined"
+                  sx={{
+                    borderRadius: 999,
+                    fontWeight: 800,
+                  }}
+                />
+              </Stack>
 
               <Divider />
 
