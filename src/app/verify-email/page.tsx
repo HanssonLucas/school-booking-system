@@ -14,6 +14,8 @@ import {
 import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
 import ErrorOutlineRoundedIcon from "@mui/icons-material/ErrorOutlineRounded";
 import AppHeader from "@/components/layout/AppHeader";
+import { useAuth } from "@/components/auth/useAuth";
+
 type VerificationStatus = "loading" | "success" | "error";
 
 type VerifyEmailResponse = {
@@ -24,6 +26,7 @@ type VerifyEmailResponse = {
 type VerificationErrorKey = "expiredToken" | "invalidToken" | "fallbackError";
 
 function VerifyEmailContent() {
+  const { refreshUser } = useAuth();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
   const { t } = useTranslations();
@@ -59,6 +62,7 @@ function VerifyEmailContent() {
           return;
         }
 
+        await refreshUser();
         setStatus("success");
       } catch {
         setError("fallbackError");
@@ -67,7 +71,7 @@ function VerifyEmailContent() {
     };
 
     void verifyEmail();
-  }, [token]);
+  }, [token, refreshUser]);
 
   const displayStatus: VerificationStatus = token ? status : "error";
 
