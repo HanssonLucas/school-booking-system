@@ -41,3 +41,81 @@ export const createEmailVerificationToken = (userId: number) => {
     expiresAt,
   };
 };
+
+type EmailVerificationTokenRow = {
+  user_id: number;
+  expires_at: string;
+  email_verified_at: string | null;
+};
+
+type VerifyEmailResult =
+  | { success: true }
+  | {
+      success: false;
+      reason: "INVALID_TOKEN" | "EXPIRED_TOKEN";
+    };
+
+export const verifyEmailToken = (token: string): VerifyEmailResult => {
+  const tokenHash = hashEmailVerificationToken(token);
+
+  const tokenRow = db
+    .prepare(
+      `
+        SELECT
+          email_verification_tokens.user_id,
+          email_verification_tokens.expires_at,
+          users.email_verified_at
+        FROM email_verification_tokens
+        JOIN users
+          ON users.id = email_verification_tokens.user_id
+        WHERE email_verification_tokens.token_hash = ?
+      `,
+    )
+    .get(tokenHash) as EmailVerificationTokenRow | undefined;
+
+  if (!tokenRow) {
+    return {
+      success: false,
+      reason: "INVALID_TOKEN",
+    };
+  }
+
+  if (new Date(tokenRow.expires_at).getTime() <= Date.now()) {
+    db.prepare(
+      `
+        DELETE FROM email_verification_tokens
+        WHERE token_hash = ?
+      `,
+    ).run(tokenHash);
+
+    return {
+      success: false,
+      reason: "EXPIRED_TOKEN",
+    };
+  }
+
+  const verifyEmail = db.transaction(() => {
+    if (!tokenRow.email_verified_at) {
+      db.prepare(
+        `
+          UPDATE users
+          SET email_verified_at = CURRENT_TIMESTAMP
+          WHERE id = ?
+        `,
+      ).run(tokenRow.user_id);
+    }
+
+    db.prepare(
+      `
+        DELETE FROM email_verification_tokens
+        WHERE token_hash = ?
+      `,
+    ).run(tokenHash);
+  });
+
+  verifyEmail();
+
+  return {
+    success: true,
+  };
+};
