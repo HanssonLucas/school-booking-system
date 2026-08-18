@@ -18,9 +18,12 @@ type AuthUserRow = {
 
 export class AuthError extends Error {
   status: number;
-  code: "UNAUTHORIZED" | "FORBIDDEN";
+  code: "UNAUTHORIZED" | "FORBIDDEN" | "EMAIL_NOT_VERIFIED";
 
-  constructor(code: "UNAUTHORIZED" | "FORBIDDEN", status: number) {
+  constructor(
+    code: "UNAUTHORIZED" | "FORBIDDEN" | "EMAIL_NOT_VERIFIED",
+    status: number,
+  ) {
     super(code);
     this.name = "AuthError";
     this.code = code;
@@ -129,6 +132,16 @@ export const requireUser = async () => {
 
   if (!user) {
     throw new AuthError("UNAUTHORIZED", 401);
+  }
+
+  return user;
+};
+
+export const requireVerifiedUser = async () => {
+  const user = await requireUser();
+
+  if (!user.emailVerified) {
+    throw new AuthError("EMAIL_NOT_VERIFIED", 403);
   }
 
   return user;
