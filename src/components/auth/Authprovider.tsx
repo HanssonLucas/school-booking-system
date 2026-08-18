@@ -97,5 +97,21 @@ export default function AuthProvider({ children }: AuthProviderProps) {
     [user, isLoading, refreshUser, logout],
   );
 
+  useEffect(() => {
+    const handleAuthChange = (event: StorageEvent) => {
+      if (event.key !== "auth-user-updated") {
+        return;
+      }
+
+      void refreshUser();
+    };
+
+    window.addEventListener("storage", handleAuthChange);
+
+    return () => {
+      window.removeEventListener("storage", handleAuthChange);
+    };
+  }, [refreshUser]);
+
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
