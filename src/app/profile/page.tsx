@@ -44,6 +44,13 @@ export default function ProfilePage() {
     message: string;
   } | null>(null);
 
+  const [isResendingVerification, setIsResendingVerification] = useState(false);
+
+  const [verificationFeedback, setVerificationFeedback] = useState<{
+    type: "success" | "error";
+    message: string;
+  } | null>(null);
+
   const handleEditName = () => {
     if (!user) {
       return;
@@ -141,6 +148,55 @@ export default function ProfilePage() {
       });
     } finally {
       setIsSavingPassword(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    if (!user || user.emailVerified) {
+      return;
+    }
+
+    setIsResendingVerification(true);
+    setVerificationFeedback(null);
+
+    try {
+      const response = await fetch("/api/auth/resend-verification", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          language,
+        }),
+      });
+
+      if (!response.ok) {
+        const data = (await response.json()) as {
+          error?: string;
+        };
+
+        setVerificationFeedback({
+          type: "error",
+          message:
+            data.error === "VERIFICATION_EMAIL_COOLDOWN"
+              ? t.profile.verificationEmailCooldown
+              : t.profile.verificationEmailSendFailed,
+        });
+
+        return;
+      }
+
+      setVerificationFeedback({
+        type: "success",
+        message: t.profile.verificationEmailSent,
+      });
+    } catch {
+      setVerificationFeedback({
+        type: "error",
+        message: t.profile.verificationEmailSendFailed,
+      });
+    } finally {
+      setIsResendingVerification(false);
     }
   };
 
@@ -477,21 +533,51 @@ export default function ProfilePage() {
                   <Typography sx={{ fontWeight: 700 }}>{user.email}</Typography>
                 </Box>
 
-                <Chip
-                  size="small"
-                  label={
-                    user.emailVerified
-                      ? t.profile.emailVerified
-                      : t.profile.emailNotVerified
-                  }
-                  color={user.emailVerified ? "success" : "warning"}
-                  variant="outlined"
+                <Stack
+                  direction={{ xs: "column", sm: "row" }}
+                  spacing={1}
                   sx={{
-                    borderRadius: 999,
-                    fontWeight: 800,
+                    alignItems: { xs: "flex-start", sm: "center" },
                   }}
-                />
+                >
+                  <Chip
+                    size="small"
+                    label={
+                      user.emailVerified
+                        ? t.profile.emailVerified
+                        : t.profile.emailNotVerified
+                    }
+                    color={user.emailVerified ? "success" : "warning"}
+                    variant="outlined"
+                    sx={{
+                      borderRadius: 999,
+                      fontWeight: 800,
+                    }}
+                  />
+
+                  {!user.emailVerified && (
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      onClick={handleResendVerification}
+                      disabled={isResendingVerification}
+                      sx={{
+                        borderRadius: 999,
+                        textTransform: "none",
+                        fontWeight: 800,
+                      }}
+                    >
+                      {t.profile.resendVerificationEmail}
+                    </Button>
+                  )}
+                </Stack>
               </Stack>
+
+              {verificationFeedback && (
+                <Alert severity={verificationFeedback.type}>
+                  {verificationFeedback.message}
+                </Alert>
+              )}
 
               <Divider />
 
