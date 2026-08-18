@@ -18,6 +18,7 @@ type RegisterRequestBody = {
   password?: unknown;
   role?: unknown;
   teacherSignupCode?: unknown;
+  language?: unknown;
 };
 
 const isValidTeacherSignupCode = (teacherSignupCode: unknown) => {
@@ -43,6 +44,7 @@ export async function POST(request: Request) {
       typeof body.email === "string" ? normalizeEmail(body.email) : "";
     const password = typeof body.password === "string" ? body.password : "";
     const role = isUserRole(body.role) ? body.role : null;
+    const language = body.language === "en" ? "en" : "sv";
 
     if (!name || !email || !password || !role) {
       return NextResponse.json(
@@ -126,7 +128,7 @@ export async function POST(request: Request) {
       to: user.email,
       userName: user.name,
       token,
-      language: "sv",
+      language,
     });
 
     const { sessionId, expiresAt } = createSession(user.id);
