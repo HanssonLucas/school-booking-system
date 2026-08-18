@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { requireUserOrResponse } from "@/lib/apiAuth";
-import { createEmailVerificationToken } from "@/lib/emailVerification";
+import {
+  canResendEmailVerification,
+  createEmailVerificationToken,
+} from "@/lib/emailVerification";
 import { notifyEmailVerification } from "@/lib/emailNotifications";
 
 type ResendVerificationRequestBody = {
@@ -12,6 +15,16 @@ export async function POST(request: Request) {
 
   if (auth.response) {
     return auth.response;
+  }
+
+  if (!canResendEmailVerification(auth.user.id)) {
+    return NextResponse.json({ error: "RESEND_COOLDOWN" }, { status: 429 });
+  }
+  if (!canResendEmailVerification(auth.user.id)) {
+    return NextResponse.json(
+      { error: "VERIFICATION_EMAIL_COOLDOWN" },
+      { status: 429 },
+    );
   }
 
   if (auth.user.emailVerified) {

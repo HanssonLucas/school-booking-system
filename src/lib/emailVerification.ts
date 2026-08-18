@@ -2,6 +2,31 @@ import { createHash, randomBytes } from "crypto";
 import { db } from "@/lib/db";
 
 const EMAIL_VERIFICATION_TOKEN_DURATION_MS = 24 * 60 * 60 * 1000;
+const EMAIL_VERIFICATION_RESEND_COOLDOWN_MS = 60 * 1000;
+
+type EmailVerificationTokenCreatedRow = {
+  created_at: string;
+};
+
+export const canResendEmailVerification = (userId: number) => {
+  const token = db
+    .prepare(
+      `
+        SELECT created_at
+        FROM email_verification_tokens
+        WHERE user_id = ?
+      `,
+    )
+    .get(userId) as EmailVerificationTokenCreatedRow | undefined;
+
+  if (!token) {
+    return true;
+  }
+
+  const createdAt = new Date(`${token.created_at}Z`).getTime();
+
+  return Date.now() - createdAt >= EMAIL_VERIFICATION_RESEND_COOLDOWN_MS;
+};
 
 export const hashEmailVerificationToken = (token: string) => {
   return createHash("sha256").update(token).digest("hex");
