@@ -5,12 +5,14 @@ import { useSearchParams } from "next/navigation";
 import { useTranslations } from "@/i18n/useTranslations";
 import {
   Alert,
+  Box,
   CircularProgress,
   Container,
   Paper,
   Stack,
   Typography,
 } from "@mui/material";
+import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
 import AppHeader from "@/components/layout/AppHeader";
 type VerificationStatus = "loading" | "success" | "error";
 
@@ -101,15 +103,54 @@ function VerifyEmailContent() {
             )}
 
             {displayStatus === "success" && (
-              <>
-                <Typography variant="h4" sx={{ fontWeight: 900 }}>
-                  {t.verifyEmail.successTitle}
-                </Typography>
+              <Stack
+                spacing={2.5}
+                sx={{
+                  width: "100%",
+                  alignItems: "center",
+                  textAlign: "center",
+                  py: { xs: 2, sm: 3 },
+                }}
+              >
+                <Box
+                  sx={{
+                    width: 88,
+                    height: 88,
+                    borderRadius: "50%",
+                    display: "grid",
+                    placeItems: "center",
+                    bgcolor: "success.main",
+                    color: "success.contrastText",
+                    boxShadow: 3,
+                  }}
+                >
+                  <CheckCircleOutlineRoundedIcon sx={{ fontSize: 52 }} />
+                </Box>
 
-                <Alert severity="success" sx={{ width: "100%" }}>
-                  {t.verifyEmail.successMessage}
-                </Alert>
-              </>
+                <Box>
+                  <Typography
+                    variant="h4"
+                    component="h1"
+                    sx={{
+                      fontWeight: 900,
+                      letterSpacing: -0.7,
+                    }}
+                  >
+                    {t.verifyEmail.successTitle}
+                  </Typography>
+
+                  <Typography
+                    color="text.secondary"
+                    sx={{
+                      mt: 1.5,
+                      fontSize: { xs: "1rem", sm: "1.05rem" },
+                      lineHeight: 1.7,
+                    }}
+                  >
+                    {t.verifyEmail.successMessage}
+                  </Typography>
+                </Box>
+              </Stack>
             )}
 
             {displayStatus === "error" && (
