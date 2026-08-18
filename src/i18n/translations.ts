@@ -160,6 +160,12 @@ export const translations = {
       darkMode: "Mörkt läge",
       emailVerified: "Verifierad",
       emailNotVerified: "Ej verifierad",
+      resendVerificationEmail: "Skicka verifieringsmail igen",
+      verificationEmailSent: "Ett nytt verifieringsmail har skickats.",
+      verificationEmailCooldown:
+        "Vänta en liten stund innan du skickar ett nytt verifieringsmail.",
+      verificationEmailSendFailed:
+        "Det gick inte att skicka ett nytt verifieringsmail.",
     },
     createSessionForm: {
       title: "Skapa bokningstillfälle",
@@ -451,6 +457,11 @@ export const translations = {
       darkMode: "Dark mode",
       emailVerified: "Verified",
       emailNotVerified: "Not verified",
+      resendVerificationEmail: "Resend verification email",
+      verificationEmailSent: "A new verification email has been sent.",
+      verificationEmailCooldown:
+        "Please wait a moment before sending another verification email.",
+      verificationEmailSendFailed: "Could not send a new verification email.",
     },
     createSessionForm: {
       title: "Create booking session",
