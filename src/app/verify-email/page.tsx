@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "@/i18n/useTranslations";
 import {
   Alert,
   CircularProgress,
@@ -18,12 +19,15 @@ type VerifyEmailResponse = {
   error?: string;
 };
 
+type VerificationErrorKey = "expiredToken" | "invalidToken" | "fallbackError";
+
 function VerifyEmailContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
+  const { t } = useTranslations();
 
   const [status, setStatus] = useState<VerificationStatus>("loading");
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<VerificationErrorKey | null>(null);
 
   useEffect(() => {
     if (!token) {
@@ -44,9 +48,9 @@ function VerifyEmailContent() {
 
         if (!response.ok) {
           if (data.error === "EXPIRED_VERIFICATION_TOKEN") {
-            setError("Verifieringslänken har gått ut.");
+            setError("expiredToken");
           } else {
-            setError("Verifieringslänken är ogiltig eller har redan använts.");
+            setError("invalidToken");
           }
 
           setStatus("error");
@@ -55,7 +59,7 @@ function VerifyEmailContent() {
 
         setStatus("success");
       } catch {
-        setError("Något gick fel när e-postadressen skulle verifieras.");
+        setError("fallbackError");
         setStatus("error");
       }
     };
@@ -67,7 +71,9 @@ function VerifyEmailContent() {
 
   const displayError = token
     ? error
-    : "Verifieringslänken saknar en giltig token.";
+      ? t.verifyEmail[error]
+      : null
+    : t.verifyEmail.missingToken;
 
   return (
     <>
@@ -89,7 +95,7 @@ function VerifyEmailContent() {
                 <CircularProgress />
 
                 <Typography variant="h5" sx={{ fontWeight: 850 }}>
-                  Verifierar din e-postadress...
+                  {t.verifyEmail.verifying}
                 </Typography>
               </>
             )}
@@ -97,11 +103,11 @@ function VerifyEmailContent() {
             {displayStatus === "success" && (
               <>
                 <Typography variant="h4" sx={{ fontWeight: 900 }}>
-                  E-postadressen är verifierad
+                  {t.verifyEmail.successTitle}
                 </Typography>
 
                 <Alert severity="success" sx={{ width: "100%" }}>
-                  Din e-postadress har verifierats.
+                  {t.verifyEmail.successMessage}
                 </Alert>
               </>
             )}
@@ -109,7 +115,7 @@ function VerifyEmailContent() {
             {displayStatus === "error" && (
               <>
                 <Typography variant="h4" sx={{ fontWeight: 900 }}>
-                  Verifieringen misslyckades
+                  {t.verifyEmail.errorTitle}
                 </Typography>
 
                 <Alert severity="error" sx={{ width: "100%" }}>
