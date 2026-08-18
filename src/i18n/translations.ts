@@ -87,6 +87,16 @@ export const translations = {
       teacherSignupCodeHelper: "Krävs endast för att skapa ett lärarkonto.",
       invalidTeacherSignupCode: "Lärarkoden är fel eller saknas.",
     },
+    verifyEmail: {
+      verifying: "Verifierar din e-postadress...",
+      successTitle: "E-postadressen är verifierad",
+      successMessage: "Din e-postadress har verifierats.",
+      errorTitle: "Verifieringen misslyckades",
+      missingToken: "Verifieringslänken saknar en giltig token.",
+      expiredToken: "Verifieringslänken har gått ut.",
+      invalidToken: "Verifieringslänken är ogiltig eller har redan använts.",
+      fallbackError: "Något gick fel när e-postadressen skulle verifieras.",
+    },
     student: {
       title: "Studentvy",
       description:
@@ -363,6 +373,17 @@ export const translations = {
       teacherSignupCodeHelper: "Only required when creating a teacher account.",
       invalidTeacherSignupCode:
         "The teacher signup code is missing or incorrect.",
+    },
+    verifyEmail: {
+      verifying: "Verifying your email address...",
+      successTitle: "Email address verified",
+      successMessage: "Your email address has been verified.",
+      errorTitle: "Verification failed",
+      missingToken: "The verification link does not contain a valid token.",
+      expiredToken: "The verification link has expired.",
+      invalidToken:
+        "The verification link is invalid or has already been used.",
+      fallbackError: "Something went wrong while verifying your email address.",
     },
     student: {
       title: "Student view",
