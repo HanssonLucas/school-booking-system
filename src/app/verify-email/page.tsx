@@ -4,7 +4,6 @@ import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "@/i18n/useTranslations";
 import {
-  Alert,
   Box,
   CircularProgress,
   Container,
@@ -13,6 +12,7 @@ import {
   Typography,
 } from "@mui/material";
 import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
+import ErrorOutlineRoundedIcon from "@mui/icons-material/ErrorOutlineRounded";
 import AppHeader from "@/components/layout/AppHeader";
 type VerificationStatus = "loading" | "success" | "error";
 
@@ -154,15 +154,54 @@ function VerifyEmailContent() {
             )}
 
             {displayStatus === "error" && (
-              <>
-                <Typography variant="h4" sx={{ fontWeight: 900 }}>
-                  {t.verifyEmail.errorTitle}
-                </Typography>
+              <Stack
+                spacing={2.5}
+                sx={{
+                  width: "100%",
+                  alignItems: "center",
+                  textAlign: "center",
+                  py: { xs: 2, sm: 3 },
+                }}
+              >
+                <Box
+                  sx={{
+                    width: 88,
+                    height: 88,
+                    borderRadius: "50%",
+                    display: "grid",
+                    placeItems: "center",
+                    bgcolor: "error.main",
+                    color: "error.contrastText",
+                    boxShadow: 3,
+                  }}
+                >
+                  <ErrorOutlineRoundedIcon sx={{ fontSize: 52 }} />
+                </Box>
 
-                <Alert severity="error" sx={{ width: "100%" }}>
-                  {displayError}
-                </Alert>
-              </>
+                <Box>
+                  <Typography
+                    variant="h4"
+                    component="h1"
+                    sx={{
+                      fontWeight: 900,
+                      letterSpacing: -0.7,
+                    }}
+                  >
+                    {t.verifyEmail.errorTitle}
+                  </Typography>
+
+                  <Typography
+                    color="text.secondary"
+                    sx={{
+                      mt: 1.5,
+                      fontSize: { xs: "1rem", sm: "1.05rem" },
+                      lineHeight: 1.7,
+                    }}
+                  >
+                    {displayError}
+                  </Typography>
+                </Box>
+              </Stack>
             )}
           </Stack>
         </Paper>
