@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
-import { AuthError, requireTeacher, requireUser } from "@/lib/session";
+import {
+  AuthError,
+  requireTeacher,
+  requireUser,
+  requireVerifiedUser,
+} from "@/lib/session";
 import type { AuthUser } from "@/types/auth";
 
 type AuthCheckResult =
@@ -34,6 +39,30 @@ export const requireUserOrResponse = async (): Promise<AuthCheckResult> => {
     throw error;
   }
 };
+
+export const requireVerifiedUserOrResponse =
+  async (): Promise<AuthCheckResult> => {
+    try {
+      const user = await requireVerifiedUser();
+
+      return {
+        user,
+        response: null,
+      };
+    } catch (error) {
+      if (error instanceof AuthError) {
+        return {
+          user: null,
+          response: NextResponse.json(
+            { code: error.code },
+            { status: error.status },
+          ),
+        };
+      }
+
+      throw error;
+    }
+  };
 
 export const requireTeacherOrResponse = async () => {
   try {
