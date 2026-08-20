@@ -188,6 +188,15 @@ export default function BookSessionDialog({
             </Alert>
           )}
 
+          {!isAuthLoading &&
+            currentUser &&
+            isStudent &&
+            !currentUser.emailVerified && (
+              <Alert severity="warning" sx={{ borderRadius: 3 }}>
+                {t.auth.emailVerificationRequired}
+              </Alert>
+            )}
+
           {errorMessage && (
             <Alert severity="error" sx={{ borderRadius: 3 }}>
               {errorMessage}
@@ -228,6 +237,20 @@ export default function BookSessionDialog({
                 }}
               >
                 {t.auth.loginButton}
+              </Button>
+            ) : currentUser && isStudent && !currentUser.emailVerified ? (
+              <Button
+                variant="contained"
+                startIcon={<PersonOutlineOutlinedIcon />}
+                onClick={() => router.push("/profile")}
+                sx={{
+                  borderRadius: 999,
+                  textTransform: "none",
+                  fontWeight: 800,
+                  px: 2.5,
+                }}
+              >
+                {t.profile.title}
               </Button>
             ) : (
               <Button
