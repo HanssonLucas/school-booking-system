@@ -165,6 +165,13 @@ export default function StudentPage() {
       };
     }
 
+    if (!currentUser.emailVerified) {
+      return {
+        success: false,
+        message: t.auth.emailVerificationRequired,
+      };
+    }
+
     const response = await fetch("/api/bookings", {
       method: "POST",
       headers: {
