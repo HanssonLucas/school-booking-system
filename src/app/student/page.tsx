@@ -182,6 +182,7 @@ export default function StudentPage() {
       const errorMessages: Record<string, string> = {
         UNAUTHORIZED: t.auth.studentLoginRequired,
         FORBIDDEN: t.auth.studentActionForbidden,
+        EMAIL_NOT_VERIFIED: t.auth.emailVerificationRequired,
         MISSING_BOOKING_FIELDS: t.errors.missingBookingFields,
         SESSION_NOT_FOUND: t.errors.sessionNotFound,
         BOOKING_ALREADY_EXISTS: t.errors.bookingAlreadyExists,
