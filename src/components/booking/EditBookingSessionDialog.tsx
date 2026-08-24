@@ -23,6 +23,9 @@ import TimerOutlinedIcon from "@mui/icons-material/TimerOutlined";
 import type { BookingSession } from "@/types/booking";
 import { useTranslations } from "@/i18n/useTranslations";
 import { getSlotCount, SLOT_DURATION_OPTIONS } from "@/lib/bookingSlots";
+import { useRouter } from "next/navigation";
+import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
+import { useAuth } from "@/components/auth/useAuth";
 
 export type EditFormValues = {
   title: string;
@@ -91,6 +94,8 @@ function EditBookingSessionDialogContent({
   );
 
   const { t } = useTranslations();
+  const router = useRouter();
+  const { user: currentUser } = useAuth();
 
   const calculatedSlotCount =
     formValues.startTime && formValues.endTime
@@ -201,205 +206,255 @@ function EditBookingSessionDialogContent({
             </Stack>
           </Box>
 
-          <Box
-            component="form"
-            onSubmit={handleSubmit}
-            sx={{ p: { xs: 3, sm: 4 } }}
-          >
-            <Stack spacing={3}>
-              <TextField
-                label={t.editSessionDialog.titleLabel}
-                fullWidth
-                value={formValues.title}
-                onChange={(event) => handleChange("title", event.target.value)}
-                slotProps={{
-                  input: {
-                    startAdornment: (
-                      <TitleOutlinedIcon
-                        sx={{ mr: 1, color: "text.secondary" }}
-                      />
-                    ),
-                  },
-                }}
-                sx={textFieldSx}
-              />
+          {currentUser && !currentUser.emailVerified ? (
+            <Box sx={{ p: { xs: 3, sm: 4 } }}>
+              <Stack spacing={3}>
+                <Alert severity="warning" sx={{ borderRadius: 3 }}>
+                  {t.auth.teacherEmailVerificationRequired}
+                </Alert>
 
-              <TextField
-                label={t.editSessionDialog.descriptionLabel}
-                fullWidth
-                multiline
-                minRows={3}
-                value={formValues.description}
-                onChange={(event) =>
-                  handleChange("description", event.target.value)
-                }
-                slotProps={{
-                  input: {
-                    startAdornment: (
-                      <NotesOutlinedIcon
-                        sx={{
-                          mr: 1,
-                          mt: 1,
-                          color: "text.secondary",
-                          alignSelf: "flex-start",
-                        }}
-                      />
-                    ),
-                  },
-                }}
-                sx={textFieldSx}
-              />
-
-              <Stack
-                direction={{ xs: "column", sm: "row" }}
-                spacing={2}
-                sx={{
-                  alignItems: "flex-start",
-                }}
-              >
-                <TextField
-                  label={t.editSessionDialog.dateLabel}
-                  type="date"
-                  fullWidth
-                  value={formValues.date}
-                  onChange={(event) => handleChange("date", event.target.value)}
-                  slotProps={{
-                    inputLabel: {
-                      shrink: true,
-                    },
-                    input: {
-                      startAdornment: (
-                        <CalendarMonthOutlinedIcon
-                          sx={{ mr: 1, color: "text.secondary" }}
-                        />
-                      ),
-                    },
+                <DialogActions
+                  sx={{
+                    px: 0,
+                    pt: 1,
+                    gap: 1,
+                    flexWrap: "wrap",
+                    justifyContent: "flex-end",
                   }}
-                  sx={textFieldSx}
-                />
+                >
+                  <Button
+                    onClick={onClose}
+                    sx={{
+                      borderRadius: 999,
+                      textTransform: "none",
+                      fontWeight: 800,
+                      px: 2.5,
+                    }}
+                  >
+                    {t.editSessionDialog.cancelButton}
+                  </Button>
 
-                <TextField
-                  label={t.editSessionDialog.startTimeLabel}
-                  type="time"
-                  fullWidth
-                  value={formValues.startTime}
-                  onChange={(event) =>
-                    handleChange("startTime", event.target.value)
-                  }
-                  slotProps={{
-                    inputLabel: {
-                      shrink: true,
-                    },
-                    input: {
-                      startAdornment: (
-                        <AccessTimeOutlinedIcon
-                          sx={{ mr: 1, color: "text.secondary" }}
-                        />
-                      ),
-                    },
-                  }}
-                  sx={textFieldSx}
-                />
-
-                <TextField
-                  label={t.editSessionDialog.endTimeLabel}
-                  type="time"
-                  fullWidth
-                  value={formValues.endTime}
-                  onChange={(event) =>
-                    handleChange("endTime", event.target.value)
-                  }
-                  slotProps={{
-                    inputLabel: {
-                      shrink: true,
-                    },
-                    input: {
-                      startAdornment: (
-                        <AccessTimeOutlinedIcon
-                          sx={{ mr: 1, color: "text.secondary" }}
-                        />
-                      ),
-                    },
-                  }}
-                  sx={textFieldSx}
-                />
+                  <Button
+                    variant="contained"
+                    startIcon={<PersonOutlineOutlinedIcon />}
+                    onClick={() => router.push("/profile")}
+                    sx={{
+                      borderRadius: 999,
+                      textTransform: "none",
+                      fontWeight: 800,
+                      px: 2.5,
+                    }}
+                  >
+                    {t.profile.title}
+                  </Button>
+                </DialogActions>
               </Stack>
+            </Box>
+          ) : (
+            <Box
+              component="form"
+              onSubmit={handleSubmit}
+              sx={{ p: { xs: 3, sm: 4 } }}
+            >
+              <Stack spacing={3}>
+                <TextField
+                  label={t.editSessionDialog.titleLabel}
+                  fullWidth
+                  value={formValues.title}
+                  onChange={(event) =>
+                    handleChange("title", event.target.value)
+                  }
+                  slotProps={{
+                    input: {
+                      startAdornment: (
+                        <TitleOutlinedIcon
+                          sx={{ mr: 1, color: "text.secondary" }}
+                        />
+                      ),
+                    },
+                  }}
+                  sx={textFieldSx}
+                />
 
-              <TextField
-                select
-                label={t.bookingSession.slotDuration}
-                fullWidth
-                value={formValues.slotDurationMinutes}
-                onChange={(event) =>
-                  handleChange("slotDurationMinutes", event.target.value)
-                }
-                slotProps={{
-                  input: {
-                    startAdornment: (
-                      <TimerOutlinedIcon
-                        sx={{ mr: 1, color: "text.secondary" }}
-                      />
-                    ),
-                  },
-                }}
-                sx={textFieldSx}
-              >
-                {SLOT_DURATION_OPTIONS.map((duration) => (
-                  <MenuItem key={duration} value={String(duration)}>
-                    {duration} minuter
-                  </MenuItem>
-                ))}
-              </TextField>
+                <TextField
+                  label={t.editSessionDialog.descriptionLabel}
+                  fullWidth
+                  multiline
+                  minRows={3}
+                  value={formValues.description}
+                  onChange={(event) =>
+                    handleChange("description", event.target.value)
+                  }
+                  slotProps={{
+                    input: {
+                      startAdornment: (
+                        <NotesOutlinedIcon
+                          sx={{
+                            mr: 1,
+                            mt: 1,
+                            color: "text.secondary",
+                            alignSelf: "flex-start",
+                          }}
+                        />
+                      ),
+                    },
+                  }}
+                  sx={textFieldSx}
+                />
 
-              <Alert
-                severity={calculatedSlotCount > 0 ? "info" : "warning"}
-                icon={<TimerOutlinedIcon />}
-                sx={{ borderRadius: 3 }}
-              >
-                {t.createSessionForm.calculatedSlotsLabel}{" "}
-                <Box component="span" sx={{ fontWeight: 900 }}>
-                  {calculatedSlotCount > 0 ? calculatedSlotCount : "-"}
-                </Box>
-              </Alert>
-
-              <DialogActions
-                sx={{
-                  px: 0,
-                  pt: 1,
-                  gap: 1,
-                  flexWrap: "wrap",
-                  justifyContent: "flex-end",
-                }}
-              >
-                <Button
-                  onClick={onClose}
+                <Stack
+                  direction={{ xs: "column", sm: "row" }}
+                  spacing={2}
                   sx={{
-                    borderRadius: 999,
-                    textTransform: "none",
-                    fontWeight: 800,
-                    px: 2.5,
+                    alignItems: "flex-start",
                   }}
                 >
-                  {t.editSessionDialog.cancelButton}
-                </Button>
+                  <TextField
+                    label={t.editSessionDialog.dateLabel}
+                    type="date"
+                    fullWidth
+                    value={formValues.date}
+                    onChange={(event) =>
+                      handleChange("date", event.target.value)
+                    }
+                    slotProps={{
+                      inputLabel: {
+                        shrink: true,
+                      },
+                      input: {
+                        startAdornment: (
+                          <CalendarMonthOutlinedIcon
+                            sx={{ mr: 1, color: "text.secondary" }}
+                          />
+                        ),
+                      },
+                    }}
+                    sx={textFieldSx}
+                  />
 
-                <Button
-                  variant="contained"
-                  type="submit"
-                  startIcon={<EditOutlinedIcon />}
+                  <TextField
+                    label={t.editSessionDialog.startTimeLabel}
+                    type="time"
+                    fullWidth
+                    value={formValues.startTime}
+                    onChange={(event) =>
+                      handleChange("startTime", event.target.value)
+                    }
+                    slotProps={{
+                      inputLabel: {
+                        shrink: true,
+                      },
+                      input: {
+                        startAdornment: (
+                          <AccessTimeOutlinedIcon
+                            sx={{ mr: 1, color: "text.secondary" }}
+                          />
+                        ),
+                      },
+                    }}
+                    sx={textFieldSx}
+                  />
+
+                  <TextField
+                    label={t.editSessionDialog.endTimeLabel}
+                    type="time"
+                    fullWidth
+                    value={formValues.endTime}
+                    onChange={(event) =>
+                      handleChange("endTime", event.target.value)
+                    }
+                    slotProps={{
+                      inputLabel: {
+                        shrink: true,
+                      },
+                      input: {
+                        startAdornment: (
+                          <AccessTimeOutlinedIcon
+                            sx={{ mr: 1, color: "text.secondary" }}
+                          />
+                        ),
+                      },
+                    }}
+                    sx={textFieldSx}
+                  />
+                </Stack>
+
+                <TextField
+                  select
+                  label={t.bookingSession.slotDuration}
+                  fullWidth
+                  value={formValues.slotDurationMinutes}
+                  onChange={(event) =>
+                    handleChange("slotDurationMinutes", event.target.value)
+                  }
+                  slotProps={{
+                    input: {
+                      startAdornment: (
+                        <TimerOutlinedIcon
+                          sx={{ mr: 1, color: "text.secondary" }}
+                        />
+                      ),
+                    },
+                  }}
+                  sx={textFieldSx}
+                >
+                  {SLOT_DURATION_OPTIONS.map((duration) => (
+                    <MenuItem key={duration} value={String(duration)}>
+                      {duration} minuter
+                    </MenuItem>
+                  ))}
+                </TextField>
+
+                <Alert
+                  severity={calculatedSlotCount > 0 ? "info" : "warning"}
+                  icon={<TimerOutlinedIcon />}
+                  sx={{ borderRadius: 3 }}
+                >
+                  {t.createSessionForm.calculatedSlotsLabel}{" "}
+                  <Box component="span" sx={{ fontWeight: 900 }}>
+                    {calculatedSlotCount > 0 ? calculatedSlotCount : "-"}
+                  </Box>
+                </Alert>
+
+                <DialogActions
                   sx={{
-                    borderRadius: 999,
-                    textTransform: "none",
-                    fontWeight: 800,
-                    px: 3,
-                    py: 1.1,
+                    px: 0,
+                    pt: 1,
+                    gap: 1,
+                    flexWrap: "wrap",
+                    justifyContent: "flex-end",
                   }}
                 >
-                  {t.editSessionDialog.saveButton}
-                </Button>
-              </DialogActions>
-            </Stack>
-          </Box>
+                  <Button
+                    onClick={onClose}
+                    sx={{
+                      borderRadius: 999,
+                      textTransform: "none",
+                      fontWeight: 800,
+                      px: 2.5,
+                    }}
+                  >
+                    {t.editSessionDialog.cancelButton}
+                  </Button>
+
+                  <Button
+                    variant="contained"
+                    type="submit"
+                    startIcon={<EditOutlinedIcon />}
+                    sx={{
+                      borderRadius: 999,
+                      textTransform: "none",
+                      fontWeight: 800,
+                      px: 3,
+                      py: 1.1,
+                    }}
+                  >
+                    {t.editSessionDialog.saveButton}
+                  </Button>
+                </DialogActions>
+              </Stack>
+            </Box>
+          )}
         </Paper>
       </DialogContent>
     </Dialog>
