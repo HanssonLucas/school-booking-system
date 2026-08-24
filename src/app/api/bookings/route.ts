@@ -6,10 +6,7 @@ import {
   notifyBookingConfirmed,
 } from "@/lib/emailNotifications";
 import type { BookingLanguage } from "@/types/booking";
-import {
-  requireTeacherOrResponse,
-  requireVerifiedUserOrResponse,
-} from "@/lib/apiAuth";
+import { requireVerifiedUserOrResponse } from "@/lib/apiAuth";
 
 const getValidBookingLanguage = (language: unknown): BookingLanguage => {
   return language === "en" ? "en" : "sv";
@@ -20,10 +17,16 @@ export async function GET(request: Request) {
   const sessionId = Number(searchParams.get("sessionId"));
 
   if (sessionId) {
-    const authResponse = await requireTeacherOrResponse();
+    const authResult = await requireVerifiedUserOrResponse();
 
-    if (authResponse) {
-      return authResponse;
+    if (authResult.response) {
+      return authResult.response;
+    }
+
+    const teacher = authResult.user;
+
+    if (teacher.role !== "teacher") {
+      return NextResponse.json({ code: "FORBIDDEN" }, { status: 403 });
     }
 
     const session = db
