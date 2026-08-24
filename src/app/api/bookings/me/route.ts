@@ -1,16 +1,20 @@
 import { NextResponse } from "next/server";
-import { requireStudentOrResponse } from "@/lib/apiAuth";
+import { requireVerifiedUserOrResponse } from "@/lib/apiAuth";
 import { db } from "@/lib/db";
 import type { StudentBookingLookup } from "@/types/booking";
 
 export async function GET() {
-  const authResult = await requireStudentOrResponse();
+  const authResult = await requireVerifiedUserOrResponse();
 
   if (authResult.response) {
     return authResult.response;
   }
 
   const student = authResult.user;
+
+  if (student.role !== "student") {
+    return NextResponse.json({ code: "FORBIDDEN" }, { status: 403 });
+  }
 
   const bookings = db
     .prepare(
