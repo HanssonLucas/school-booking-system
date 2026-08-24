@@ -227,6 +227,7 @@ function TeacherPageContent() {
         CANNOT_CHANGE_SLOT_STRUCTURE_WITH_BOOKINGS:
           t.errors.cannotChangeSlotStructureWithBookings,
         INVALID_SLOT_DURATION: t.errors.invalidSlotDuration,
+        EMAIL_NOT_VERIFIED: t.auth.teacherEmailVerificationRequired,
       };
 
       setErrorMessage(
@@ -268,6 +269,7 @@ function TeacherPageContent() {
       const errorMessages: Record<string, string> = {
         INVALID_SESSION_ID: t.errors.sessionNotFound,
         SESSION_NOT_FOUND: t.errors.sessionNotFound,
+        EMAIL_NOT_VERIFIED: t.auth.teacherEmailVerificationRequired,
       };
 
       setErrorMessage(
