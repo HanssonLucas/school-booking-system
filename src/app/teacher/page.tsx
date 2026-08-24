@@ -293,7 +293,7 @@ function TeacherPageContent() {
       <Dialog
         open={isCreateDialogOpen}
         onClose={() => setIsCreateDialogOpen(false)}
-        maxWidth="md"
+        maxWidth={currentUser?.emailVerified === false ? "sm" : "md"}
         fullWidth
         slotProps={{
           paper: {
