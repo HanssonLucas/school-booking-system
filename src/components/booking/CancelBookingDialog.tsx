@@ -15,7 +15,6 @@ import {
 import EventBusyOutlinedIcon from "@mui/icons-material/EventBusyOutlined";
 import LoginOutlinedIcon from "@mui/icons-material/LoginOutlined";
 import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
-import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
 import { useTranslations } from "@/i18n/useTranslations";
 import type { AuthUser } from "@/types/auth";
 
@@ -159,14 +158,6 @@ export default function CancelBookingDialog({
 
       <DialogContent sx={{ p: { xs: 3, sm: 4 } }}>
         <Stack spacing={3} component="form" onSubmit={handleSubmit}>
-          <Alert
-            severity="warning"
-            icon={<WarningAmberOutlinedIcon />}
-            sx={{ borderRadius: 3 }}
-          >
-            {t.cancelBookingDialog.description}
-          </Alert>
-
           {isAuthLoading && (
             <Alert severity="info" sx={{ borderRadius: 3 }}>
               {t.auth.loadingUser}
