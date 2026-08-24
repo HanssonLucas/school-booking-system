@@ -27,6 +27,9 @@ import EditBookingSessionDialog, {
 import BookingSessionList from "@/components/booking/BookingSessionList";
 import SessionFilterControls from "@/components/booking/SessionFilterControls";
 import { useTranslations } from "@/i18n/useTranslations";
+import { useRouter } from "next/navigation";
+import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
+import { useAuth } from "@/components/auth/useAuth";
 import type {
   BookingSession,
   CreateBookingSessionInput,
@@ -64,6 +67,9 @@ function TeacherPageContent() {
   const [showOnlyFull, setShowOnlyFull] = useState(false);
   const [showOnlyWithBookings, setShowOnlyWithBookings] = useState(false);
   const [sortOption, setSortOption] = useState<SortOption>("dateAsc");
+
+  const router = useRouter();
+  const { user: currentUser } = useAuth();
 
   const { t } = useTranslations();
 
@@ -164,6 +170,7 @@ function TeacherPageContent() {
       const errorData = await response.json();
 
       const errorMessages: Record<string, string> = {
+        EMAIL_NOT_VERIFIED: t.auth.teacherEmailVerificationRequired,
         MISSING_SESSION_FIELDS: t.errors.missingSessionFields,
       };
 
@@ -288,10 +295,107 @@ function TeacherPageContent() {
         onClose={() => setIsCreateDialogOpen(false)}
         maxWidth="md"
         fullWidth
+        slotProps={{
+          paper: {
+            sx: {
+              borderRadius: 5,
+              overflow: "hidden",
+              border: 1,
+              borderColor: "divider",
+            },
+          },
+        }}
       >
-        <DialogContent>
-          <CreateBookingSessionForm onCreateSession={handleCreateSession} />
-        </DialogContent>
+        {currentUser && !currentUser.emailVerified ? (
+          <>
+            <Box
+              sx={{
+                p: { xs: 3, sm: 4 },
+                pb: 2,
+                background:
+                  "linear-gradient(135deg, rgba(156, 39, 176, 0.14), rgba(25, 118, 210, 0.08))",
+                borderBottom: 1,
+                borderColor: "divider",
+              }}
+            >
+              <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
+                <Box
+                  sx={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 4,
+                    display: "grid",
+                    placeItems: "center",
+                    bgcolor: "secondary.main",
+                    color: "secondary.contrastText",
+                    boxShadow: 3,
+                    flexShrink: 0,
+                  }}
+                >
+                  <AddRoundedIcon />
+                </Box>
+
+                <Typography
+                  variant="h5"
+                  component="h2"
+                  sx={{
+                    fontWeight: 900,
+                    letterSpacing: -0.4,
+                  }}
+                >
+                  {t.teacher.createSessionButton}
+                </Typography>
+              </Stack>
+            </Box>
+
+            <DialogContent sx={{ p: { xs: 3, sm: 4 } }}>
+              <Stack spacing={3}>
+                <Alert severity="warning" sx={{ borderRadius: 3 }}>
+                  {t.auth.teacherEmailVerificationRequired}
+                </Alert>
+
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  sx={{
+                    justifyContent: "flex-end",
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <Button
+                    onClick={() => setIsCreateDialogOpen(false)}
+                    sx={{
+                      borderRadius: 999,
+                      textTransform: "none",
+                      fontWeight: 800,
+                      px: 2.5,
+                    }}
+                  >
+                    {t.bookSessionDialog.cancelButton}
+                  </Button>
+
+                  <Button
+                    variant="contained"
+                    startIcon={<PersonOutlineOutlinedIcon />}
+                    onClick={() => router.push("/profile")}
+                    sx={{
+                      borderRadius: 999,
+                      textTransform: "none",
+                      fontWeight: 800,
+                      px: 2.5,
+                    }}
+                  >
+                    {t.profile.title}
+                  </Button>
+                </Stack>
+              </Stack>
+            </DialogContent>
+          </>
+        ) : (
+          <DialogContent>
+            <CreateBookingSessionForm onCreateSession={handleCreateSession} />
+          </DialogContent>
+        )}
       </Dialog>
 
       <EditBookingSessionDialog

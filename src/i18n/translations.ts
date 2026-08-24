@@ -88,6 +88,8 @@ export const translations = {
       invalidTeacherSignupCode: "Lärarkoden är fel eller saknas.",
       emailVerificationRequired:
         "Du måste verifiera din e-postadress innan du kan boka.",
+      teacherEmailVerificationRequired:
+        "Du måste verifiera din e-postadress innan du kan skapa bokningstillfällen.",
     },
     verifyEmail: {
       verifying: "Verifierar din e-postadress...",
@@ -385,6 +387,8 @@ export const translations = {
         "The teacher signup code is missing or incorrect.",
       emailVerificationRequired:
         "You must verify your email address before making a booking.",
+      teacherEmailVerificationRequired:
+        "You must verify your email address before creating booking sessions.",
     },
     verifyEmail: {
       verifying: "Verifying your email address...",
