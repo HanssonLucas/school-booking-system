@@ -7,7 +7,6 @@ import {
 } from "@/lib/emailNotifications";
 import type { BookingLanguage } from "@/types/booking";
 import {
-  requireStudentOrResponse,
   requireTeacherOrResponse,
   requireVerifiedUserOrResponse,
 } from "@/lib/apiAuth";
@@ -262,13 +261,17 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  const authResult = await requireStudentOrResponse();
+  const authResult = await requireVerifiedUserOrResponse();
 
   if (authResult.response) {
     return authResult.response;
   }
 
   const student = authResult.user;
+
+  if (student.role !== "student") {
+    return NextResponse.json({ code: "FORBIDDEN" }, { status: 403 });
+  }
   const body = await request.json();
 
   const { sessionId } = body;
