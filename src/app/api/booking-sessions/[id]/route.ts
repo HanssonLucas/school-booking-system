@@ -4,10 +4,7 @@ import {
   DEFAULT_SLOT_DURATION_MINUTES,
   getSlotCount,
 } from "@/lib/bookingSlots";
-import {
-  requireTeacherOrResponse,
-  requireVerifiedUserOrResponse,
-} from "@/lib/apiAuth";
+import { requireVerifiedUserOrResponse } from "@/lib/apiAuth";
 
 type RouteContext = {
   params: Promise<{
@@ -181,11 +178,18 @@ export async function PATCH(request: Request, context: RouteContext) {
 }
 
 export async function DELETE(request: Request, context: RouteContext) {
-  const authResponse = await requireTeacherOrResponse();
+  const authResult = await requireVerifiedUserOrResponse();
 
-  if (authResponse) {
-    return authResponse;
+  if (authResult.response) {
+    return authResult.response;
   }
+
+  const teacher = authResult.user;
+
+  if (teacher.role !== "teacher") {
+    return NextResponse.json({ code: "FORBIDDEN" }, { status: 403 });
+  }
+
   const { id } = await context.params;
   const sessionId = Number(id);
 
