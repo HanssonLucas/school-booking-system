@@ -85,6 +85,12 @@ export default function MyBookingsDialog({
       return;
     }
 
+    if (!currentUser.emailVerified) {
+      setBookings([]);
+      setHasLoaded(true);
+      return;
+    }
+
     setIsLoadingBookings(true);
 
     try {
@@ -380,6 +386,15 @@ export default function MyBookingsDialog({
             </Alert>
           )}
 
+          {!isAuthLoading &&
+            currentUser &&
+            isStudent &&
+            !currentUser.emailVerified && (
+              <Alert severity="warning" sx={{ borderRadius: 3 }}>
+                {t.auth.emailVerificationRequired}
+              </Alert>
+            )}
+
           {isLoadingBookings && (
             <Alert severity="info" sx={{ borderRadius: 3 }}>
               {t.bookingsDialog.loading}
@@ -410,6 +425,7 @@ export default function MyBookingsDialog({
           {hasLoaded &&
             !isLoadingBookings &&
             currentUser?.role === "student" &&
+            currentUser.emailVerified &&
             bookings.length === 0 && (
               <Alert severity="info" sx={{ borderRadius: 3 }}>
                 {t.myBookingsDialog.empty}
@@ -572,14 +588,11 @@ export default function MyBookingsDialog({
               </Button>
             )}
 
-            {currentUser && isStudent && (
+            {currentUser && isStudent && !currentUser.emailVerified ? (
               <Button
                 variant="contained"
-                startIcon={<RefreshOutlinedIcon />}
-                disabled={isLoadingBookings || cancellingBookingId !== null}
-                onClick={() => {
-                  void fetchMyBookings();
-                }}
+                startIcon={<PersonOutlineOutlinedIcon />}
+                onClick={() => router.push("/profile")}
                 sx={{
                   borderRadius: 999,
                   textTransform: "none",
@@ -587,8 +600,28 @@ export default function MyBookingsDialog({
                   px: 2.5,
                 }}
               >
-                {t.myBookingsDialog.refreshButton}
+                {t.profile.title}
               </Button>
+            ) : (
+              currentUser &&
+              isStudent && (
+                <Button
+                  variant="contained"
+                  startIcon={<RefreshOutlinedIcon />}
+                  disabled={isLoadingBookings || cancellingBookingId !== null}
+                  onClick={() => {
+                    void fetchMyBookings();
+                  }}
+                  sx={{
+                    borderRadius: 999,
+                    textTransform: "none",
+                    fontWeight: 800,
+                    px: 2.5,
+                  }}
+                >
+                  {t.myBookingsDialog.refreshButton}
+                </Button>
+              )
             )}
           </DialogActions>
         </Stack>
