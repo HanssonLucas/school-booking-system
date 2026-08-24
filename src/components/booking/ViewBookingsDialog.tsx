@@ -19,7 +19,9 @@ import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import EventAvailableOutlinedIcon from "@mui/icons-material/EventAvailableOutlined";
 import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import { useRouter } from "next/navigation";
 import type { BookingSession, BookingWithSlotTime } from "@/types/booking";
+import { useAuth } from "@/components/auth/useAuth";
 import { useTranslations } from "@/i18n/useTranslations";
 
 type ViewBookingsDialogProps = {
@@ -36,10 +38,12 @@ export default function ViewBookingsDialog({
   const [bookings, setBookings] = useState<BookingWithSlotTime[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  const router = useRouter();
+  const { user: currentUser } = useAuth();
   const { t } = useTranslations();
 
   useEffect(() => {
-    if (!open || !session) {
+    if (!open || !session || !currentUser?.emailVerified) {
       return;
     }
 
@@ -61,19 +65,21 @@ export default function ViewBookingsDialog({
       }
     };
 
-    fetchBookings();
-  }, [open, session]);
+    void fetchBookings();
+  }, [open, session, currentUser?.emailVerified]);
 
   const handleClose = () => {
     setBookings([]);
     onClose();
   };
 
+  const isEmailUnverified = currentUser?.emailVerified === false;
+
   return (
     <Dialog
       open={open}
       onClose={handleClose}
-      maxWidth="md"
+      maxWidth={isEmailUnverified ? "sm" : "md"}
       fullWidth
       slotProps={{
         paper: {
@@ -138,7 +144,49 @@ export default function ViewBookingsDialog({
       </Box>
 
       <DialogContent sx={{ p: { xs: 3, sm: 4 } }}>
-        {isLoading ? (
+        {isEmailUnverified ? (
+          <Stack spacing={3}>
+            <Alert severity="warning" sx={{ borderRadius: 3 }}>
+              {t.auth.teacherEmailVerificationRequired}
+            </Alert>
+
+            <DialogActions
+              sx={{
+                px: 0,
+                pt: 1,
+                gap: 1,
+                flexWrap: "wrap",
+                justifyContent: "flex-end",
+              }}
+            >
+              <Button
+                onClick={handleClose}
+                sx={{
+                  borderRadius: 999,
+                  textTransform: "none",
+                  fontWeight: 800,
+                  px: 2.5,
+                }}
+              >
+                {t.bookingsDialog.closeButton}
+              </Button>
+
+              <Button
+                variant="contained"
+                startIcon={<PersonOutlineOutlinedIcon />}
+                onClick={() => router.push("/profile")}
+                sx={{
+                  borderRadius: 999,
+                  textTransform: "none",
+                  fontWeight: 800,
+                  px: 2.5,
+                }}
+              >
+                {t.profile.title}
+              </Button>
+            </DialogActions>
+          </Stack>
+        ) : isLoading ? (
           <Alert severity="info" sx={{ borderRadius: 3 }}>
             {t.bookingsDialog.loading}
           </Alert>
@@ -190,7 +238,6 @@ export default function ViewBookingsDialog({
                         }}
                       >
                         <EmailOutlinedIcon sx={{ fontSize: 18 }} />
-
                         <Typography variant="body2">
                           {booking.studentEmail}
                         </Typography>
@@ -245,25 +292,27 @@ export default function ViewBookingsDialog({
         )}
       </DialogContent>
 
-      <DialogActions
-        sx={{
-          px: { xs: 3, sm: 4 },
-          pb: { xs: 3, sm: 4 },
-          pt: 0,
-        }}
-      >
-        <Button
-          onClick={handleClose}
+      {!isEmailUnverified && (
+        <DialogActions
           sx={{
-            borderRadius: 999,
-            textTransform: "none",
-            fontWeight: 800,
-            px: 2.5,
+            px: { xs: 3, sm: 4 },
+            pb: { xs: 3, sm: 4 },
+            pt: 0,
           }}
         >
-          {t.bookingsDialog.closeButton}
-        </Button>
-      </DialogActions>
+          <Button
+            onClick={handleClose}
+            sx={{
+              borderRadius: 999,
+              textTransform: "none",
+              fontWeight: 800,
+              px: 2.5,
+            }}
+          >
+            {t.bookingsDialog.closeButton}
+          </Button>
+        </DialogActions>
+      )}
     </Dialog>
   );
 }
