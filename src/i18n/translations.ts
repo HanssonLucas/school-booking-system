@@ -89,7 +89,7 @@ export const translations = {
       emailVerificationRequired:
         "Du måste verifiera din e-postadress innan du kan boka.",
       teacherEmailVerificationRequired:
-        "Du måste verifiera din e-postadress innan du kan skapa bokningstillfällen.",
+        "Du måste verifiera din e-postadress för att hantera bokningstillfällen.",
     },
     verifyEmail: {
       verifying: "Verifierar din e-postadress...",
@@ -388,7 +388,7 @@ export const translations = {
       emailVerificationRequired:
         "You must verify your email address before making a booking.",
       teacherEmailVerificationRequired:
-        "You must verify your email address before creating booking sessions.",
+        "You must verify your email address to manage booking sessions.",
     },
     verifyEmail: {
       verifying: "Verifying your email address...",
