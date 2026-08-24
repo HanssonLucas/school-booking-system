@@ -4,7 +4,7 @@ import {
   DEFAULT_SLOT_DURATION_MINUTES,
   getSlotCount,
 } from "@/lib/bookingSlots";
-import { requireTeacherOrResponse } from "@/lib/apiAuth";
+import { requireVerifiedUserOrResponse } from "@/lib/apiAuth";
 
 export async function GET() {
   const sessions = db
@@ -33,10 +33,16 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const authResponse = await requireTeacherOrResponse();
+  const authResult = await requireVerifiedUserOrResponse();
 
-  if (authResponse) {
-    return authResponse;
+  if (authResult.response) {
+    return authResult.response;
+  }
+
+  const teacher = authResult.user;
+
+  if (teacher.role !== "teacher") {
+    return NextResponse.json({ code: "FORBIDDEN" }, { status: 403 });
   }
 
   const body = await request.json();
