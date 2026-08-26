@@ -90,6 +90,14 @@ export const translations = {
         "Du måste verifiera din e-postadress innan du kan boka.",
       teacherEmailVerificationRequired:
         "Du måste verifiera din e-postadress för att hantera bokningstillfällen.",
+      registrationSuccessTitle: "Kontot är skapat!",
+      registrationSuccessMessage:
+        "Vi har skickat ett verifieringsmail till din e-postadress.",
+      registrationVerificationRequired:
+        "Verifiera din e-postadress för att kunna använda alla funktioner i Bokningssystemet.",
+      registrationCheckSpam:
+        "Hittar du inte mailet? Kontrollera även din skräppost.",
+      registrationContinueButton: "Fortsätt",
     },
     verifyEmail: {
       verifying: "Verifierar din e-postadress...",
@@ -389,6 +397,14 @@ export const translations = {
         "You must verify your email address before making a booking.",
       teacherEmailVerificationRequired:
         "You must verify your email address to manage booking sessions.",
+      registrationSuccessTitle: "Account created!",
+      registrationSuccessMessage:
+        "We have sent a verification email to your email address.",
+      registrationVerificationRequired:
+        "Verify your email address to use all features in the booking system.",
+      registrationCheckSpam:
+        "Can't find the email? Check your spam folder as well.",
+      registrationContinueButton: "Continue",
     },
     verifyEmail: {
       verifying: "Verifying your email address...",
