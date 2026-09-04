@@ -11,6 +11,7 @@ export const hashPasswordResetToken = (token: string) => {
 export const createPasswordResetToken = (userId: number) => {
   const token = randomBytes(32).toString("hex");
   const tokenHash = hashPasswordResetToken(token);
+
   const expiresAt = new Date(
     Date.now() + PASSWORD_RESET_TOKEN_DURATION_MS,
   ).toISOString();
@@ -40,5 +41,62 @@ export const createPasswordResetToken = (userId: number) => {
   return {
     token,
     expiresAt,
+  };
+};
+
+type PasswordResetTokenRow = {
+  user_id: number;
+  expires_at: string;
+};
+
+export type ValidatePasswordResetTokenResult =
+  | {
+      success: true;
+      userId: number;
+    }
+  | {
+      success: false;
+      reason: "INVALID_TOKEN" | "EXPIRED_TOKEN";
+    };
+
+export const validatePasswordResetToken = (
+  token: string,
+): ValidatePasswordResetTokenResult => {
+  const tokenHash = hashPasswordResetToken(token);
+
+  const tokenRow = db
+    .prepare(
+      `
+        SELECT user_id, expires_at
+        FROM password_reset_tokens
+        WHERE token_hash = ?
+      `,
+    )
+    .get(tokenHash) as PasswordResetTokenRow | undefined;
+
+  if (!tokenRow) {
+    return {
+      success: false,
+      reason: "INVALID_TOKEN",
+    };
+  }
+
+  if (new Date(tokenRow.expires_at).getTime() <= Date.now()) {
+    db.prepare(
+      `
+        DELETE FROM password_reset_tokens
+        WHERE token_hash = ?
+      `,
+    ).run(tokenHash);
+
+    return {
+      success: false,
+      reason: "EXPIRED_TOKEN",
+    };
+  }
+
+  return {
+    success: true,
+    userId: tokenRow.user_id,
   };
 };
