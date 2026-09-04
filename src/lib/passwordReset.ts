@@ -5,11 +5,35 @@ import { hashPassword, validatePassword } from "@/lib/password";
 import { deleteUserSessions } from "@/lib/session";
 
 const PASSWORD_RESET_TOKEN_DURATION_MS = 60 * 60 * 1000;
+const PASSWORD_RESET_REQUEST_COOLDOWN_MS = 60 * 1000;
 
 export const hashPasswordResetToken = (token: string) => {
   return createHash("sha256").update(token).digest("hex");
 };
 
+type PasswordResetTokenCreatedRow = {
+  created_at: string;
+};
+
+export const canRequestPasswordReset = (userId: number) => {
+  const token = db
+    .prepare(
+      `
+        SELECT created_at
+        FROM password_reset_tokens
+        WHERE user_id = ?
+      `,
+    )
+    .get(userId) as PasswordResetTokenCreatedRow | undefined;
+
+  if (!token) {
+    return true;
+  }
+
+  const createdAt = new Date(`${token.created_at}Z`).getTime();
+
+  return Date.now() - createdAt >= PASSWORD_RESET_REQUEST_COOLDOWN_MS;
+};
 export const createPasswordResetToken = (userId: number) => {
   const token = randomBytes(32).toString("hex");
   const tokenHash = hashPasswordResetToken(token);
