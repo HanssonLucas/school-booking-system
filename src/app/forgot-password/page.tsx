@@ -1,0 +1,24 @@
+import { Box, Container } from "@mui/material";
+
+import ForgotPasswordForm from "@/components/auth/ForgotPasswordForm";
+import AppHeader from "@/components/layout/AppHeader";
+
+export default function ForgotPasswordPage() {
+  return (
+    <>
+      <AppHeader />
+
+      <Container sx={{ py: { xs: 4, md: 8 } }}>
+        <Box
+          sx={{
+            minHeight: "calc(100vh - 180px)",
+            display: "grid",
+            placeItems: "center",
+          }}
+        >
+          <ForgotPasswordForm />
+        </Box>
+      </Container>
+    </>
+  );
+}
