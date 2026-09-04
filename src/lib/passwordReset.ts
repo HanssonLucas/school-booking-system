@@ -1,6 +1,8 @@
 import { createHash, randomBytes } from "crypto";
 
 import { db } from "@/lib/db";
+import { hashPassword, validatePassword } from "@/lib/password";
+import { deleteUserSessions } from "@/lib/session";
 
 const PASSWORD_RESET_TOKEN_DURATION_MS = 60 * 60 * 1000;
 
@@ -99,4 +101,85 @@ export const validatePasswordResetToken = (
     success: true,
     userId: tokenRow.user_id,
   };
+};
+
+export type ResetPasswordWithTokenResult =
+  | {
+      success: true;
+    }
+  | {
+      success: false;
+      reason: "INVALID_PASSWORD" | "INVALID_TOKEN" | "EXPIRED_TOKEN";
+    };
+
+export const resetPasswordWithToken = async (
+  token: string,
+  newPassword: string,
+): Promise<ResetPasswordWithTokenResult> => {
+  const passwordError = validatePassword(newPassword);
+
+  if (passwordError) {
+    return {
+      success: false,
+      reason: "INVALID_PASSWORD",
+    };
+  }
+
+  const initialTokenValidation = validatePasswordResetToken(token);
+
+  if (!initialTokenValidation.success) {
+    return {
+      success: false,
+      reason: initialTokenValidation.reason,
+    };
+  }
+
+  const newPasswordHash = await hashPassword(newPassword);
+  const tokenHash = hashPasswordResetToken(token);
+
+  const resetPassword = db.transaction((): ResetPasswordWithTokenResult => {
+    const tokenValidation = validatePasswordResetToken(token);
+
+    if (!tokenValidation.success) {
+      return {
+        success: false,
+        reason: tokenValidation.reason,
+      };
+    }
+
+    const updateResult = db
+      .prepare(
+        `
+            UPDATE users
+            SET password_hash = ?
+            WHERE id = ?
+          `,
+      )
+      .run(newPasswordHash, tokenValidation.userId);
+
+    if (updateResult.changes !== 1) {
+      throw new Error("Password reset user not found");
+    }
+
+    deleteUserSessions(tokenValidation.userId);
+
+    const deleteTokenResult = db
+      .prepare(
+        `
+            DELETE FROM password_reset_tokens
+            WHERE token_hash = ?
+          `,
+      )
+      .run(tokenHash);
+
+    if (deleteTokenResult.changes !== 1) {
+      throw new Error("Password reset token could not be consumed");
+    }
+
+    return {
+      success: true,
+    };
+  });
+
+  return resetPassword();
 };
