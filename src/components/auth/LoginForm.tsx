@@ -144,6 +144,17 @@ export default function LoginForm() {
               required
             />
 
+            <Link
+              component={NextLink}
+              href="/forgot-password"
+              sx={{
+                alignSelf: "flex-end",
+                fontWeight: 700,
+              }}
+            >
+              {t.passwordReset.forgotPasswordLink}
+            </Link>
+
             <Button
               type="submit"
               variant="contained"
