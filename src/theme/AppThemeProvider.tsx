@@ -1,7 +1,13 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
+import { createContext, useCallback, useContext, useMemo } from "react";
+
+import { CssBaseline } from "@mui/material";
+import {
+  ThemeProvider,
+  createTheme,
+  useColorScheme,
+} from "@mui/material/styles";
 
 type ColorMode = "light" | "dark";
 
@@ -16,56 +22,49 @@ type AppThemeProviderProps = {
   children: React.ReactNode;
 };
 
-const isColorMode = (value: string): value is ColorMode => {
-  return value === "light" || value === "dark";
-};
+const theme = createTheme({
+  cssVariables: true,
+  colorSchemes: {
+    dark: true,
+  },
+});
 
-export default function AppThemeProvider({ children }: AppThemeProviderProps) {
-  const [mode, setMode] = useState<ColorMode>("light");
+function AppThemeContextBridge({ children }: AppThemeProviderProps) {
+  const { mode, setMode } = useColorScheme();
 
-  useEffect(() => {
-    const storedMode = window.localStorage.getItem("colorMode");
+  const resolvedMode: ColorMode = mode === "dark" ? "dark" : "light";
 
-    if (storedMode && isColorMode(storedMode)) {
-      queueMicrotask(() => {
-        setMode(storedMode);
-      });
-    }
-  }, []);
-
-  const toggleColorMode = () => {
-    setMode((currentMode) => {
-      const newMode = currentMode === "light" ? "dark" : "light";
-      window.localStorage.setItem("colorMode", newMode);
-      return newMode;
-    });
-  };
-
-  const theme = useMemo(
-    () =>
-      createTheme({
-        palette: {
-          mode,
-        },
-      }),
-    [mode],
-  );
+  const toggleColorMode = useCallback(() => {
+    setMode(resolvedMode === "light" ? "dark" : "light");
+  }, [resolvedMode, setMode]);
 
   const value = useMemo(
     () => ({
-      mode,
+      mode: resolvedMode,
       toggleColorMode,
     }),
-    [mode],
+    [resolvedMode, toggleColorMode],
   );
 
   return (
     <AppThemeContext.Provider value={value}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        {children}
-      </ThemeProvider>
+      {children}
     </AppThemeContext.Provider>
+  );
+}
+
+export default function AppThemeProvider({ children }: AppThemeProviderProps) {
+  return (
+    <ThemeProvider
+      theme={theme}
+      defaultMode="light"
+      modeStorageKey="colorMode"
+      disableTransitionOnChange
+    >
+      <CssBaseline enableColorScheme />
+
+      <AppThemeContextBridge>{children}</AppThemeContextBridge>
+    </ThemeProvider>
   );
 }
 

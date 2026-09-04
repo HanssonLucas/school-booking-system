@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
+
+import InitColorSchemeScript from "@mui/material/InitColorSchemeScript";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
+
+import AuthProvider from "@/components/auth/Authprovider";
 import LanguageProvider from "@/i18n/LanguageProvider";
 import AppThemeProvider from "@/theme/AppThemeProvider";
-import AuthProvider from "@/components/auth/Authprovider";
 
 export const metadata: Metadata = {
   title: "Bokningssystem",
@@ -15,8 +18,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="sv">
+    <html lang="sv" suppressHydrationWarning>
       <body>
+        <InitColorSchemeScript defaultMode="light" modeStorageKey="colorMode" />
+
         <AppRouterCacheProvider>
           <LanguageProvider>
             <AppThemeProvider>
