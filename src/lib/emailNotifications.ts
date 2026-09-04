@@ -2,7 +2,9 @@ import {
   sendBookingCancellationEmail,
   sendBookingConfirmationEmail,
   sendEmailVerificationEmail,
+  sendPasswordResetEmail,
 } from "@/lib/email";
+
 import type { BookingLanguage } from "@/types/booking";
 
 type BookingEmailNotificationInput = {
@@ -16,6 +18,13 @@ type BookingEmailNotificationInput = {
 };
 
 type EmailVerificationNotificationInput = {
+  to: string;
+  userName: string;
+  token: string;
+  language: BookingLanguage;
+};
+
+type PasswordResetNotificationInput = {
   to: string;
   userName: string;
   token: string;
@@ -49,5 +58,15 @@ export const notifyEmailVerification = async (
     await sendEmailVerificationEmail(input);
   } catch (error) {
     console.error("Kunde inte skicka verifieringsmail:", error);
+  }
+};
+
+export const notifyPasswordReset = async (
+  input: PasswordResetNotificationInput,
+) => {
+  try {
+    await sendPasswordResetEmail(input);
+  } catch (error) {
+    console.error("Kunde inte skicka lösenordsåterställningsmail:", error);
   }
 };
