@@ -17,6 +17,7 @@ import LoginOutlinedIcon from "@mui/icons-material/LoginOutlined";
 import type { AuthUser } from "@/types/auth";
 import { useTranslations } from "@/i18n/useTranslations";
 import { useAuth } from "@/components/auth/useAuth";
+import PasswordField from "@/components/auth/PasswordField";
 
 type LoginResponse = {
   user?: AuthUser;
@@ -135,11 +136,11 @@ export default function LoginForm() {
               required
             />
 
-            <TextField
+            <PasswordField
               label={t.auth.passwordLabel}
-              type="password"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
+              autoComplete="current-password"
               fullWidth
               required
             />
