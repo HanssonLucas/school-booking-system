@@ -34,6 +34,15 @@ export const canRequestPasswordReset = (userId: number) => {
 
   return Date.now() - createdAt >= PASSWORD_RESET_REQUEST_COOLDOWN_MS;
 };
+
+export const deletePasswordResetTokensForUser = (userId: number) => {
+  db.prepare(
+    `
+      DELETE FROM password_reset_tokens
+      WHERE user_id = ?
+    `,
+  ).run(userId);
+};
 export const createPasswordResetToken = (userId: number) => {
   const token = randomBytes(32).toString("hex");
   const tokenHash = hashPasswordResetToken(token);

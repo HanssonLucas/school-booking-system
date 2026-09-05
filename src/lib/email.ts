@@ -27,6 +27,13 @@ type EmailVerificationInput = {
   language: BookingLanguage;
 };
 
+type PasswordResetEmailInput = {
+  to: string;
+  userName: string;
+  token: string;
+  language: BookingLanguage;
+};
+
 type EmailVerificationContent = {
   subject: string;
   heading: string;
@@ -177,6 +184,36 @@ const emailVerificationContent: Record<
     actionLabel: "Verify email address",
     footerText:
       "If you did not create this account, you can ignore this message.",
+    automaticMessageText:
+      "This is an automatic message from the Booking System.",
+  },
+};
+
+const passwordResetEmailContent: Record<
+  BookingLanguage,
+  EmailVerificationContent
+> = {
+  sv: {
+    subject: "Återställ ditt lösenord",
+    heading: "Återställ ditt lösenord",
+    greeting: "Hej",
+    introText:
+      "Vi har fått en begäran om att återställa lösenordet för ditt konto. Klicka på knappen nedan för att välja ett nytt lösenord.",
+    actionLabel: "Återställ lösenord",
+    footerText:
+      "Länken är giltig i en timme. Om du inte begärde lösenordsåterställningen kan du ignorera meddelandet.",
+    automaticMessageText:
+      "Detta är ett automatiskt meddelande från Bokningssystem.",
+  },
+  en: {
+    subject: "Reset your password",
+    heading: "Reset your password",
+    greeting: "Hi",
+    introText:
+      "We received a request to reset the password for your account. Click the button below to choose a new password.",
+    actionLabel: "Reset password",
+    footerText:
+      "The link is valid for one hour. If you did not request a password reset, you can ignore this message.",
     automaticMessageText:
       "This is an automatic message from the Booking System.",
   },
@@ -657,6 +694,49 @@ ${content.footerText}
     greeting: content.greeting,
     introText: content.introText,
     actionUrl: verificationUrlString,
+    actionLabel: content.actionLabel,
+    footerText: content.footerText,
+    automaticMessageText: content.automaticMessageText,
+    htmlLanguage: language,
+  });
+
+  await sendEmail({
+    to,
+    subject: content.subject,
+    text,
+    html,
+  });
+};
+
+export const sendPasswordResetEmail = async ({
+  to,
+  userName,
+  token,
+  language,
+}: PasswordResetEmailInput) => {
+  const content = passwordResetEmailContent[language];
+
+  const resetPasswordUrl = new URL("/reset-password", getAppUrl());
+  resetPasswordUrl.searchParams.set("token", token);
+
+  const resetPasswordUrlString = resetPasswordUrl.toString();
+
+  const text = `
+${content.greeting} ${userName}!
+
+${content.introText}
+
+${resetPasswordUrlString}
+
+${content.footerText}
+`.trim();
+
+  const html = createEmailVerificationLayout({
+    userName,
+    heading: content.heading,
+    greeting: content.greeting,
+    introText: content.introText,
+    actionUrl: resetPasswordUrlString,
     actionLabel: content.actionLabel,
     footerText: content.footerText,
     automaticMessageText: content.automaticMessageText,

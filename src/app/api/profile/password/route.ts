@@ -7,6 +7,7 @@ import {
   deleteUserSessions,
   setSessionCookie,
 } from "@/lib/session";
+import { deletePasswordResetTokensForUser } from "@/lib/passwordReset";
 
 type ChangePasswordBody = {
   currentPassword?: unknown;
@@ -88,6 +89,7 @@ export async function PATCH(request: Request) {
   ).run(newPasswordHash, auth.user.id);
 
   deleteUserSessions(auth.user.id);
+  deletePasswordResetTokensForUser(auth.user.id);
 
   const { sessionId, expiresAt } = createSession(auth.user.id);
 
