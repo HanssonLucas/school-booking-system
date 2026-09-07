@@ -106,6 +106,8 @@ export const translations = {
       registrationCheckSpam:
         "Hittar du inte mailet? Kontrollera även din skräppost.",
       registrationContinueButton: "Fortsätt",
+      loginRateLimited:
+        "För många inloggningsförsök. Vänta en stund och försök igen.",
     },
     passwordReset: {
       forgotPasswordLink: "Glömt lösenord?",
@@ -448,6 +450,8 @@ export const translations = {
       registrationCheckSpam:
         "Can't find the email? Check your spam folder as well.",
       registrationContinueButton: "Continue",
+      loginRateLimited:
+        "Too many login attempts. Please wait a moment and try again.",
     },
     passwordReset: {
       forgotPasswordLink: "Forgot password?",

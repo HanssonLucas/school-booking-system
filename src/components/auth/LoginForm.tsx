@@ -50,6 +50,8 @@ export default function LoginForm() {
         return t.auth.missingFields;
       case "INVALID_LOGIN_CREDENTIALS":
         return t.auth.invalidLoginCredentials;
+      case "LOGIN_RATE_LIMITED":
+        return t.auth.loginRateLimited;
       default:
         return t.auth.fallbackError;
     }
