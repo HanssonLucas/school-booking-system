@@ -10,17 +10,18 @@ import { useAuth } from "@/components/auth/useAuth";
 
 type HeaderAuthActionsProps = {
   mobile?: boolean;
+  showProfile?: boolean;
   onNavigate?: () => void;
 };
 
 export default function HeaderAuthActions({
   mobile = false,
+  showProfile = true,
   onNavigate,
 }: HeaderAuthActionsProps) {
   const router = useRouter();
   const pathname = usePathname();
   const { t } = useTranslations();
-
   const { user, isLoading, logout } = useAuth();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
@@ -76,7 +77,6 @@ export default function HeaderAuthActions({
         >
           {t.auth.loginButton}
         </Button>
-
         <Button
           onClick={() => navigateTo("/register")}
           sx={authButtonSx(pathname === "/register")}
@@ -97,26 +97,28 @@ export default function HeaderAuthActions({
         minWidth: 0,
       }}
     >
-      <Chip
-        icon={<PersonOutlineOutlinedIcon />}
-        label={`${user.name} · ${
-          user.role === "teacher" ? t.auth.teacherRole : t.auth.studentRole
-        }`}
-        onClick={() => navigateTo("/profile")}
-        sx={{
-          borderRadius: 999,
-          fontWeight: 800,
-          cursor: "pointer",
-          color:
-            pathname === "/profile" ? "primary.contrastText" : "text.primary",
-          bgcolor: pathname === "/profile" ? "primary.main" : "action.hover",
-          boxShadow: pathname === "/profile" ? 3 : 0,
-          "&:hover": {
-            bgcolor:
-              pathname === "/profile" ? "primary.dark" : "action.selected",
-          },
-        }}
-      />
+      {showProfile && (
+        <Chip
+          icon={<PersonOutlineOutlinedIcon />}
+          label={`${user.name} · ${
+            user.role === "teacher" ? t.auth.teacherRole : t.auth.studentRole
+          }`}
+          onClick={() => navigateTo("/profile")}
+          sx={{
+            borderRadius: 999,
+            fontWeight: 800,
+            cursor: "pointer",
+            color:
+              pathname === "/profile" ? "primary.contrastText" : "text.primary",
+            bgcolor: pathname === "/profile" ? "primary.main" : "action.hover",
+            boxShadow: pathname === "/profile" ? 3 : 0,
+            "&:hover": {
+              bgcolor:
+                pathname === "/profile" ? "primary.dark" : "action.selected",
+            },
+          }}
+        />
+      )}
 
       <Button
         onClick={handleLogout}

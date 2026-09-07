@@ -15,6 +15,8 @@ export const translations = {
       languageLabel: "Språk",
       openNavigationMenu: "Öppna navigeringsmenyn",
       closeNavigationMenu: "Stäng navigeringsmenyn",
+      navigationMenu: "Meny",
+      viewProfile: "Visa profil",
     },
     home: {
       title: "Bokningssystem",
@@ -354,6 +356,8 @@ export const translations = {
       languageLabel: "Language",
       openNavigationMenu: "Open navigation menu",
       closeNavigationMenu: "Close navigation menu",
+      navigationMenu: "Menu",
+      viewProfile: "View profile",
     },
     home: {
       title: "Booking system",
