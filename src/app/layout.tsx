@@ -20,7 +20,11 @@ export default function RootLayout({
   return (
     <html lang="sv" suppressHydrationWarning>
       <body>
-        <InitColorSchemeScript defaultMode="light" modeStorageKey="colorMode" />
+        <InitColorSchemeScript
+          attribute="class"
+          defaultMode="light"
+          modeStorageKey="colorMode"
+        />
 
         <AppRouterCacheProvider>
           <LanguageProvider>

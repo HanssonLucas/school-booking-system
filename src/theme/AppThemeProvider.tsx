@@ -23,7 +23,9 @@ type AppThemeProviderProps = {
 };
 
 const theme = createTheme({
-  cssVariables: true,
+  cssVariables: {
+    colorSchemeSelector: "class",
+  },
   colorSchemes: {
     dark: true,
   },
