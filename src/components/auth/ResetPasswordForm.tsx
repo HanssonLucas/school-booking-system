@@ -12,7 +12,6 @@ import {
   Link,
   Paper,
   Stack,
-  TextField,
   Typography,
 } from "@mui/material";
 
@@ -23,6 +22,7 @@ import LockResetOutlinedIcon from "@mui/icons-material/LockResetOutlined";
 
 import { useAuth } from "@/components/auth/useAuth";
 import { useTranslations } from "@/i18n/useTranslations";
+import PasswordField from "@/components/auth/PasswordField";
 
 type ResetPasswordResponse = {
   success?: boolean;
@@ -266,9 +266,8 @@ export default function ResetPasswordForm() {
 
           <Box component="form" onSubmit={handleSubmit}>
             <Stack spacing={2.5}>
-              <TextField
+              <PasswordField
                 label={t.passwordReset.newPasswordLabel}
-                type="password"
                 value={newPassword}
                 onChange={(event) => setNewPassword(event.target.value)}
                 autoComplete="new-password"
@@ -276,9 +275,8 @@ export default function ResetPasswordForm() {
                 required
               />
 
-              <TextField
+              <PasswordField
                 label={t.passwordReset.confirmPasswordLabel}
-                type="password"
                 value={confirmPassword}
                 onChange={(event) => setConfirmPassword(event.target.value)}
                 autoComplete="new-password"
