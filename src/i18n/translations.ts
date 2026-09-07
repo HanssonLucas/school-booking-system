@@ -135,6 +135,7 @@ export const translations = {
       invalidToken: "Återställningslänken är ogiltig eller har redan använts.",
       expiredToken: "Återställningslänken har gått ut.",
       fallbackError: "Det gick inte att återställa lösenordet. Försök igen.",
+      rateLimited: "För många försök. Vänta en stund och försök igen.",
     },
     verifyEmail: {
       verifying: "Verifierar din e-postadress...",
@@ -478,6 +479,7 @@ export const translations = {
       invalidToken: "The reset link is invalid or has already been used.",
       expiredToken: "The reset link has expired.",
       fallbackError: "The password could not be reset. Please try again.",
+      rateLimited: "Too many attempts. Please wait a moment and try again.",
     },
     verifyEmail: {
       verifying: "Verifying your email address...",

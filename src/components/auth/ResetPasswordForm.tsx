@@ -80,6 +80,10 @@ export default function ResetPasswordForm() {
       const data = (await response.json()) as ResetPasswordResponse;
 
       if (!response.ok || !data.success) {
+        if (data.error === "PASSWORD_RESET_RATE_LIMITED") {
+          setFormError(t.passwordReset.rateLimited);
+          return;
+        }
         if (data.error === "EXPIRED_PASSWORD_RESET_TOKEN") {
           setTokenError("expiredToken");
           return;
