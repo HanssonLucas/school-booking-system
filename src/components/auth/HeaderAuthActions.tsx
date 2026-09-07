@@ -8,7 +8,15 @@ import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined
 import { useTranslations } from "@/i18n/useTranslations";
 import { useAuth } from "@/components/auth/useAuth";
 
-export default function HeaderAuthActions() {
+type HeaderAuthActionsProps = {
+  mobile?: boolean;
+  onNavigate?: () => void;
+};
+
+export default function HeaderAuthActions({
+  mobile = false,
+  onNavigate,
+}: HeaderAuthActionsProps) {
   const router = useRouter();
   const pathname = usePathname();
   const { t } = useTranslations();
@@ -16,12 +24,17 @@ export default function HeaderAuthActions() {
   const { user, isLoading, logout } = useAuth();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
+  const navigateTo = (path: string) => {
+    onNavigate?.();
+    router.push(path);
+  };
+
   const handleLogout = async () => {
     setIsLoggingOut(true);
 
     try {
       await logout();
-
+      onNavigate?.();
       router.push("/");
       router.refresh();
     } finally {
@@ -48,16 +61,24 @@ export default function HeaderAuthActions() {
 
   if (!user) {
     return (
-      <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+      <Stack
+        direction={mobile ? "column" : "row"}
+        spacing={1}
+        sx={{
+          alignItems: mobile ? "stretch" : "center",
+          width: mobile ? "100%" : "auto",
+          minWidth: 0,
+        }}
+      >
         <Button
-          onClick={() => router.push("/login")}
+          onClick={() => navigateTo("/login")}
           sx={authButtonSx(pathname === "/login")}
         >
           {t.auth.loginButton}
         </Button>
 
         <Button
-          onClick={() => router.push("/register")}
+          onClick={() => navigateTo("/register")}
           sx={authButtonSx(pathname === "/register")}
         >
           {t.auth.registerButton}
@@ -67,13 +88,21 @@ export default function HeaderAuthActions() {
   }
 
   return (
-    <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+    <Stack
+      direction={mobile ? "column" : "row"}
+      spacing={1}
+      sx={{
+        alignItems: mobile ? "stretch" : "center",
+        width: mobile ? "100%" : "auto",
+        minWidth: 0,
+      }}
+    >
       <Chip
         icon={<PersonOutlineOutlinedIcon />}
         label={`${user.name} · ${
           user.role === "teacher" ? t.auth.teacherRole : t.auth.studentRole
         }`}
-        onClick={() => router.push("/profile")}
+        onClick={() => navigateTo("/profile")}
         sx={{
           borderRadius: 999,
           fontWeight: 800,
