@@ -13,18 +13,23 @@ import { useTranslations } from "@/i18n/useTranslations";
 type PasswordFieldProps = Omit<
   TextFieldProps,
   "type" | "multiline" | "select" | "slots" | "slotProps"
->;
+> & {
+  showLabel?: string;
+  hideLabel?: string;
+};
 
 export default function PasswordField({
   disabled,
+  showLabel,
+  hideLabel,
   ...props
 }: PasswordFieldProps) {
   const { t } = useTranslations();
   const [showPassword, setShowPassword] = useState(false);
 
   const visibilityLabel = showPassword
-    ? t.auth.hidePassword
-    : t.auth.showPassword;
+    ? (hideLabel ?? t.auth.hidePassword)
+    : (showLabel ?? t.auth.showPassword);
 
   return (
     <TextField

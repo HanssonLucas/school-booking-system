@@ -309,12 +309,13 @@ export default function RegisterForm() {
               </TextField>
 
               {role === "teacher" && (
-                <TextField
+                <PasswordField
                   label={t.auth.teacherSignupCodeLabel}
-                  type="password"
                   value={teacherSignupCode}
                   onChange={(event) => setTeacherSignupCode(event.target.value)}
                   helperText={t.auth.teacherSignupCodeHelper}
+                  showLabel={t.auth.showTeacherSignupCode}
+                  hideLabel={t.auth.hideTeacherSignupCode}
                   fullWidth
                   required
                 />
