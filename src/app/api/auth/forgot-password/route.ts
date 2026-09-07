@@ -1,27 +1,46 @@
 import { NextResponse } from "next/server";
-
 import { findUserByEmail, isValidEmail, normalizeEmail } from "@/lib/auth";
 import { notifyPasswordReset } from "@/lib/emailNotifications";
 import {
   canRequestPasswordReset,
   createPasswordResetToken,
 } from "@/lib/passwordReset";
+import { consumeRateLimit } from "@/lib/rateLimit";
+
+const PASSWORD_RESET_REQUEST_LIMIT = 3;
+const PASSWORD_RESET_REQUEST_WINDOW_MS = 15 * 60 * 1000;
 
 type ForgotPasswordRequestBody = {
   email?: unknown;
   language?: unknown;
 };
 
+const isForgotPasswordRequestBody = (
+  value: unknown,
+): value is ForgotPasswordRequestBody => {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+};
+
 const createAcceptedResponse = () => {
-  return NextResponse.json({ success: true });
+  return NextResponse.json(
+    { success: true },
+    { headers: { "Cache-Control": "no-store" } },
+  );
 };
 
 export async function POST(request: Request) {
-  let body: ForgotPasswordRequestBody;
+  let body: unknown;
 
   try {
-    body = (await request.json()) as ForgotPasswordRequestBody;
+    body = await request.json();
   } catch {
+    return NextResponse.json(
+      { error: "INVALID_REQUEST_BODY" },
+      { status: 400 },
+    );
+  }
+
+  if (!isForgotPasswordRequestBody(body)) {
     return NextResponse.json(
       { error: "INVALID_REQUEST_BODY" },
       { status: 400 },
@@ -40,6 +59,16 @@ export async function POST(request: Request) {
   }
 
   try {
+    const rateLimit = consumeRateLimit({
+      key: `forgot-password:email:${email}`,
+      limit: PASSWORD_RESET_REQUEST_LIMIT,
+      windowMs: PASSWORD_RESET_REQUEST_WINDOW_MS,
+    });
+
+    if (!rateLimit.allowed) {
+      return createAcceptedResponse();
+    }
+
     const user = findUserByEmail(email);
 
     if (!user) {
