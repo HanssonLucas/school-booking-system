@@ -21,6 +21,7 @@ import { useTranslations } from "@/i18n/useTranslations";
 import { useState, type FormEvent } from "react";
 import AppHeader from "@/components/layout/AppHeader";
 import { useAppTheme } from "@/theme/AppThemeProvider";
+import PasswordField from "@/components/auth/PasswordField";
 
 export default function ProfilePage() {
   const { user, isLoading, refreshUser } = useAuth();
@@ -828,9 +829,8 @@ export default function ProfilePage() {
                   onSubmit={handlePasswordSubmit}
                   spacing={2}
                 >
-                  <TextField
+                  <PasswordField
                     label={t.profile.currentPasswordLabel}
-                    type="password"
                     value={currentPassword}
                     onChange={(event) => setCurrentPassword(event.target.value)}
                     disabled={isSavingPassword}
@@ -838,9 +838,8 @@ export default function ProfilePage() {
                     fullWidth
                   />
 
-                  <TextField
+                  <PasswordField
                     label={t.profile.newPasswordLabel}
-                    type="password"
                     value={newPassword}
                     onChange={(event) => setNewPassword(event.target.value)}
                     disabled={isSavingPassword}
@@ -848,9 +847,8 @@ export default function ProfilePage() {
                     fullWidth
                   />
 
-                  <TextField
+                  <PasswordField
                     label={t.profile.confirmNewPasswordLabel}
-                    type="password"
                     value={confirmNewPassword}
                     onChange={(event) =>
                       setConfirmNewPassword(event.target.value)
