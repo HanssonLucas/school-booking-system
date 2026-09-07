@@ -22,6 +22,7 @@ import type { AuthUser, UserRole } from "@/types/auth";
 import { useAuth } from "@/components/auth/useAuth";
 import { useTranslations } from "@/i18n/useTranslations";
 import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
+import PasswordField from "@/components/auth/PasswordField";
 
 type RegisterResponse = {
   user?: AuthUser;
@@ -278,11 +279,11 @@ export default function RegisterForm() {
                 required
               />
 
-              <TextField
+              <PasswordField
                 label={t.auth.passwordLabel}
-                type="password"
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
+                autoComplete="new-password"
                 fullWidth
                 required
               />
