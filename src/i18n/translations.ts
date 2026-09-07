@@ -13,6 +13,8 @@ export const translations = {
       switchToLightMode: "Byt till ljust läge",
       appSubtitle: "Planera och boka tider",
       languageLabel: "Språk",
+      openNavigationMenu: "Öppna navigeringsmenyn",
+      closeNavigationMenu: "Stäng navigeringsmenyn",
     },
     home: {
       title: "Bokningssystem",
@@ -350,6 +352,8 @@ export const translations = {
       switchToLightMode: "Switch to light mode",
       appSubtitle: "Plan and book times",
       languageLabel: "Language",
+      openNavigationMenu: "Open navigation menu",
+      closeNavigationMenu: "Close navigation menu",
     },
     home: {
       title: "Booking system",
