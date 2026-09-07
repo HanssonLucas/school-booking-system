@@ -48,6 +48,31 @@ export async function POST(request: Request) {
   }
 
   try {
+    // Local testing only. Replace with a trusted client-IP key
+    // when the hosting/proxy setup has been decided.
+    if (process.env.NODE_ENV === "development") {
+      const developmentLimit = consumeRateLimit({
+        key: "login:development:all-clients",
+        limit: 30,
+        windowMs: 60 * 1000,
+      });
+
+      if (!developmentLimit.allowed) {
+        return NextResponse.json(
+          {
+            error: "LOGIN_RATE_LIMITED",
+            retryAfterSeconds: developmentLimit.retryAfterSeconds,
+          },
+          {
+            status: 429,
+            headers: {
+              "Retry-After": String(developmentLimit.retryAfterSeconds),
+              "Cache-Control": "no-store",
+            },
+          },
+        );
+      }
+    }
     const rateLimit = consumeRateLimit({
       key: `login:email:${email}`,
       limit: LOGIN_ATTEMPT_LIMIT,
