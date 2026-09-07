@@ -1,25 +1,72 @@
 import { NextResponse } from "next/server";
 import { findUserByEmail, normalizeEmail, toAuthUser } from "@/lib/auth";
 import { verifyPassword } from "@/lib/password";
+import { consumeRateLimit } from "@/lib/rateLimit";
 import { createSession, setSessionCookie } from "@/lib/session";
+
+const LOGIN_ATTEMPT_LIMIT = 5;
+const LOGIN_WINDOW_MS = 60 * 1000;
 
 type LoginRequestBody = {
   email?: unknown;
   password?: unknown;
 };
 
+const isLoginRequestBody = (value: unknown): value is LoginRequestBody => {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+};
+
 export async function POST(request: Request) {
+  let body: unknown;
+
   try {
-    const body = (await request.json()) as LoginRequestBody;
+    body = await request.json();
+  } catch {
+    return NextResponse.json(
+      { error: "INVALID_REQUEST_BODY" },
+      { status: 400 },
+    );
+  }
 
-    const email =
-      typeof body.email === "string" ? normalizeEmail(body.email) : "";
-    const password = typeof body.password === "string" ? body.password : "";
+  if (!isLoginRequestBody(body)) {
+    return NextResponse.json(
+      { error: "INVALID_REQUEST_BODY" },
+      { status: 400 },
+    );
+  }
 
-    if (!email || !password) {
+  const email =
+    typeof body.email === "string" ? normalizeEmail(body.email) : "";
+
+  const password = typeof body.password === "string" ? body.password : "";
+
+  if (!email || !password) {
+    return NextResponse.json(
+      { error: "MISSING_LOGIN_FIELDS" },
+      { status: 400 },
+    );
+  }
+
+  try {
+    const rateLimit = consumeRateLimit({
+      key: `login:email:${email}`,
+      limit: LOGIN_ATTEMPT_LIMIT,
+      windowMs: LOGIN_WINDOW_MS,
+    });
+
+    if (!rateLimit.allowed) {
       return NextResponse.json(
-        { error: "MISSING_LOGIN_FIELDS" },
-        { status: 400 },
+        {
+          error: "LOGIN_RATE_LIMITED",
+          retryAfterSeconds: rateLimit.retryAfterSeconds,
+        },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(rateLimit.retryAfterSeconds),
+            "Cache-Control": "no-store",
+          },
+        },
       );
     }
 
