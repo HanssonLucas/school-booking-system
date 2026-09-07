@@ -43,6 +43,15 @@ db.exec(`
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
   );
 
+  CREATE TABLE IF NOT EXISTS rate_limits (
+    key TEXT PRIMARY KEY,
+    attempts INTEGER NOT NULL DEFAULT 0 CHECK(attempts >= 0),
+    expires_at INTEGER NOT NULL
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_rate_limits_expires_at
+    ON rate_limits(expires_at);
+
   CREATE TABLE IF NOT EXISTS booking_sessions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL,
