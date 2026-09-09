@@ -5,6 +5,10 @@ import {
   createEmailVerificationToken,
 } from "@/lib/emailVerification";
 import { notifyEmailVerification } from "@/lib/emailNotifications";
+import { consumeRateLimit } from "@/lib/rateLimit";
+
+const VERIFICATION_RESEND_LIMIT = 3;
+const VERIFICATION_RESEND_WINDOW_MS = 15 * 60 * 1000;
 
 type ResendVerificationRequestBody = {
   language?: unknown;
@@ -55,6 +59,27 @@ export async function POST(request: Request) {
   const language = body.language === "en" ? "en" : "sv";
 
   try {
+    const rateLimit = consumeRateLimit({
+      key: `resend-verification:user:${auth.user.id}`,
+      limit: VERIFICATION_RESEND_LIMIT,
+      windowMs: VERIFICATION_RESEND_WINDOW_MS,
+    });
+
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        {
+          error: "VERIFICATION_EMAIL_RATE_LIMITED",
+          retryAfterSeconds: rateLimit.retryAfterSeconds,
+        },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(rateLimit.retryAfterSeconds),
+            "Cache-Control": "no-store",
+          },
+        },
+      );
+    }
     if (!canResendEmailVerification(auth.user.id)) {
       return NextResponse.json({ error: "RESEND_COOLDOWN" }, { status: 429 });
     }
