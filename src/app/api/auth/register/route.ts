@@ -21,6 +21,12 @@ type RegisterRequestBody = {
   language?: unknown;
 };
 
+const isRegisterRequestBody = (
+  value: unknown,
+): value is RegisterRequestBody => {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+};
+
 const isValidTeacherSignupCode = (teacherSignupCode: unknown) => {
   const configuredCode = process.env.TEACHER_SIGNUP_CODE?.trim();
 
@@ -36,9 +42,25 @@ const isValidTeacherSignupCode = (teacherSignupCode: unknown) => {
 };
 
 export async function POST(request: Request) {
-  try {
-    const body = (await request.json()) as RegisterRequestBody;
+  let body: unknown;
 
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json(
+      { error: "INVALID_REQUEST_BODY" },
+      { status: 400 },
+    );
+  }
+
+  if (!isRegisterRequestBody(body)) {
+    return NextResponse.json(
+      { error: "INVALID_REQUEST_BODY" },
+      { status: 400 },
+    );
+  }
+
+  try {
     const name = typeof body.name === "string" ? body.name.trim() : "";
     const email =
       typeof body.email === "string" ? normalizeEmail(body.email) : "";
