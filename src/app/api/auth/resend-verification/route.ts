@@ -10,21 +10,17 @@ type ResendVerificationRequestBody = {
   language?: unknown;
 };
 
+const isResendVerificationRequestBody = (
+  value: unknown,
+): value is ResendVerificationRequestBody => {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+};
+
 export async function POST(request: Request) {
   const auth = await requireUserOrResponse();
 
   if (auth.response) {
     return auth.response;
-  }
-
-  if (!canResendEmailVerification(auth.user.id)) {
-    return NextResponse.json({ error: "RESEND_COOLDOWN" }, { status: 429 });
-  }
-  if (!canResendEmailVerification(auth.user.id)) {
-    return NextResponse.json(
-      { error: "VERIFICATION_EMAIL_COOLDOWN" },
-      { status: 429 },
-    );
   }
 
   if (auth.user.emailVerified) {
@@ -34,26 +30,53 @@ export async function POST(request: Request) {
     );
   }
 
-  let body: ResendVerificationRequestBody = {};
+  let body: unknown = {};
 
   try {
-    body = (await request.json()) as ResendVerificationRequestBody;
+    const rawBody = await request.text();
+
+    if (rawBody.trim()) {
+      body = JSON.parse(rawBody);
+    }
   } catch {
-    // Language is optional, so an empty body is allowed.
+    return NextResponse.json(
+      { error: "INVALID_REQUEST_BODY" },
+      { status: 400 },
+    );
+  }
+
+  if (!isResendVerificationRequestBody(body)) {
+    return NextResponse.json(
+      { error: "INVALID_REQUEST_BODY" },
+      { status: 400 },
+    );
   }
 
   const language = body.language === "en" ? "en" : "sv";
 
-  const { token } = createEmailVerificationToken(auth.user.id);
+  try {
+    if (!canResendEmailVerification(auth.user.id)) {
+      return NextResponse.json({ error: "RESEND_COOLDOWN" }, { status: 429 });
+    }
 
-  await notifyEmailVerification({
-    to: auth.user.email,
-    userName: auth.user.name,
-    token,
-    language,
-  });
+    const { token } = createEmailVerificationToken(auth.user.id);
 
-  return NextResponse.json({
-    sent: true,
-  });
+    await notifyEmailVerification({
+      to: auth.user.email,
+      userName: auth.user.name,
+      token,
+      language,
+    });
+
+    return NextResponse.json({
+      sent: true,
+    });
+  } catch (error) {
+    console.error("Failed to resend verification email:", error);
+
+    return NextResponse.json(
+      { error: "RESEND_VERIFICATION_FAILED" },
+      { status: 500 },
+    );
+  }
 }
