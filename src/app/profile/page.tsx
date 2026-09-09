@@ -176,12 +176,21 @@ export default function ProfilePage() {
           error?: string;
         };
 
+        let message: string = t.profile.verificationEmailSendFailed;
+
+        switch (data.error) {
+          case "RESEND_COOLDOWN":
+            message = t.profile.verificationEmailCooldown;
+            break;
+
+          case "VERIFICATION_EMAIL_RATE_LIMITED":
+            message = t.profile.verificationEmailRateLimited;
+            break;
+        }
+
         setVerificationFeedback({
           type: "error",
-          message:
-            data.error === "VERIFICATION_EMAIL_COOLDOWN"
-              ? t.profile.verificationEmailCooldown
-              : t.profile.verificationEmailSendFailed,
+          message,
         });
 
         return;

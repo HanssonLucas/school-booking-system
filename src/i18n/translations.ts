@@ -216,6 +216,8 @@ export const translations = {
         "Vänta en liten stund innan du skickar ett nytt verifieringsmail.",
       verificationEmailSendFailed:
         "Det gick inte att skicka ett nytt verifieringsmail.",
+      verificationEmailRateLimited:
+        "För många begäranden om verifieringsmejl. Vänta en stund och försök igen.",
     },
     createSessionForm: {
       title: "Skapa bokningstillfälle",
@@ -561,6 +563,8 @@ export const translations = {
       verificationEmailCooldown:
         "Please wait a moment before sending another verification email.",
       verificationEmailSendFailed: "Could not send a new verification email.",
+      verificationEmailRateLimited:
+        "Too many verification email requests. Please wait a moment and try again.",
     },
     createSessionForm: {
       title: "Create booking session",
