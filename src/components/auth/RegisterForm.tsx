@@ -66,6 +66,8 @@ export default function RegisterForm() {
         return t.auth.emailAlreadyExists;
       case "INVALID_TEACHER_SIGNUP_CODE":
         return t.auth.invalidTeacherSignupCode;
+      case "REGISTER_RATE_LIMITED":
+        return t.auth.registerRateLimited;
       default:
         return t.auth.fallbackError;
     }
