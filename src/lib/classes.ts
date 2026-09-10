@@ -320,3 +320,65 @@ export const getClassStudentsForTeacher = (
 ): ClassStudentsResult | null => {
   return getClassStudentsTransaction(teacherId, classId);
 };
+
+type RegenerateClassJoinCodeResult = {
+  schoolClass: StudentClass;
+  joinCode: string;
+};
+
+const regenerateClassJoinCodeTransaction = db.transaction(
+  (
+    teacherId: number,
+    classId: number,
+  ): RegenerateClassJoinCodeResult | null => {
+    const schoolClass = db
+      .prepare(
+        `
+          SELECT classes.id, classes.name
+          FROM classes
+          INNER JOIN class_teachers
+            ON class_teachers.class_id = classes.id
+          INNER JOIN users
+            ON users.id = class_teachers.teacher_id
+          WHERE classes.id = ?
+            AND class_teachers.teacher_id = ?
+            AND users.role = 'teacher'
+            AND users.email_verified_at IS NOT NULL
+        `,
+      )
+      .get(classId, teacherId) as StudentClass | undefined;
+
+    if (!schoolClass) {
+      return null;
+    }
+
+    const joinCode = randomBytes(8).toString("hex").toUpperCase();
+    const joinCodeHash = hashClassJoinCode(joinCode);
+
+    const result = db
+      .prepare(
+        `
+          UPDATE classes
+          SET join_code_hash = ?
+          WHERE id = ?
+        `,
+      )
+      .run(joinCodeHash, classId);
+
+    if (result.changes !== 1) {
+      throw new Error("Failed to update class join code");
+    }
+
+    return {
+      schoolClass,
+      joinCode,
+    };
+  },
+);
+
+export const regenerateClassJoinCodeForTeacher = (
+  teacherId: number,
+  classId: number,
+): RegenerateClassJoinCodeResult | null => {
+  return regenerateClassJoinCodeTransaction.immediate(teacherId, classId);
+};
