@@ -3,16 +3,23 @@
 import { useEffect, useState } from "react";
 import {
   Alert,
+  Avatar,
+  Box,
   Button,
   CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
-  DialogTitle,
   Paper,
   Stack,
   Typography,
 } from "@mui/material";
+import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
+import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
+import ClassDialogHeader, {
+  classButtonSx,
+  classDialogPaperSx,
+} from "./ClassDialogHeader";
 import { useTranslations } from "@/i18n/useTranslations";
 
 type SchoolClass = { id: number; name: string };
@@ -118,23 +125,18 @@ export default function ClassStudentsDialog({ schoolClass, onClose }: Props) {
       fullWidth
       maxWidth="sm"
       aria-labelledby="class-students-heading"
-      slotProps={{ paper: { sx: { borderRadius: 5 } } }}
+      slotProps={{ paper: { sx: classDialogPaperSx } }}
     >
-      <DialogTitle id="class-students-heading" sx={{ fontWeight: 850 }}>
-        {text.title}
-      </DialogTitle>
-      <DialogContent dividers>
+      <ClassDialogHeader
+        id="class-students-heading"
+        title={text.title}
+        description={
+          state.status === "ready" ? state.schoolClass.name : schoolClass.name
+        }
+        icon={<GroupsOutlinedIcon />}
+      />
+      <DialogContent sx={{ p: { xs: 3, sm: 4 } }}>
         <Stack spacing={3}>
-          <Typography
-            variant="h6"
-            component="h3"
-            sx={{ overflowWrap: "anywhere" }}
-          >
-            {state.status === "ready"
-              ? state.schoolClass.name
-              : schoolClass.name}
-          </Typography>
-
           {state.status === "loading" && (
             <Stack
               direction="row"
@@ -149,19 +151,34 @@ export default function ClassStudentsDialog({ schoolClass, onClose }: Props) {
 
           {state.status === "error" && (
             <Stack spacing={2} sx={{ alignItems: "flex-start" }}>
-              <Alert severity="error">{text[state.error]}</Alert>
+              <Alert sx={{ borderRadius: 3 }} severity="error">
+                {text[state.error]}
+              </Alert>
               {state.error === "verificationRequired" && (
-                <Button href="/profile" variant="outlined">
+                <Button
+                  color="primary"
+                  sx={classButtonSx}
+                  href="/profile"
+                  variant="outlined"
+                >
                   {t.profile.title}
                 </Button>
               )}
               {state.error === "unauthorized" && (
-                <Button href="/login" variant="outlined">
+                <Button
+                  color="primary"
+                  sx={classButtonSx}
+                  href="/login"
+                  variant="outlined"
+                >
                   {text.signIn}
                 </Button>
               )}
               {state.error === "loadFailed" && (
                 <Button
+                  variant="contained"
+                  color="primary"
+                  sx={classButtonSx}
                   onClick={() => {
                     setState({ status: "loading" });
                     setLoadAttempt((attempt) => attempt + 1);
@@ -175,11 +192,20 @@ export default function ClassStudentsDialog({ schoolClass, onClose }: Props) {
 
           {state.status === "ready" && (
             <>
-              <Typography color="text.secondary">
-                {text.countLabel}: {state.students.length}
-              </Typography>
+              <Alert
+                severity="info"
+                icon={<GroupsOutlinedIcon />}
+                sx={{ borderRadius: 3 }}
+              >
+                {text.countLabel}:{" "}
+                <Box component="span" sx={{ fontWeight: 900 }}>
+                  {state.students.length}
+                </Box>
+              </Alert>
               {state.students.length === 0 ? (
-                <Alert severity="info">{text.empty}</Alert>
+                <Alert sx={{ borderRadius: 3 }} severity="info">
+                  {text.empty}
+                </Alert>
               ) : (
                 <Stack
                   component="ul"
@@ -189,21 +215,48 @@ export default function ClassStudentsDialog({ schoolClass, onClose }: Props) {
                   {state.students.map((student) => (
                     <Paper
                       component="li"
-                      variant="outlined"
+                      elevation={0}
                       key={student.id}
-                      sx={{ p: 2, borderRadius: 3 }}
+                      sx={{
+                        p: 2.25,
+                        borderRadius: 4,
+                        border: 1,
+                        borderColor: "divider",
+                        bgcolor: "background.default",
+                      }}
                     >
-                      <Typography
-                        sx={{ fontWeight: 750, overflowWrap: "anywhere" }}
+                      <Stack
+                        direction="row"
+                        spacing={1.5}
+                        sx={{ alignItems: "center" }}
                       >
-                        {student.name}
-                      </Typography>
-                      <Typography
-                        color="text.secondary"
-                        sx={{ overflowWrap: "anywhere" }}
-                      >
-                        {student.email}
-                      </Typography>
+                        <Avatar
+                          sx={{
+                            bgcolor: "primary.main",
+                            color: "primary.contrastText",
+                          }}
+                        >
+                          <PersonOutlineOutlinedIcon />
+                        </Avatar>
+                        <Box sx={{ minWidth: 0 }}>
+                          <Typography
+                            sx={{
+                              fontWeight: 900,
+                              letterSpacing: -0.2,
+                              overflowWrap: "anywhere",
+                            }}
+                          >
+                            {student.name}
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{ mt: 0.25, overflowWrap: "anywhere" }}
+                          >
+                            {student.email}
+                          </Typography>
+                        </Box>
+                      </Stack>
                     </Paper>
                   ))}
                 </Stack>
@@ -212,8 +265,10 @@ export default function ClassStudentsDialog({ schoolClass, onClose }: Props) {
           )}
         </Stack>
       </DialogContent>
-      <DialogActions sx={{ p: 2 }}>
-        <Button onClick={onClose} sx={{ borderRadius: 999 }}>
+      <DialogActions
+        sx={{ px: { xs: 3, sm: 4 }, pb: 3, pt: 0, gap: 1, flexWrap: "wrap" }}
+      >
+        <Button color="primary" onClick={onClose} sx={classButtonSx}>
           {t.common.close}
         </Button>
       </DialogActions>

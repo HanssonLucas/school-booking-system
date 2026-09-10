@@ -193,7 +193,26 @@ export const translations = {
       retry: "Försök igen",
       signIn: "Logga in",
     },
+    regenerateClassCode: {
+      title: "Generera ny klasskod",
+      description:
+        "Vill du byta klasskod? Den gamla koden slutar fungera direkt. Elever som redan tillhör klassen påverkas inte.",
+      confirm: "Generera ny kod",
+      submitting: "Genererar…",
+      successTitle: "Ny klasskod skapad",
+      success:
+        "Klasskoden har bytts. Befintliga elever är fortfarande anslutna.",
+      failed:
+        "Det gick inte att bekräfta kodbytet. Koden kan ha ändrats om anslutningen bröts. Stäng dialogen och öppna Ny klasskod igen för att generera en kod som du kan spara.",
+      notFound:
+        "Klassen finns inte längre eller så saknar du tillgång till den.",
+      unauthorized: "Din session har gått ut. Logga in igen.",
+      forbidden: "Du behöver vara inloggad som lärare för att byta klasskod.",
+      verificationRequired:
+        "Verifiera din e-postadress på profilsidan för att byta klasskod.",
+    },
     teacherClasses: {
+      newCode: "Ny klasskod",
       viewStudents: "Visa elever",
       title: "Mina klasser",
       description:
@@ -609,7 +628,26 @@ export const translations = {
       retry: "Try again",
       signIn: "Sign in",
     },
+    regenerateClassCode: {
+      title: "Generate new class code",
+      description:
+        "Replace the class code? The old code will stop working immediately. Students who already belong to the class will not be affected.",
+      confirm: "Generate new code",
+      submitting: "Generating…",
+      successTitle: "New class code created",
+      success:
+        "The class code has been replaced. Existing students are still members.",
+      failed:
+        "Could not confirm the code change. The code may have changed if the connection was lost. Close this dialog and reopen New class code to generate a code you can save.",
+      notFound: "This class no longer exists or you do not have access to it.",
+      unauthorized: "Your session has expired. Please sign in again.",
+      forbidden:
+        "You must be signed in as a teacher to replace the class code.",
+      verificationRequired:
+        "Verify your email address on your profile to replace the class code.",
+    },
     teacherClasses: {
+      newCode: "New class code",
       viewStudents: "View students",
       title: "My classes",
       description:

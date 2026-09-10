@@ -9,7 +9,6 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogTitle,
   Divider,
   Paper,
   Stack,
@@ -19,6 +18,13 @@ import {
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import ContentCopyOutlinedIcon from "@mui/icons-material/ContentCopyOutlined";
 import ClassStudentsDialog from "@/components/classes/ClassStudentsDialog";
+import ClassDialogHeader, {
+  classButtonSx,
+  classDialogPaperSx,
+} from "./ClassDialogHeader";
+import RegenerateClassCodeDialog from "./RegenerateClassCodeDialog";
+import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
+import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
 import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
 import { useTranslations } from "@/i18n/useTranslations";
 
@@ -67,6 +73,7 @@ export default function TeacherClassesSection() {
   const text = t.teacherClasses;
   const [loadState, setLoadState] = useState<LoadState>({ status: "loading" });
   const [loadAttempt, setLoadAttempt] = useState(0);
+  const [codeClass, setCodeClass] = useState<SchoolClass | null>(null);
   const [selectedClass, setSelectedClass] = useState<SchoolClass | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [name, setName] = useState("");
@@ -198,11 +205,15 @@ export default function TeacherClassesSection() {
         <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
           <Box
             sx={{
-              p: 1,
-              display: "flex",
-              borderRadius: 3,
-              bgcolor: "action.hover",
-              color: "primary.main",
+              width: 48,
+              height: 48,
+              display: "grid",
+              placeItems: "center",
+              borderRadius: 4,
+              bgcolor: "primary.main",
+              color: "primary.contrastText",
+              boxShadow: 3,
+              flexShrink: 0,
             }}
           >
             <SchoolOutlinedIcon />
@@ -211,17 +222,18 @@ export default function TeacherClassesSection() {
             id="teacher-classes-heading"
             variant="h5"
             component="h2"
-            sx={{ fontWeight: 850 }}
+            sx={{ fontWeight: 900, letterSpacing: -0.4 }}
           >
             {text.title}
           </Typography>
         </Stack>
         <Button
+          color="primary"
           variant="contained"
           startIcon={<AddRoundedIcon />}
           disabled={loadState.status !== "ready"}
           onClick={openDialog}
-          sx={{ borderRadius: 999, textTransform: "none", fontWeight: 800 }}
+          sx={classButtonSx}
         >
           {text.create}
         </Button>
@@ -244,13 +256,22 @@ export default function TeacherClassesSection() {
       )}
       {loadState.status === "error" && (
         <Stack spacing={2} sx={{ alignItems: "flex-start" }}>
-          <Alert severity="error">{text[loadState.error]}</Alert>
+          <Alert sx={{ borderRadius: 3 }} severity="error">
+            {text[loadState.error]}
+          </Alert>
           {loadState.error === "verificationRequired" && (
-            <Button href="/profile" variant="outlined">
+            <Button
+              color="primary"
+              sx={classButtonSx}
+              href="/profile"
+              variant="outlined"
+            >
               {t.profile.title}
             </Button>
           )}
           <Button
+            color="primary"
+            sx={classButtonSx}
             onClick={() => {
               setLoadState({ status: "loading" });
               setLoadAttempt((attempt) => attempt + 1);
@@ -276,36 +297,65 @@ export default function TeacherClassesSection() {
               .map((schoolClass) => (
                 <Paper
                   component="li"
-                  variant="outlined"
                   key={schoolClass.id}
-                  sx={{ p: 2, borderRadius: 3 }}
+                  elevation={1}
+                  sx={{
+                    borderRadius: 4,
+                    overflow: "hidden",
+                    border: 1,
+                    borderColor: "divider",
+                    bgcolor: "background.paper",
+                  }}
                 >
                   <Stack
-                    direction={{ xs: "column", sm: "row" }}
-                    spacing={2}
-                    sx={{
-                      justifyContent: "space-between",
-                      alignItems: { sm: "center" },
-                    }}
+                    direction="row"
+                    spacing={1.5}
+                    sx={{ p: 2.5, alignItems: "center" }}
                   >
+                    <SchoolOutlinedIcon color="primary" />
                     <Typography
+                      variant="subtitle1"
                       sx={{
-                        fontWeight: 750,
+                        fontWeight: 900,
+                        letterSpacing: -0.2,
                         overflowWrap: "anywhere",
                         minWidth: 0,
                       }}
                     >
                       {schoolClass.name}
                     </Typography>
+                  </Stack>
+                  <Stack
+                    direction={{ xs: "column", sm: "row" }}
+                    spacing={1}
+                    sx={{
+                      px: 2.5,
+                      py: 1.5,
+                      borderTop: 1,
+                      borderColor: "divider",
+                      bgcolor: "action.hover",
+                      justifyContent: "flex-end",
+                    }}
+                  >
                     <Button
                       variant="outlined"
+                      color="primary"
+                      size="small"
+                      startIcon={<RefreshOutlinedIcon />}
+                      onClick={() => setCodeClass(schoolClass)}
+                      aria-label={`${text.newCode}: ${schoolClass.name}`}
+                      sx={classButtonSx}
+                    >
+                      {text.newCode}
+                    </Button>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      startIcon={<GroupsOutlinedIcon />}
                       onClick={() => setSelectedClass(schoolClass)}
                       aria-label={`${text.viewStudents}: ${schoolClass.name}`}
-                      sx={{
-                        flexShrink: 0,
-                        borderRadius: 999,
-                        textTransform: "none",
-                      }}
+                      sx={classButtonSx}
                     >
                       {text.viewStudents}
                     </Button>
@@ -314,6 +364,14 @@ export default function TeacherClassesSection() {
               ))}
           </Stack>
         ))}
+
+      {codeClass && (
+        <RegenerateClassCodeDialog
+          key={codeClass.id}
+          schoolClass={codeClass}
+          onClose={() => setCodeClass(null)}
+        />
+      )}
 
       {selectedClass && (
         <ClassStudentsDialog
@@ -331,15 +389,22 @@ export default function TeacherClassesSection() {
         onClose={() => {
           if (!created) closeDialog();
         }}
-        slotProps={{ paper: { sx: { borderRadius: 5 } } }}
+        slotProps={{ paper: { sx: classDialogPaperSx } }}
       >
         <Box component="form" onSubmit={handleCreate}>
-          <DialogTitle id="create-class-heading" sx={{ fontWeight: 850 }}>
-            {created ? text.created : text.create}
-          </DialogTitle>
-          <DialogContent>
+          <ClassDialogHeader
+            id="create-class-heading"
+            title={created ? text.created : text.create}
+            description={text.description}
+            icon={<SchoolOutlinedIcon />}
+          />
+          <DialogContent sx={{ p: { xs: 3, sm: 4 } }}>
             <Stack spacing={3} sx={{ pt: 1 }}>
-              {error && <Alert severity="error">{text[error]}</Alert>}
+              {error && (
+                <Alert sx={{ borderRadius: 3 }} severity="error">
+                  {text[error]}
+                </Alert>
+              )}
               {created ? (
                 <>
                   <Typography
@@ -347,7 +412,9 @@ export default function TeacherClassesSection() {
                   >
                     {created.schoolClass.name}
                   </Typography>
-                  <Alert severity="info">{text.codeNotice}</Alert>
+                  <Alert sx={{ borderRadius: 3 }} severity="info">
+                    {text.codeNotice}
+                  </Alert>
                   <TextField
                     label={text.codeLabel}
                     value={created.joinCode}
@@ -356,14 +423,18 @@ export default function TeacherClassesSection() {
                     onFocus={(event) => event.target.select()}
                   />
                   <Button
-                    variant="outlined"
+                    variant="contained"
+                    color="primary"
+                    sx={classButtonSx}
                     startIcon={<ContentCopyOutlinedIcon />}
                     onClick={copyCode}
                   >
                     {copyStatus === "copied" ? text.copied : text.copy}
                   </Button>
                   {copyStatus === "failed" && (
-                    <Alert severity="warning">{text.copyFailed}</Alert>
+                    <Alert sx={{ borderRadius: 3 }} severity="warning">
+                      {text.copyFailed}
+                    </Alert>
                   )}
                 </>
               ) : (
@@ -385,19 +456,40 @@ export default function TeacherClassesSection() {
               )}
             </Stack>
           </DialogContent>
-          <DialogActions sx={{ p: 3, pt: 1 }}>
+          <DialogActions
+            sx={{
+              px: { xs: 3, sm: 4 },
+              pb: { xs: 3, sm: 4 },
+              pt: 0,
+              gap: 1,
+              flexWrap: "wrap",
+            }}
+          >
             {created ? (
-              <Button variant="contained" onClick={closeDialog}>
+              <Button
+                variant="contained"
+                color="primary"
+                sx={classButtonSx}
+                onClick={closeDialog}
+              >
                 {text.done}
               </Button>
             ) : (
               <>
-                <Button disabled={isCreating} onClick={closeDialog}>
+                <Button
+                  color="primary"
+                  sx={classButtonSx}
+                  disabled={isCreating}
+                  onClick={closeDialog}
+                >
                   {text.cancel}
                 </Button>
                 <Button
                   type="submit"
                   variant="contained"
+                  color="primary"
+                  sx={classButtonSx}
+                  startIcon={<AddRoundedIcon />}
                   disabled={isCreating || !name.trim()}
                 >
                   {isCreating ? text.creating : text.create}
