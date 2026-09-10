@@ -5,6 +5,8 @@ const MAX_CLASS_NAME_LENGTH = 100;
 
 type ClassManagementErrorCode =
   | "INVALID_CLASS_NAME"
+  | "INVALID_CLASS_CODE"
+  | "ALREADY_IN_CLASS"
   | "UNAUTHORIZED"
   | "FORBIDDEN"
   | "EMAIL_NOT_VERIFIED";
@@ -132,4 +134,102 @@ export const getClassesForTeacher = (teacherId: number): TeacherClass[] => {
       `,
     )
     .all(teacherId) as TeacherClass[];
+};
+
+type StudentRoleRow = {
+  role: string;
+};
+
+type ClassByCodeRow = {
+  id: number;
+  name: string;
+};
+
+type StudentMembershipRow = {
+  class_id: number;
+};
+
+const findStudentRole = db.prepare(`
+  SELECT role
+  FROM users
+  WHERE id = ?
+`);
+
+const findClassByCodeHash = db.prepare(`
+  SELECT id, name
+  FROM classes
+  WHERE join_code_hash = ?
+`);
+
+const findStudentMembership = db.prepare(`
+  SELECT class_id
+  FROM class_students
+  WHERE student_id = ?
+`);
+
+const insertClassStudent = db.prepare(`
+  INSERT INTO class_students (student_id, class_id)
+  VALUES (?, ?)
+`);
+
+const joinClassTransaction = db.transaction(
+  (studentId: number, joinCodeHash: string) => {
+    const student = findStudentRole.get(studentId) as
+      | StudentRoleRow
+      | undefined;
+
+    if (!student) {
+      throw new ClassManagementError("UNAUTHORIZED");
+    }
+
+    if (student.role !== "student") {
+      throw new ClassManagementError("FORBIDDEN");
+    }
+
+    const schoolClass = findClassByCodeHash.get(joinCodeHash) as
+      | ClassByCodeRow
+      | undefined;
+
+    if (!schoolClass) {
+      throw new ClassManagementError("INVALID_CLASS_CODE");
+    }
+
+    const membership = findStudentMembership.get(studentId) as
+      | StudentMembershipRow
+      | undefined;
+
+    if (membership) {
+      if (membership.class_id !== schoolClass.id) {
+        throw new ClassManagementError("ALREADY_IN_CLASS");
+      }
+
+      return {
+        schoolClass,
+        alreadyMember: true,
+      };
+    }
+
+    insertClassStudent.run(studentId, schoolClass.id);
+
+    return {
+      schoolClass,
+      alreadyMember: false,
+    };
+  },
+);
+
+export const joinClassForStudent = (studentId: number, code: unknown) => {
+  if (typeof code !== "string") {
+    throw new ClassManagementError("INVALID_CLASS_CODE");
+  }
+
+  const normalizedCode = normalizeClassJoinCode(code);
+
+  if (!/^[A-F0-9]{16}$/.test(normalizedCode)) {
+    throw new ClassManagementError("INVALID_CLASS_CODE");
+  }
+
+  const joinCodeHash = hashClassJoinCode(normalizedCode);
+
+  return joinClassTransaction.immediate(studentId, joinCodeHash);
 };
