@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { requireVerifiedUserOrResponse } from "@/lib/apiAuth";
-import { ClassManagementError, createClassForTeacher } from "@/lib/classes";
+import {
+  ClassManagementError,
+  createClassForTeacher,
+  getClassesForTeacher,
+} from "@/lib/classes";
 
 type CreateClassRequestBody = {
   name?: unknown;
@@ -11,6 +15,35 @@ const isCreateClassRequestBody = (
 ): value is CreateClassRequestBody => {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 };
+
+export async function GET() {
+  const auth = await requireVerifiedUserOrResponse();
+
+  if (auth.response) {
+    return auth.response;
+  }
+
+  if (auth.user.role !== "teacher") {
+    return NextResponse.json({ code: "FORBIDDEN" }, { status: 403 });
+  }
+
+  try {
+    const classes = getClassesForTeacher(auth.user.id);
+
+    return NextResponse.json(
+      { classes },
+      {
+        headers: {
+          "Cache-Control": "no-store",
+        },
+      },
+    );
+  } catch (error) {
+    console.error("Failed to get teacher classes:", error);
+
+    return NextResponse.json({ code: "CLASSES_FETCH_FAILED" }, { status: 500 });
+  }
+}
 
 export async function POST(request: Request) {
   const auth = await requireVerifiedUserOrResponse();

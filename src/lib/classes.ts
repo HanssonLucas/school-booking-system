@@ -107,3 +107,29 @@ export const createClassForTeacher = (teacherId: number, name: unknown) => {
     joinCode,
   };
 };
+
+export type TeacherClass = {
+  id: number;
+  name: string;
+  createdByUserId: number;
+  createdAt: string;
+};
+
+export const getClassesForTeacher = (teacherId: number): TeacherClass[] => {
+  return db
+    .prepare(
+      `
+        SELECT
+          classes.id,
+          classes.name,
+          classes.created_by_user_id AS createdByUserId,
+          classes.created_at AS createdAt
+        FROM classes
+        INNER JOIN class_teachers
+          ON class_teachers.class_id = classes.id
+        WHERE class_teachers.teacher_id = ?
+        ORDER BY classes.name COLLATE NOCASE ASC, classes.id ASC
+      `,
+    )
+    .all(teacherId) as TeacherClass[];
+};
