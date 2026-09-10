@@ -22,6 +22,7 @@ import { useState, type FormEvent } from "react";
 import AppHeader from "@/components/layout/AppHeader";
 import { useAppTheme } from "@/theme/AppThemeProvider";
 import PasswordField from "@/components/auth/PasswordField";
+import StudentClassSection from "@/components/classes/StudentClassSection";
 
 export default function ProfilePage() {
   const { user, isLoading, refreshUser } = useAuth();
@@ -608,6 +609,9 @@ export default function ProfilePage() {
               </Box>
             </Stack>
           </Paper>
+
+          {user.role === "student" && <StudentClassSection key={user.id} />}
+
           <Paper
             variant="outlined"
             sx={{
