@@ -233,3 +233,26 @@ export const joinClassForStudent = (studentId: number, code: unknown) => {
 
   return joinClassTransaction.immediate(studentId, joinCodeHash);
 };
+
+export type StudentClass = {
+  id: number;
+  name: string;
+};
+
+export const getClassForStudent = (studentId: number): StudentClass | null => {
+  const schoolClass = db
+    .prepare(
+      `
+        SELECT
+          classes.id,
+          classes.name
+        FROM class_students
+        INNER JOIN classes
+          ON classes.id = class_students.class_id
+        WHERE class_students.student_id = ?
+      `,
+    )
+    .get(studentId) as StudentClass | undefined;
+
+  return schoolClass ?? null;
+};
