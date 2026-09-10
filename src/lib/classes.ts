@@ -256,3 +256,67 @@ export const getClassForStudent = (studentId: number): StudentClass | null => {
 
   return schoolClass ?? null;
 };
+
+export type ClassStudent = {
+  id: number;
+  name: string;
+  email: string;
+};
+
+type ClassStudentsResult = {
+  schoolClass: StudentClass;
+  students: ClassStudent[];
+  studentCount: number;
+};
+
+const getClassStudentsTransaction = db.transaction(
+  (teacherId: number, classId: number): ClassStudentsResult | null => {
+    const schoolClass = db
+      .prepare(
+        `
+          SELECT classes.id, classes.name
+          FROM classes
+          INNER JOIN class_teachers
+            ON class_teachers.class_id = classes.id
+          INNER JOIN users
+            ON users.id = class_teachers.teacher_id
+          WHERE classes.id = ?
+            AND class_teachers.teacher_id = ?
+            AND users.role = 'teacher'
+            AND users.email_verified_at IS NOT NULL
+        `,
+      )
+      .get(classId, teacherId) as StudentClass | undefined;
+
+    if (!schoolClass) {
+      return null;
+    }
+
+    const students = db
+      .prepare(
+        `
+          SELECT users.id, users.name, users.email
+          FROM class_students
+          INNER JOIN users
+            ON users.id = class_students.student_id
+          WHERE class_students.class_id = ?
+            AND users.role = 'student'
+          ORDER BY users.name COLLATE NOCASE ASC, users.id ASC
+        `,
+      )
+      .all(classId) as ClassStudent[];
+
+    return {
+      schoolClass,
+      students,
+      studentCount: students.length,
+    };
+  },
+);
+
+export const getClassStudentsForTeacher = (
+  teacherId: number,
+  classId: number,
+): ClassStudentsResult | null => {
+  return getClassStudentsTransaction(teacherId, classId);
+};
