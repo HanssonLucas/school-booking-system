@@ -11,6 +11,10 @@ import { createSession, setSessionCookie } from "@/lib/session";
 import type { DbUserRow } from "@/types/auth";
 import { createEmailVerificationToken } from "@/lib/emailVerification";
 import { notifyEmailVerification } from "@/lib/emailNotifications";
+import { consumeRateLimit } from "@/lib/rateLimit";
+
+const REGISTER_ATTEMPT_LIMIT = 5;
+const REGISTER_WINDOW_MS = 15 * 60 * 1000;
 
 type RegisterRequestBody = {
   name?: unknown;
@@ -75,6 +79,32 @@ export async function POST(request: Request) {
       );
     }
 
+    if (!isValidEmail(email)) {
+      return NextResponse.json({ error: "INVALID_EMAIL" }, { status: 400 });
+    }
+
+    const rateLimit = consumeRateLimit({
+      key: `register:email:${email}`,
+      limit: REGISTER_ATTEMPT_LIMIT,
+      windowMs: REGISTER_WINDOW_MS,
+    });
+
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        {
+          error: "REGISTER_RATE_LIMITED",
+          retryAfterSeconds: rateLimit.retryAfterSeconds,
+        },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(rateLimit.retryAfterSeconds),
+            "Cache-Control": "no-store",
+          },
+        },
+      );
+    }
+
     if (
       role === "teacher" &&
       !isValidTeacherSignupCode(body.teacherSignupCode)
@@ -83,10 +113,6 @@ export async function POST(request: Request) {
         { error: "INVALID_TEACHER_SIGNUP_CODE" },
         { status: 403 },
       );
-    }
-
-    if (!isValidEmail(email)) {
-      return NextResponse.json({ error: "INVALID_EMAIL" }, { status: 400 });
     }
 
     const passwordError = validatePassword(password);
