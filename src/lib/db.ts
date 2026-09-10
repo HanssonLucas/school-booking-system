@@ -17,6 +17,46 @@ db.exec(`
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
   );
 
+    CREATE TABLE IF NOT EXISTS classes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL CHECK(length(trim(name)) > 0),
+    created_by_user_id INTEGER NOT NULL,
+    join_code_hash TEXT NOT NULL UNIQUE,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (created_by_user_id)
+      REFERENCES users(id) ON DELETE RESTRICT
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_classes_created_by_user_id
+    ON classes(created_by_user_id);
+
+  CREATE TABLE IF NOT EXISTS class_teachers (
+    class_id INTEGER NOT NULL,
+    teacher_id INTEGER NOT NULL,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (class_id, teacher_id),
+    FOREIGN KEY (class_id)
+      REFERENCES classes(id) ON DELETE CASCADE,
+    FOREIGN KEY (teacher_id)
+      REFERENCES users(id) ON DELETE CASCADE
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_class_teachers_teacher_id
+    ON class_teachers(teacher_id);
+
+  CREATE TABLE IF NOT EXISTS class_students (
+    student_id INTEGER PRIMARY KEY,
+    class_id INTEGER NOT NULL,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (student_id)
+      REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (class_id)
+      REFERENCES classes(id) ON DELETE CASCADE
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_class_students_class_id
+    ON class_students(class_id);
+
   CREATE TABLE IF NOT EXISTS sessions (
     id TEXT PRIMARY KEY,
     user_id INTEGER NOT NULL,
