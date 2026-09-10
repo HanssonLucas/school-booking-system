@@ -178,6 +178,37 @@ export const translations = {
       deleteFallbackError: "Det gick inte att ta bort bokningstillfället.",
       createSessionButton: "Skapa nytt tillfälle",
     },
+    teacherClasses: {
+      title: "Mina klasser",
+      description:
+        "Skapa klasser och dela klasskoden med dina elever så att de kan ansluta.",
+      create: "Skapa klass",
+      creating: "Skapar…",
+      created: "Klassen är skapad",
+      loading: "Hämtar dina klasser…",
+      empty:
+        "Du har inga klasser ännu. Skapa din första klass för att komma igång.",
+      loadFailed: "Det gick inte att hämta dina klasser.",
+      createFailed:
+        "Det gick inte att bekräfta att klassen skapades. Om anslutningen bröts, stäng dialogen och ladda om sidan för att kontrollera klasslistan innan du försöker igen.",
+      invalidName: "Ange ett klassnamn med 1–100 tecken.",
+      unauthorized: "Din session har gått ut. Logga in igen.",
+      forbidden: "Du behöver vara inloggad som lärare för att hantera klasser.",
+      verificationRequired:
+        "Verifiera din e-postadress på profilsidan för att se och skapa klasser.",
+      retry: "Försök igen",
+      nameLabel: "Klassnamn",
+      nameHelper: "Exempel: Frontend 2026. Högst 100 tecken.",
+      codeLabel: "Klasskod",
+      codeNotice:
+        "Kopiera och spara koden innan du stänger dialogen. Den visas bara nu. Dela koden med de elever som ska tillhöra klassen.",
+      copy: "Kopiera klasskod",
+      copied: "Koden är kopierad",
+      copyFailed:
+        "Det gick inte att kopiera automatiskt. Markera koden och kopiera den manuellt.",
+      done: "Klart",
+      cancel: "Avbryt",
+    },
     studentClass: {
       title: "Min klass",
       description: "Anslut till din klass med koden du fått av din lärare.",
@@ -547,6 +578,36 @@ export const translations = {
       deleteSuccess: "The booking session has been deleted.",
       deleteFallbackError: "The booking session could not be deleted.",
       createSessionButton: "Create new session",
+    },
+    teacherClasses: {
+      title: "My classes",
+      description:
+        "Create classes and share the class code with your students so they can join.",
+      create: "Create class",
+      creating: "Creating…",
+      created: "Class created",
+      loading: "Loading your classes…",
+      empty: "You have no classes yet. Create your first class to get started.",
+      loadFailed: "Could not load your classes.",
+      createFailed:
+        "Could not confirm that the class was created. If the connection was lost, close the dialog and reload the page to check the class list before trying again.",
+      invalidName: "Enter a class name containing 1–100 characters.",
+      unauthorized: "Your session has expired. Please sign in again.",
+      forbidden: "You must be signed in as a teacher to manage classes.",
+      verificationRequired:
+        "Verify your email address on your profile to view and create classes.",
+      retry: "Try again",
+      nameLabel: "Class name",
+      nameHelper: "Example: Frontend 2026. Maximum 100 characters.",
+      codeLabel: "Class code",
+      codeNotice:
+        "Copy and save the code before closing this dialog. It is only shown now. Share it with the students who should belong to this class.",
+      copy: "Copy class code",
+      copied: "Code copied",
+      copyFailed:
+        "Could not copy automatically. Select the code and copy it manually.",
+      done: "Done",
+      cancel: "Cancel",
     },
     studentClass: {
       title: "My class",

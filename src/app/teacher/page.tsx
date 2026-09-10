@@ -37,6 +37,7 @@ import type {
 import ViewBookingsDialog from "@/components/booking/ViewBookingsDialog";
 import DeleteBookingSessionDialog from "@/components/booking/DeleteBookingSessionDialog";
 import TeacherRouteGuard from "@/components/auth/TeacherRouteGuard";
+import TeacherClassesSection from "@/components/classes/TeacherClassesSection";
 
 type SortOption = "dateAsc" | "dateDesc" | "bookedFirst";
 
@@ -606,6 +607,12 @@ function TeacherPageContent() {
             </Stack>
           </Box>
         </Paper>
+
+        {currentUser && (
+          <TeacherClassesSection
+            key={`${currentUser.id}:${currentUser.emailVerified}`}
+          />
+        )}
 
         <Paper
           id="teacher-sessions"
