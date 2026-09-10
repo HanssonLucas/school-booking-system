@@ -18,6 +18,7 @@ import {
 } from "@mui/material";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import ContentCopyOutlinedIcon from "@mui/icons-material/ContentCopyOutlined";
+import ClassStudentsDialog from "@/components/classes/ClassStudentsDialog";
 import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
 import { useTranslations } from "@/i18n/useTranslations";
 
@@ -66,6 +67,7 @@ export default function TeacherClassesSection() {
   const text = t.teacherClasses;
   const [loadState, setLoadState] = useState<LoadState>({ status: "loading" });
   const [loadAttempt, setLoadAttempt] = useState(0);
+  const [selectedClass, setSelectedClass] = useState<SchoolClass | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [name, setName] = useState("");
   const [isCreating, setIsCreating] = useState(false);
@@ -278,15 +280,48 @@ export default function TeacherClassesSection() {
                   key={schoolClass.id}
                   sx={{ p: 2, borderRadius: 3 }}
                 >
-                  <Typography
-                    sx={{ fontWeight: 750, overflowWrap: "anywhere" }}
+                  <Stack
+                    direction={{ xs: "column", sm: "row" }}
+                    spacing={2}
+                    sx={{
+                      justifyContent: "space-between",
+                      alignItems: { sm: "center" },
+                    }}
                   >
-                    {schoolClass.name}
-                  </Typography>
+                    <Typography
+                      sx={{
+                        fontWeight: 750,
+                        overflowWrap: "anywhere",
+                        minWidth: 0,
+                      }}
+                    >
+                      {schoolClass.name}
+                    </Typography>
+                    <Button
+                      variant="outlined"
+                      onClick={() => setSelectedClass(schoolClass)}
+                      aria-label={`${text.viewStudents}: ${schoolClass.name}`}
+                      sx={{
+                        flexShrink: 0,
+                        borderRadius: 999,
+                        textTransform: "none",
+                      }}
+                    >
+                      {text.viewStudents}
+                    </Button>
+                  </Stack>
                 </Paper>
               ))}
           </Stack>
         ))}
+
+      {selectedClass && (
+        <ClassStudentsDialog
+          key={selectedClass.id}
+          schoolClass={selectedClass}
+          onClose={() => setSelectedClass(null)}
+        />
+      )}
 
       <Dialog
         open={isOpen}

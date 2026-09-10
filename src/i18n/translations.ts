@@ -178,7 +178,23 @@ export const translations = {
       deleteFallbackError: "Det gick inte att ta bort bokningstillfället.",
       createSessionButton: "Skapa nytt tillfälle",
     },
+    classStudents: {
+      title: "Elever i klassen",
+      loading: "Hämtar elever…",
+      countLabel: "Antal elever",
+      empty: "Inga elever har anslutit till klassen ännu.",
+      loadFailed: "Det gick inte att hämta eleverna. Försök igen.",
+      notFound:
+        "Klassen finns inte längre eller så saknar du tillgång till den.",
+      unauthorized: "Din session har gått ut. Logga in igen.",
+      forbidden: "Du behöver vara inloggad som lärare för att se eleverna.",
+      verificationRequired:
+        "Verifiera din e-postadress på profilsidan för att se eleverna.",
+      retry: "Försök igen",
+      signIn: "Logga in",
+    },
     teacherClasses: {
+      viewStudents: "Visa elever",
       title: "Mina klasser",
       description:
         "Skapa klasser och dela klasskoden med dina elever så att de kan ansluta.",
@@ -579,7 +595,22 @@ export const translations = {
       deleteFallbackError: "The booking session could not be deleted.",
       createSessionButton: "Create new session",
     },
+    classStudents: {
+      title: "Students in this class",
+      loading: "Loading students…",
+      countLabel: "Number of students",
+      empty: "No students have joined this class yet.",
+      loadFailed: "Could not load the students. Please try again.",
+      notFound: "This class no longer exists or you do not have access to it.",
+      unauthorized: "Your session has expired. Please sign in again.",
+      forbidden: "You must be signed in as a teacher to view the students.",
+      verificationRequired:
+        "Verify your email address on your profile to view the students.",
+      retry: "Try again",
+      signIn: "Sign in",
+    },
     teacherClasses: {
+      viewStudents: "View students",
       title: "My classes",
       description:
         "Create classes and share the class code with your students so they can join.",
