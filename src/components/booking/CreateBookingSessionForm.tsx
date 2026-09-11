@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Alert,
   Box,
@@ -11,6 +11,8 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
+import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import TitleOutlinedIcon from "@mui/icons-material/TitleOutlined";
 import NotesOutlinedIcon from "@mui/icons-material/NotesOutlined";
@@ -22,6 +24,7 @@ import { useTranslations } from "@/i18n/useTranslations";
 import { getSlotCount, SLOT_DURATION_OPTIONS } from "@/lib/bookingSlots";
 
 type FormValues = {
+  classId: string;
   title: string;
   description: string;
   date: string;
@@ -33,16 +36,51 @@ type FormValues = {
 type FormErrors = Partial<Record<keyof FormValues, string>>;
 
 type CreateBookingSessionFormProps = {
-  onCreateSession: (session: CreateBookingSessionInput) => void;
+  onCreateSession: (session: CreateBookingSessionInput) => void | Promise<void>;
 };
 
 const initialFormValues: FormValues = {
+  classId: "",
   title: "",
   description: "",
   date: "",
   startTime: "",
   endTime: "",
   slotDurationMinutes: "15",
+};
+
+type TeacherClass = { id: number; name: string };
+type ClassLoadError =
+  | "loadFailed"
+  | "unauthorized"
+  | "forbidden"
+  | "verificationRequired";
+type ClassLoadState =
+  | { status: "loading" }
+  | { status: "error"; error: ClassLoadError }
+  | { status: "ready"; classes: TeacherClass[] };
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+const isTeacherClass = (value: unknown): value is TeacherClass =>
+  isRecord(value) &&
+  typeof value.id === "number" &&
+  Number.isSafeInteger(value.id) &&
+  value.id > 0 &&
+  typeof value.name === "string";
+
+const getClassLoadError = (value: unknown): ClassLoadError => {
+  switch (isRecord(value) ? value.code : undefined) {
+    case "UNAUTHORIZED":
+      return "unauthorized";
+    case "FORBIDDEN":
+      return "forbidden";
+    case "EMAIL_NOT_VERIFIED":
+      return "verificationRequired";
+    default:
+      return "loadFailed";
+  }
 };
 
 export default function CreateBookingSessionForm({
@@ -52,6 +90,58 @@ export default function CreateBookingSessionForm({
   const [formErrors, setFormErrors] = useState<FormErrors>({});
 
   const { t } = useTranslations();
+  const text = t.bookingClassSelect;
+  const [classState, setClassState] = useState<ClassLoadState>({
+    status: "loading",
+  });
+  const [loadAttempt, setLoadAttempt] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitFailed, setSubmitFailed] = useState(false);
+  const submitting = useRef(false);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const loadClasses = async () => {
+      try {
+        const response = await fetch("/api/classes", {
+          cache: "no-store",
+          signal: controller.signal,
+        });
+        const body: unknown = await response.json();
+        if (controller.signal.aborted) return;
+        if (!response.ok) {
+          setClassState({ status: "error", error: getClassLoadError(body) });
+          return;
+        }
+        if (
+          !isRecord(body) ||
+          !Array.isArray(body.classes) ||
+          !body.classes.every(isTeacherClass)
+        ) {
+          throw new Error("Invalid classes response");
+        }
+        setClassState({ status: "ready", classes: body.classes });
+      } catch {
+        if (!controller.signal.aborted) {
+          setClassState({ status: "error", error: "loadFailed" });
+        }
+      }
+    };
+    void loadClasses();
+    return () => controller.abort();
+  }, [loadAttempt]);
+
+  const hasSelectedClass =
+    classState.status === "ready" &&
+    classState.classes.some(
+      (schoolClass) => String(schoolClass.id) === formValues.classId,
+    );
+
+  const reloadClasses = () => {
+    setClassState({ status: "loading" });
+    setFormValues((values) => ({ ...values, classId: "" }));
+    setLoadAttempt((attempt) => attempt + 1);
+  };
 
   const calculatedSlotCount =
     formValues.startTime && formValues.endTime
@@ -76,6 +166,10 @@ export default function CreateBookingSessionForm({
 
   const validateForm = () => {
     const errors: FormErrors = {};
+
+    if (!hasSelectedClass) {
+      errors.classId = text.required;
+    }
 
     if (!formValues.title.trim()) {
       errors.title = t.createSessionForm.titleRequired;
@@ -106,25 +200,38 @@ export default function CreateBookingSessionForm({
     return Object.keys(errors).length === 0;
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
-    const isValid = validateForm();
-
-    if (!isValid) {
+    if (
+      submitting.current ||
+      classState.status !== "ready" ||
+      classState.classes.length === 0
+    )
       return;
+
+    if (!validateForm()) return;
+
+    submitting.current = true;
+    setIsSubmitting(true);
+    setSubmitFailed(false);
+    try {
+      await onCreateSession({
+        classId: Number(formValues.classId),
+        title: formValues.title,
+        description: formValues.description,
+        date: formValues.date,
+        startTime: formValues.startTime,
+        endTime: formValues.endTime,
+        slotDurationMinutes: Number(formValues.slotDurationMinutes),
+      });
+      // The parent closes the dialog after a successful response.
+      // Keep the entered values here if the request is rejected.
+    } catch {
+      setSubmitFailed(true);
+    } finally {
+      submitting.current = false;
+      setIsSubmitting(false);
     }
-
-    onCreateSession({
-      title: formValues.title,
-      description: formValues.description,
-      date: formValues.date,
-      startTime: formValues.startTime,
-      endTime: formValues.endTime,
-      slotDurationMinutes: Number(formValues.slotDurationMinutes),
-    });
-
-    setFormValues(initialFormValues);
   };
 
   const textFieldSx = {
@@ -198,6 +305,88 @@ export default function CreateBookingSessionForm({
         sx={{ p: { xs: 3, sm: 4 } }}
       >
         <Stack spacing={3}>
+          {classState.status === "loading" && (
+            <Alert severity="info" sx={{ borderRadius: 3 }}>
+              {text.loading}
+            </Alert>
+          )}
+          {classState.status === "error" && (
+            <Stack spacing={1} sx={{ alignItems: "flex-start" }}>
+              <Alert severity="error" sx={{ borderRadius: 3 }}>
+                {text[classState.error]}
+              </Alert>
+              <Button
+                onClick={reloadClasses}
+                sx={{
+                  borderRadius: 999,
+                  textTransform: "none",
+                  fontWeight: 800,
+                }}
+              >
+                {text.retry}
+              </Button>
+            </Stack>
+          )}
+          {classState.status === "ready" && classState.classes.length === 0 && (
+            <Stack spacing={1} sx={{ alignItems: "flex-start" }}>
+              <Alert severity="info" sx={{ borderRadius: 3 }}>
+                {text.empty}
+              </Alert>
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={<RefreshOutlinedIcon />}
+                onClick={reloadClasses}
+                sx={{
+                  borderRadius: 999,
+                  textTransform: "none",
+                  fontWeight: 800,
+                  px: 2.5,
+                  py: 1.1,
+                }}
+              >
+                {text.refresh}
+              </Button>
+            </Stack>
+          )}
+          {submitFailed && (
+            <Alert severity="error" sx={{ borderRadius: 3 }}>
+              {text.submitFailed}
+            </Alert>
+          )}
+          <TextField
+            select
+            label={text.label}
+            fullWidth
+            value={formValues.classId}
+            onChange={(event) => handleChange("classId", event.target.value)}
+            disabled={
+              isSubmitting ||
+              classState.status !== "ready" ||
+              classState.classes.length === 0
+            }
+            error={Boolean(formErrors.classId)}
+            helperText={formErrors.classId ?? text.helper}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <SchoolOutlinedIcon sx={{ mr: 1, color: "text.secondary" }} />
+                ),
+              },
+            }}
+            sx={textFieldSx}
+          >
+            <MenuItem value="" disabled>
+              {text.placeholder}
+            </MenuItem>
+            {classState.status === "ready" &&
+              classState.classes.map((schoolClass) => (
+                <MenuItem key={schoolClass.id} value={String(schoolClass.id)}>
+                  {schoolClass.name}
+                </MenuItem>
+              ))}
+          </TextField>
+
           <TextField
             label={t.createSessionForm.titleLabel}
             fullWidth
@@ -361,6 +550,11 @@ export default function CreateBookingSessionForm({
             <Button
               variant="contained"
               type="submit"
+              disabled={
+                isSubmitting ||
+                classState.status !== "ready" ||
+                classState.classes.length === 0
+              }
               startIcon={<AddRoundedIcon />}
               sx={{
                 borderRadius: 999,
@@ -370,7 +564,9 @@ export default function CreateBookingSessionForm({
                 py: 1.1,
               }}
             >
-              {t.createSessionForm.submitButton}
+              {isSubmitting
+                ? text.submitting
+                : t.createSessionForm.submitButton}
             </Button>
           </Box>
         </Stack>

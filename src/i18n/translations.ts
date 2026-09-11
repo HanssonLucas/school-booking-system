@@ -307,6 +307,25 @@ export const translations = {
       verificationEmailRateLimited:
         "För många begäranden om verifieringsmejl. Vänta en stund och försök igen.",
     },
+    bookingClassSelect: {
+      label: "Klass",
+      placeholder: "Välj klass",
+      helper: "Välj vilken klass tillfället gäller. Du blir ansvarig lärare.",
+      required: "Välj en klass som du tillhör.",
+      loading: "Hämtar dina klasser…",
+      loadFailed: "Det gick inte att hämta dina klasser.",
+      unauthorized: "Din session har gått ut. Logga in igen.",
+      forbidden: "Du behöver vara inloggad som lärare för att hämta klasser.",
+      verificationRequired:
+        "Verifiera din e-postadress på profilsidan för att hämta klasser.",
+      empty:
+        "Du behöver en klass innan du kan skapa ett tillfälle. Stäng dialogen och skapa en klass under Mina klasser.",
+      retry: "Försök igen",
+      refresh: "Uppdatera klasslistan",
+      submitting: "Skapar…",
+      submitFailed:
+        "Det gick inte att bekräfta att tillfället skapades. Kontrollera tillfälleslistan innan du försöker igen.",
+    },
     createSessionForm: {
       title: "Skapa bokningstillfälle",
       titleLabel: "Titel",
@@ -741,6 +760,26 @@ export const translations = {
       verificationEmailSendFailed: "Could not send a new verification email.",
       verificationEmailRateLimited:
         "Too many verification email requests. Please wait a moment and try again.",
+    },
+    bookingClassSelect: {
+      label: "Class",
+      placeholder: "Choose a class",
+      helper:
+        "Choose the class for this session. You will be the responsible teacher.",
+      required: "Choose a class you belong to.",
+      loading: "Loading your classes…",
+      loadFailed: "Could not load your classes.",
+      unauthorized: "Your session has expired. Please sign in again.",
+      forbidden: "You must be signed in as a teacher to load classes.",
+      verificationRequired:
+        "Verify your email address on your profile to load classes.",
+      empty:
+        "You need a class before creating a session. Close this dialog and create a class under My classes.",
+      retry: "Try again",
+      refresh: "Refresh class list",
+      submitting: "Creating…",
+      submitFailed:
+        "Could not confirm that the session was created. Check the session list before trying again.",
     },
     createSessionForm: {
       title: "Create booking session",

@@ -13,6 +13,7 @@ export type BookingSession = {
 };
 
 export type CreateBookingSessionInput = {
+  classId: number;
   title: string;
   description: string;
   date: string;
