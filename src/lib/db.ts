@@ -186,3 +186,38 @@ if (!hasSessionColumn("slot_duration_minutes")) {
     `ALTER TABLE booking_sessions ADD COLUMN slot_duration_minutes INTEGER NOT NULL DEFAULT 15`,
   ).run();
 }
+
+const migrateBookingSessionRelations = db.transaction(() => {
+  const columns = db.prepare(`PRAGMA table_info(booking_sessions)`).all() as {
+    name: string;
+  }[];
+
+  const hasColumn = (columnName: string) =>
+    columns.some((column) => column.name === columnName);
+
+  if (!hasColumn("class_id")) {
+    db.exec(`
+      ALTER TABLE booking_sessions
+      ADD COLUMN class_id INTEGER
+        REFERENCES classes(id) ON DELETE RESTRICT
+    `);
+  }
+
+  if (!hasColumn("teacher_id")) {
+    db.exec(`
+      ALTER TABLE booking_sessions
+      ADD COLUMN teacher_id INTEGER
+        REFERENCES users(id) ON DELETE RESTRICT
+    `);
+  }
+
+  db.exec(`
+    CREATE INDEX IF NOT EXISTS idx_booking_sessions_class_id
+      ON booking_sessions(class_id);
+
+    CREATE INDEX IF NOT EXISTS idx_booking_sessions_teacher_id
+      ON booking_sessions(teacher_id);
+  `);
+});
+
+migrateBookingSessionRelations.immediate();
