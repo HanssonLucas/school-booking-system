@@ -337,7 +337,13 @@ export async function DELETE(request: Request) {
       INNER JOIN booking_sessions
         ON booking_sessions.id = bookings.session_id
       WHERE bookings.session_id = ?
-        AND (bookings.user_id = ? OR bookings.student_email = ?)
+      AND (
+          bookings.user_id = ?
+      OR (
+          bookings.user_id IS NULL
+      AND bookings.student_email = ?
+  )
+)
       `,
     )
     .get(sessionId, student.id, student.email) as
@@ -358,12 +364,25 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ code: "BOOKING_NOT_FOUND" }, { status: 404 });
   }
 
-  db.prepare(
-    `
-    DELETE FROM bookings
-    WHERE id = ?
+  const deleteResult = db
+    .prepare(
+      `
+      DELETE FROM bookings
+      WHERE id = ?
+        AND (
+          user_id = ?
+          OR (
+            user_id IS NULL
+            AND student_email = ?
+          )
+        )
     `,
-  ).run(existingBooking.id);
+    )
+    .run(existingBooking.id, student.id, student.email);
+
+  if (deleteResult.changes === 0) {
+    return NextResponse.json({ code: "BOOKING_NOT_FOUND" }, { status: 404 });
+  }
 
   await notifyBookingCancelled({
     to: existingBooking.studentEmail,
