@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
+  Alert,
   Box,
   Button,
   Card,
@@ -19,6 +20,8 @@ import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
 import TranslateOutlinedIcon from "@mui/icons-material/TranslateOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
+import LoginOutlinedIcon from "@mui/icons-material/LoginOutlined";
+import { useAuth } from "@/components/auth/useAuth";
 import AppHeader from "@/components/layout/AppHeader";
 import RoleSelectionDialog from "@/components/onboarding/RoleSelectionDialog";
 import BookingSessionList from "@/components/booking/BookingSessionList";
@@ -28,33 +31,12 @@ import type { BookingSession } from "@/types/booking";
 type UserRole = "student" | "teacher" | null;
 
 export default function HomePage() {
-  const [sessions, setSessions] = useState<BookingSession[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { user, isLoading: isAuthLoading } = useAuth();
   const [selectedRole, setSelectedRole] = useState<UserRole>(null);
   const [isRoleDialogOpen, setIsRoleDialogOpen] = useState(true);
 
   const router = useRouter();
   const { t } = useTranslations();
-
-  useEffect(() => {
-    const fetchSessions = async () => {
-      try {
-        const response = await fetch("/api/booking-sessions");
-
-        if (!response.ok) {
-          console.error("Kunde inte hämta bokningstillfällen");
-          return;
-        }
-
-        const data: BookingSession[] = await response.json();
-        setSessions(data);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchSessions();
-  }, []);
 
   const handleSelectRole = (role: "student" | "teacher") => {
     setSelectedRole(role);
@@ -378,18 +360,139 @@ export default function HomePage() {
             </Typography>
           </Box>
 
-          {isLoading ? (
-            <Typography color="text.secondary">
-              {t.home.loadingSessions}
-            </Typography>
+          {isAuthLoading ? (
+            <Typography color="text.secondary">{t.auth.loadingUser}</Typography>
+          ) : user ? (
+            <HomeSessionList key={`${user.id}:${user.role}`} />
           ) : (
-            <BookingSessionList
-              sessions={sessions}
-              emptyMessage={t.home.emptySessions}
-            />
+            <Button
+              href="/login"
+              variant="contained"
+              startIcon={<LoginOutlinedIcon />}
+              sx={{
+                borderRadius: 999,
+                textTransform: "none",
+                fontWeight: 800,
+                px: 2.5,
+              }}
+            >
+              {t.auth.loginButton}
+            </Button>
           )}
         </Paper>
       </Container>
     </>
+  );
+}
+
+// Mounted only after authentication has resolved and a user exists.
+type SessionLoadState =
+  | { status: "loading" }
+  | { status: "ready"; sessions: BookingSession[] }
+  | { status: "unauthorized" }
+  | { status: "error" };
+
+function HomeSessionList() {
+  const { t } = useTranslations();
+  const [state, setState] = useState<SessionLoadState>({ status: "loading" });
+  const [attempt, setAttempt] = useState(0);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const fetchSessions = async () => {
+      try {
+        const response = await fetch("/api/booking-sessions", {
+          cache: "no-store",
+          signal: controller.signal,
+        });
+        if (controller.signal.aborted) return;
+
+        if (response.status === 401) {
+          setState({ status: "unauthorized" });
+          return;
+        }
+        if (!response.ok) {
+          setState({ status: "error" });
+          return;
+        }
+
+        const sessions: unknown = await response.json();
+        if (!Array.isArray(sessions)) {
+          throw new Error("Invalid sessions response");
+        }
+        if (!controller.signal.aborted) {
+          setState({ status: "ready", sessions: sessions as BookingSession[] });
+        }
+      } catch {
+        if (!controller.signal.aborted) {
+          setState({ status: "error" });
+        }
+      }
+    };
+
+    void fetchSessions();
+    return () => controller.abort();
+  }, [attempt]);
+
+  if (state.status === "loading") {
+    return (
+      <Typography color="text.secondary">{t.home.loadingSessions}</Typography>
+    );
+  }
+
+  if (state.status === "unauthorized") {
+    return (
+      <Stack spacing={2} sx={{ alignItems: "flex-start" }}>
+        <Alert severity="warning" sx={{ borderRadius: 3 }}>
+          {t.teacherClasses.unauthorized}
+        </Alert>
+        <Button
+          href="/login"
+          variant="contained"
+          startIcon={<LoginOutlinedIcon />}
+          sx={{
+            borderRadius: 999,
+            textTransform: "none",
+            fontWeight: 800,
+            px: 2.5,
+          }}
+        >
+          {t.auth.loginButton}
+        </Button>
+      </Stack>
+    );
+  }
+
+  if (state.status === "error") {
+    return (
+      <Stack spacing={2} sx={{ alignItems: "flex-start" }}>
+        <Alert severity="error" sx={{ borderRadius: 3 }}>
+          {t.errors.unknown}
+        </Alert>
+        <Button
+          variant="contained"
+          onClick={() => {
+            setState({ status: "loading" });
+            setAttempt((current) => current + 1);
+          }}
+          sx={{
+            borderRadius: 999,
+            textTransform: "none",
+            fontWeight: 800,
+            px: 2.5,
+          }}
+        >
+          {t.teacherClasses.retry}
+        </Button>
+      </Stack>
+    );
+  }
+
+  return (
+    <BookingSessionList
+      sessions={state.sessions}
+      emptyMessage={t.home.emptySessions}
+    />
   );
 }
