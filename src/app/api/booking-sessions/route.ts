@@ -4,32 +4,86 @@ import {
   DEFAULT_SLOT_DURATION_MINUTES,
   getSlotCount,
 } from "@/lib/bookingSlots";
-import { requireVerifiedUserOrResponse } from "@/lib/apiAuth";
+import {
+  requireUserOrResponse,
+  requireVerifiedUserOrResponse,
+} from "@/lib/apiAuth";
 
 export async function GET() {
-  const sessions = db
-    .prepare(
-      `
-      SELECT
-        booking_sessions.id,
-        booking_sessions.title,
-        booking_sessions.description,
-        booking_sessions.date,
-        booking_sessions.start_time AS startTime,
-        booking_sessions.end_time AS endTime,
-        booking_sessions.slot_duration_minutes AS slotDurationMinutes,
-        booking_sessions.max_participants AS maxParticipants,
-        COUNT(bookings.id) AS bookedParticipants
-      FROM booking_sessions
-      LEFT JOIN bookings
-        ON bookings.session_id = booking_sessions.id
-      GROUP BY booking_sessions.id
-      ORDER BY booking_sessions.date ASC, booking_sessions.start_time ASC
-      `,
-    )
-    .all();
+  const headers = {
+    "Cache-Control": "no-store",
+  };
 
-  return NextResponse.json(sessions);
+  const auth = await requireUserOrResponse();
+
+  if (auth.response) {
+    auth.response.headers.set("Cache-Control", "no-store");
+    return auth.response;
+  }
+
+  const user = auth.user;
+
+  try {
+    const sessions = db
+      .prepare(
+        `
+          SELECT
+            booking_sessions.id,
+            booking_sessions.class_id AS classId,
+            booking_sessions.teacher_id AS teacherId,
+            booking_sessions.title,
+            booking_sessions.description,
+            booking_sessions.date,
+            booking_sessions.start_time AS startTime,
+            booking_sessions.end_time AS endTime,
+            booking_sessions.slot_duration_minutes AS slotDurationMinutes,
+            booking_sessions.max_participants AS maxParticipants,
+            COUNT(bookings.id) AS bookedParticipants
+          FROM booking_sessions
+          LEFT JOIN bookings
+            ON bookings.session_id = booking_sessions.id
+          WHERE booking_sessions.class_id IS NOT NULL
+            AND booking_sessions.teacher_id IS NOT NULL
+            AND (
+              (
+                ? = 'student'
+                AND EXISTS (
+                  SELECT 1
+                  FROM class_students
+                  WHERE class_students.class_id = booking_sessions.class_id
+                    AND class_students.student_id = ?
+                )
+              )
+              OR
+              (
+                ? = 'teacher'
+                AND booking_sessions.teacher_id = ?
+                AND EXISTS (
+                  SELECT 1
+                  FROM class_teachers
+                  WHERE class_teachers.class_id = booking_sessions.class_id
+                    AND class_teachers.teacher_id = ?
+                )
+              )
+            )
+          GROUP BY booking_sessions.id
+          ORDER BY
+            booking_sessions.date ASC,
+            booking_sessions.start_time ASC,
+            booking_sessions.id ASC
+        `,
+      )
+      .all(user.role, user.id, user.role, user.id, user.id);
+
+    return NextResponse.json(sessions, { headers });
+  } catch (error) {
+    console.error("Failed to get booking sessions:", error);
+
+    return NextResponse.json(
+      { code: "SESSIONS_FETCH_FAILED" },
+      { status: 500, headers },
+    );
+  }
 }
 
 export async function POST(request: Request) {
