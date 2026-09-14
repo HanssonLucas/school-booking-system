@@ -32,12 +32,19 @@ export async function GET(request: Request) {
     const session = db
       .prepare(
         `
-        SELECT id
-        FROM booking_sessions
-        WHERE id = ?
-        `,
+      SELECT booking_sessions.id
+      FROM booking_sessions
+      WHERE booking_sessions.id = ?
+        AND booking_sessions.teacher_id = ?
+        AND EXISTS (
+          SELECT 1
+          FROM class_teachers
+          WHERE class_teachers.class_id = booking_sessions.class_id
+            AND class_teachers.teacher_id = ?
+        )
+    `,
       )
-      .get(sessionId) as { id: number } | undefined;
+      .get(sessionId, teacher.id, teacher.id) as { id: number } | undefined;
 
     if (!session) {
       return NextResponse.json({ code: "SESSION_NOT_FOUND" }, { status: 404 });
