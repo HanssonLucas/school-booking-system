@@ -23,40 +23,22 @@ import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 import LoginOutlinedIcon from "@mui/icons-material/LoginOutlined";
 import { useAuth } from "@/components/auth/useAuth";
 import AppHeader from "@/components/layout/AppHeader";
-import RoleSelectionDialog from "@/components/onboarding/RoleSelectionDialog";
 import BookingSessionList from "@/components/booking/BookingSessionList";
 import { useTranslations } from "@/i18n/useTranslations";
 import type { BookingSession } from "@/types/booking";
 
-type UserRole = "student" | "teacher" | null;
-
 export default function HomePage() {
   const { user, isLoading: isAuthLoading } = useAuth();
-  const [selectedRole, setSelectedRole] = useState<UserRole>(null);
-  const [isRoleDialogOpen, setIsRoleDialogOpen] = useState(true);
-
   const router = useRouter();
   const { t } = useTranslations();
 
   const handleSelectRole = (role: "student" | "teacher") => {
-    setSelectedRole(role);
-    setIsRoleDialogOpen(false);
     router.push(`/${role}`);
-  };
-
-  const handleCloseRoleDialog = () => {
-    setIsRoleDialogOpen(false);
   };
 
   return (
     <>
       <AppHeader />
-
-      <RoleSelectionDialog
-        open={isRoleDialogOpen}
-        onClose={handleCloseRoleDialog}
-        onSelectRole={handleSelectRole}
-      />
 
       <Container sx={{ py: { xs: 4, md: 7 } }}>
         <Paper
@@ -199,15 +181,6 @@ export default function HomePage() {
                 sx={{ borderRadius: 999, bgcolor: "background.paper" }}
               />
             </Stack>
-
-            {selectedRole && (
-              <Typography sx={{ mt: 3 }} color="text.secondary">
-                {t.home.selectedView}{" "}
-                {selectedRole === "student"
-                  ? t.common.student
-                  : t.common.teacher}
-              </Typography>
-            )}
           </Box>
         </Paper>
 
