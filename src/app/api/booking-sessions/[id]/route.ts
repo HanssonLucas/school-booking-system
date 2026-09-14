@@ -199,7 +199,7 @@ export async function PATCH(request: Request, context: RouteContext) {
   return NextResponse.json(updatedSession);
 }
 
-export async function DELETE(request: Request, context: RouteContext) {
+export async function DELETE(_request: Request, context: RouteContext) {
   const authResult = await requireVerifiedUserOrResponse();
 
   if (authResult.response) {
@@ -215,30 +215,29 @@ export async function DELETE(request: Request, context: RouteContext) {
   const { id } = await context.params;
   const sessionId = Number(id);
 
-  if (!sessionId) {
+  if (!/^[1-9]\d*$/.test(id) || !Number.isSafeInteger(sessionId)) {
     return NextResponse.json({ code: "INVALID_SESSION_ID" }, { status: 400 });
   }
 
-  const existingSession = db
+  const result = db
     .prepare(
       `
-      SELECT id
-      FROM booking_sessions
-      WHERE id = ?
+        DELETE FROM booking_sessions
+        WHERE id = ?
+          AND teacher_id = ?
+          AND EXISTS (
+            SELECT 1
+            FROM class_teachers
+            WHERE class_teachers.class_id = booking_sessions.class_id
+              AND class_teachers.teacher_id = ?
+          )
       `,
     )
-    .get(sessionId) as { id: number } | undefined;
+    .run(sessionId, teacher.id, teacher.id);
 
-  if (!existingSession) {
+  if (result.changes === 0) {
     return NextResponse.json({ code: "SESSION_NOT_FOUND" }, { status: 404 });
   }
-
-  db.prepare(
-    `
-    DELETE FROM booking_sessions
-    WHERE id = ?
-    `,
-  ).run(sessionId);
 
   return NextResponse.json({
     deletedSessionId: sessionId,
