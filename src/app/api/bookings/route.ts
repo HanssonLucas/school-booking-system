@@ -81,8 +81,8 @@ export async function POST(request: Request) {
   if (student.role !== "student") {
     return NextResponse.json({ code: "FORBIDDEN" }, { status: 403 });
   }
-  const body = await request.json();
 
+  const body = await request.json();
   const { sessionId } = body;
   const language = getValidBookingLanguage(body.language);
 
@@ -93,22 +93,31 @@ export async function POST(request: Request) {
     );
   }
 
+  // Hämta bara tillfällen som tillhör elevens klass.
   const session = db
     .prepare(
       `
-      SELECT
-        id,
-        title,
-        date,
-        start_time AS startTime,
-        end_time AS endTime,
-        slot_duration_minutes AS slotDurationMinutes,
-        max_participants AS maxParticipants
-      FROM booking_sessions
-      WHERE id = ?
+        SELECT
+          booking_sessions.id,
+          booking_sessions.title,
+          booking_sessions.date,
+          booking_sessions.start_time AS startTime,
+          booking_sessions.end_time AS endTime,
+          booking_sessions.slot_duration_minutes AS slotDurationMinutes,
+          booking_sessions.max_participants AS maxParticipants
+        FROM booking_sessions
+        WHERE booking_sessions.id = ?
+          AND booking_sessions.class_id IS NOT NULL
+          AND booking_sessions.teacher_id IS NOT NULL
+          AND EXISTS (
+            SELECT 1
+            FROM class_students
+            WHERE class_students.class_id = booking_sessions.class_id
+              AND class_students.student_id = ?
+          )
       `,
     )
-    .get(sessionId) as
+    .get(sessionId, student.id) as
     | {
         id: number;
         title: string;
@@ -127,10 +136,10 @@ export async function POST(request: Request) {
   const existingBooking = db
     .prepare(
       `
-      SELECT id
-      FROM bookings
-      WHERE session_id = ?
-        AND (user_id = ? OR student_email = ?)
+        SELECT id
+        FROM bookings
+        WHERE session_id = ?
+          AND (user_id = ? OR student_email = ?)
       `,
     )
     .get(sessionId, student.id, student.email) as { id: number } | undefined;
@@ -145,9 +154,9 @@ export async function POST(request: Request) {
   const bookingCount = db
     .prepare(
       `
-      SELECT COUNT(*) AS count
-      FROM bookings
-      WHERE session_id = ?
+        SELECT COUNT(*) AS count
+        FROM bookings
+        WHERE session_id = ?
       `,
     )
     .get(sessionId) as { count: number };
@@ -159,11 +168,11 @@ export async function POST(request: Request) {
   const bookedSlots = db
     .prepare(
       `
-      SELECT
-        slot_start_time AS slotStartTime,
-        slot_end_time AS slotEndTime
-      FROM bookings
-      WHERE session_id = ?
+        SELECT
+          slot_start_time AS slotStartTime,
+          slot_end_time AS slotEndTime
+        FROM bookings
+        WHERE session_id = ?
       `,
     )
     .all(sessionId) as {
@@ -190,46 +199,64 @@ export async function POST(request: Request) {
     return NextResponse.json({ code: "SESSION_FULL" }, { status: 409 });
   }
 
+  // Kontrollera klasskopplingen igen när bokningen sparas.
   const result = db
     .prepare(
       `
-      INSERT INTO bookings (
-        session_id,
-        user_id,
-        student_name,
-        student_email,
-        slot_start_time,
-        slot_end_time,
-        language
-      )
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO bookings (
+          session_id,
+          user_id,
+          student_name,
+          student_email,
+          slot_start_time,
+          slot_end_time,
+          language
+        )
+        SELECT
+          booking_sessions.id,
+          ?, ?, ?, ?, ?, ?
+        FROM booking_sessions
+        WHERE booking_sessions.id = ?
+          AND booking_sessions.class_id IS NOT NULL
+          AND booking_sessions.teacher_id IS NOT NULL
+          AND EXISTS (
+            SELECT 1
+            FROM class_students
+            WHERE class_students.class_id = booking_sessions.class_id
+              AND class_students.student_id = ?
+          )
       `,
     )
     .run(
-      sessionId,
       student.id,
       student.name,
       student.email,
       firstAvailableSlot.slotStartTime,
       firstAvailableSlot.slotEndTime,
       language,
+      sessionId,
+      student.id,
     );
+
+  if (result.changes === 0) {
+    return NextResponse.json({ code: "SESSION_NOT_FOUND" }, { status: 404 });
+  }
 
   const booking = db
     .prepare(
       `
-      SELECT
-        id,
-        session_id AS sessionId,
-        user_id AS userId,
-        student_name AS studentName,
-        student_email AS studentEmail,
-        slot_start_time AS slotStartTime,
-        slot_end_time AS slotEndTime,
-        language,
-        created_at AS createdAt
-      FROM bookings
-      WHERE id = ?
+        SELECT
+          id,
+          session_id AS sessionId,
+          user_id AS userId,
+          student_name AS studentName,
+          student_email AS studentEmail,
+          slot_start_time AS slotStartTime,
+          slot_end_time AS slotEndTime,
+          language,
+          created_at AS createdAt
+        FROM bookings
+        WHERE id = ?
       `,
     )
     .get(result.lastInsertRowid) as
