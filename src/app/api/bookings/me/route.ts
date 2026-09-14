@@ -36,12 +36,21 @@ export async function GET() {
       FROM bookings
       INNER JOIN booking_sessions
         ON booking_sessions.id = bookings.session_id
-      WHERE bookings.user_id = ?
-        OR bookings.student_email = ?
+      WHERE (
+          bookings.user_id = ?
+      OR (
+          bookings.user_id IS NULL
+      AND bookings.student_email = ?
+    )
+   )
       ORDER BY booking_sessions.date ASC, bookings.slot_start_time ASC
       `,
     )
     .all(student.id, student.email) as StudentBookingLookup[];
 
-  return NextResponse.json(bookings);
+  return NextResponse.json(bookings, {
+    headers: {
+      "Cache-Control": "no-store",
+    },
+  });
 }
