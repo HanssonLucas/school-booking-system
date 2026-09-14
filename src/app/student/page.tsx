@@ -16,6 +16,7 @@ import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import EventAvailableOutlinedIcon from "@mui/icons-material/EventAvailableOutlined";
 import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
 import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
+import StudentRouteGuard from "@/components/auth/StudentRouteGuard";
 import AppHeader from "@/components/layout/AppHeader";
 import BookingSessionList from "@/components/booking/BookingSessionList";
 import BookSessionDialog from "@/components/booking/BookSessionDialog";
@@ -29,8 +30,25 @@ import { useTranslations } from "@/i18n/useTranslations";
 type SortOption = "dateAsc" | "dateDesc" | "availableFirst";
 
 export default function StudentPage() {
+  const { user } = useAuth();
+
+  return (
+    <>
+      <AppHeader />
+      <StudentRouteGuard>
+        {user?.role === "student" && <StudentPageContent key={user.id} />}
+      </StudentRouteGuard>
+    </>
+  );
+}
+
+function StudentPageContent() {
   const [sessions, setSessions] = useState<BookingSession[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<"unauthorized" | "failed" | null>(
+    null,
+  );
+  const [loadAttempt, setLoadAttempt] = useState(0);
   const [successMessage, setSuccessMessage] = useState("");
   const [selectedSessionId, setSelectedSessionId] = useState<number | null>(
     null,
@@ -120,24 +138,36 @@ export default function StudentPage() {
   };
 
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchSessions = async () => {
       try {
-        const response = await fetch("/api/booking-sessions");
+        const response = await fetch("/api/booking-sessions", {
+          cache: "no-store",
+          signal: controller.signal,
+        });
+        if (controller.signal.aborted) return;
 
         if (!response.ok) {
-          console.error("Kunde inte hämta bokningstillfällen");
+          setLoadError(response.status === 401 ? "unauthorized" : "failed");
           return;
         }
 
-        const data: BookingSession[] = await response.json();
-        setSessions(data);
+        const data: unknown = await response.json();
+        if (!Array.isArray(data)) throw new Error("Invalid sessions response");
+        if (!controller.signal.aborted) {
+          setSessions(data as BookingSession[]);
+        }
+      } catch {
+        if (!controller.signal.aborted) setLoadError("failed");
       } finally {
-        setIsLoading(false);
+        if (!controller.signal.aborted) setIsLoading(false);
       }
     };
 
-    fetchSessions();
-  }, []);
+    void fetchSessions();
+    return () => controller.abort();
+  }, [loadAttempt]);
 
   const handleBookSession = (sessionId: number) => {
     setSelectedSessionId(sessionId);
@@ -316,8 +346,6 @@ export default function StudentPage() {
 
   return (
     <>
-      <AppHeader />
-
       <BookSessionDialog
         open={selectedSessionId !== null}
         sessionTitle={selectedSession?.title}
@@ -569,6 +597,45 @@ export default function StudentPage() {
             <Typography color="text.secondary">
               {t.student.loadingSessions}
             </Typography>
+          ) : loadError ? (
+            <Stack spacing={2} sx={{ alignItems: "flex-start" }}>
+              <Alert severity="error" sx={{ borderRadius: 3 }}>
+                {loadError === "unauthorized"
+                  ? t.studentAccess.sessionExpired
+                  : t.studentAccess.loadFailed}
+              </Alert>
+              {loadError === "unauthorized" ? (
+                <Button
+                  href="/login"
+                  variant="contained"
+                  sx={{
+                    borderRadius: 999,
+                    textTransform: "none",
+                    fontWeight: 800,
+                    px: 2.5,
+                  }}
+                >
+                  {t.auth.loginButton}
+                </Button>
+              ) : (
+                <Button
+                  variant="contained"
+                  onClick={() => {
+                    setLoadError(null);
+                    setIsLoading(true);
+                    setLoadAttempt((attempt) => attempt + 1);
+                  }}
+                  sx={{
+                    borderRadius: 999,
+                    textTransform: "none",
+                    fontWeight: 800,
+                    px: 2.5,
+                  }}
+                >
+                  {t.studentAccess.retry}
+                </Button>
+              )}
+            </Stack>
           ) : (
             <BookingSessionList
               sessions={filteredSessions}

@@ -149,6 +149,17 @@ export const translations = {
       invalidToken: "Verifieringslänken är ogiltig eller har redan använts.",
       fallbackError: "Något gick fel när e-postadressen skulle verifieras.",
     },
+    studentAccess: {
+      title: "Studentvyn",
+      description:
+        "Här ser du klassens bokningstillfällen och hanterar dina bokningar.",
+      loginRequired: "Logga in med ett studentkonto för att öppna studentvyn.",
+      forbidden:
+        "Du är inloggad som lärare. Dina tillfällen och klasser finns i lärarvyn.",
+      sessionExpired: "Din session har gått ut. Logga in igen.",
+      loadFailed: "Det gick inte att hämta bokningstillfällen. Försök igen.",
+      retry: "Försök igen",
+    },
     student: {
       title: "Studentvy",
       description:
@@ -602,6 +613,17 @@ export const translations = {
       invalidToken:
         "The verification link is invalid or has already been used.",
       fallbackError: "Something went wrong while verifying your email address.",
+    },
+    studentAccess: {
+      title: "Student view",
+      description:
+        "View sessions for your class and manage your bookings here.",
+      loginRequired: "Sign in with a student account to open the student view.",
+      forbidden:
+        "You are signed in as a teacher. Your sessions and classes are in the teacher view.",
+      sessionExpired: "Your session has expired. Please sign in again.",
+      loadFailed: "Could not load booking sessions. Please try again.",
+      retry: "Try again",
     },
     student: {
       title: "Student view",
