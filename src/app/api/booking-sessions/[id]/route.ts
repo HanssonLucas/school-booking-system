@@ -63,15 +63,22 @@ export async function PATCH(request: Request, context: RouteContext) {
     .prepare(
       `
       SELECT
-        id,
-        start_time AS startTime,
-        end_time AS endTime,
-        slot_duration_minutes AS slotDurationMinutes
+        booking_sessions.id,
+        booking_sessions.start_time AS startTime,
+        booking_sessions.end_time AS endTime,
+        booking_sessions.slot_duration_minutes AS slotDurationMinutes
       FROM booking_sessions
-      WHERE id = ?
-      `,
+      WHERE booking_sessions.id = ?
+        AND booking_sessions.teacher_id = ?
+        AND EXISTS (
+          SELECT 1
+          FROM class_teachers
+          WHERE class_teachers.class_id = booking_sessions.class_id
+            AND class_teachers.teacher_id = ?
+        )
+    `,
     )
-    .get(sessionId) as
+    .get(sessionId, teacher.id, teacher.id) as
     | {
         id: number;
         startTime: string;
@@ -128,29 +135,44 @@ export async function PATCH(request: Request, context: RouteContext) {
     );
   }
 
-  db.prepare(
-    `
-    UPDATE booking_sessions
-    SET
-      title = ?,
-      description = ?,
-      date = ?,
-      start_time = ?,
-      end_time = ?,
-      slot_duration_minutes = ?,
-      max_participants = ?
-    WHERE id = ?
+  const updateResult = db
+    .prepare(
+      `
+      UPDATE booking_sessions
+      SET
+        title = ?,
+        description = ?,
+        date = ?,
+        start_time = ?,
+        end_time = ?,
+        slot_duration_minutes = ?,
+        max_participants = ?
+      WHERE id = ?
+        AND teacher_id = ?
+        AND EXISTS (
+          SELECT 1
+          FROM class_teachers
+          WHERE class_teachers.class_id = booking_sessions.class_id
+            AND class_teachers.teacher_id = ?
+        )
     `,
-  ).run(
-    title,
-    description ?? "",
-    date,
-    startTime,
-    endTime,
-    parsedSlotDurationMinutes,
-    maxParticipants,
-    sessionId,
-  );
+    )
+    .run(
+      title,
+      description ?? "",
+      date,
+      startTime,
+      endTime,
+      parsedSlotDurationMinutes,
+      maxParticipants,
+      sessionId,
+      teacher.id,
+      teacher.id,
+    );
+
+  if (updateResult.changes === 0) {
+    return NextResponse.json({ code: "SESSION_NOT_FOUND" }, { status: 404 });
+  }
 
   const updatedSession = db
     .prepare(
