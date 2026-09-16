@@ -19,6 +19,53 @@ export const translations = {
       viewProfile: "Visa profil",
     },
     home: {
+      gettingStarted: {
+        title: "Från klasskod till bokad tid",
+        description:
+          "Så kommer du igång, oavsett om du är student eller lärare.",
+        student: {
+          title: "För dig som student",
+          steps: [
+            {
+              title: "Skapa ditt konto",
+              description:
+                "Registrera dig som student och verifiera din e-postadress.",
+            },
+            {
+              title: "Gå med i din klass",
+              description:
+                "Använd klasskoden du får av din lärare för att ansluta till klassen.",
+            },
+            {
+              title: "Boka ett tillfälle",
+              description:
+                "Boka ett av klassens tillfällen. Du får automatiskt en ledig tid och en bekräftelse via e-post.",
+            },
+          ],
+        },
+        teacher: {
+          title: "För dig som lärare",
+          steps: [
+            {
+              title: "Skapa ditt lärarkonto",
+              description:
+                "Registrera dig med en lärarkod och verifiera din e-postadress.",
+            },
+            {
+              title: "Samla din klass",
+              description:
+                "Skapa en klass och dela klasskoden med dina studenter.",
+            },
+            {
+              title: "Planera bokningstillfällen",
+              description:
+                "Skapa tillfällen för klassen och få en överblick över studenternas bokningar.",
+            },
+          ],
+        },
+        teacherCodeNotice:
+          "För att skapa ett lärarkonto behöver du en lärarkod. Den är separat från klasskoden som studenter använder.",
+      },
       preview: {
         title: "Så kan dina bokningstillfällen se ut",
         description:
@@ -503,6 +550,53 @@ export const translations = {
       viewProfile: "View profile",
     },
     home: {
+      gettingStarted: {
+        title: "From class code to booked session",
+        description:
+          "Get started in a few steps, whether you are a student or a teacher.",
+        student: {
+          title: "For students",
+          steps: [
+            {
+              title: "Create your account",
+              description:
+                "Register as a student and verify your email address.",
+            },
+            {
+              title: "Join your class",
+              description:
+                "Enter the class code provided by your teacher to join the class.",
+            },
+            {
+              title: "Book a session",
+              description:
+                "Book one of your class sessions. You are automatically assigned an available time and receive an email confirmation.",
+            },
+          ],
+        },
+        teacher: {
+          title: "For teachers",
+          steps: [
+            {
+              title: "Create your teacher account",
+              description:
+                "Register with a teacher signup code and verify your email address.",
+            },
+            {
+              title: "Bring your class together",
+              description:
+                "Create a class and share its class code with your students.",
+            },
+            {
+              title: "Plan booking sessions",
+              description:
+                "Create sessions for your class and keep track of student bookings.",
+            },
+          ],
+        },
+        teacherCodeNotice:
+          "Creating a teacher account requires a teacher signup code. This is separate from the class code used by students.",
+      },
       preview: {
         title: "A look at your booking sessions",
         description:
