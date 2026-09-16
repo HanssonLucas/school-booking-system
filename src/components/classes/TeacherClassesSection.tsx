@@ -9,7 +9,6 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  Divider,
   Paper,
   Stack,
   TextField,
@@ -191,317 +190,374 @@ export default function TeacherClassesSection() {
   };
 
   return (
-    <Paper
+    <Box
       component="section"
       aria-labelledby="teacher-classes-heading"
       data-navigation-loading={
         loadState.status === "loading" ? "true" : "false"
       }
-      variant="outlined"
-      sx={{ p: { xs: 3, md: 4 }, mb: 5, borderRadius: 5, boxShadow: 1 }}
     >
-      <Stack
-        direction={{ xs: "column", sm: "row" }}
-        spacing={2}
-        sx={{ justifyContent: "space-between", alignItems: { sm: "center" } }}
+      <Paper
+        elevation={0}
+        sx={{
+          position: "relative",
+          isolation: "isolate",
+          overflow: "hidden",
+          borderRadius: 5,
+          border: 1,
+          borderColor: "divider",
+          bgcolor: "background.paper",
+          p: { xs: 3, sm: 4, md: 5 },
+          mb: 4,
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            inset: 0,
+            zIndex: -1,
+            bgcolor: "primary.main",
+            opacity: 0.07,
+            pointerEvents: "none",
+          },
+        }}
       >
-        <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
-          <Box
+        <GroupsOutlinedIcon
+          aria-hidden="true"
+          sx={{
+            position: "absolute",
+            right: { sm: 32, md: 48 },
+            top: "50%",
+            transform: "translateY(-50%)",
+            fontSize: 180,
+            color: "primary.main",
+            opacity: 0.1,
+            display: { xs: "none", sm: "block" },
+            pointerEvents: "none",
+            zIndex: -1,
+          }}
+        />
+
+        <Stack spacing={2.5} sx={{ maxWidth: 720 }}>
+          <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+            <SchoolOutlinedIcon
+              fontSize="small"
+              sx={{ color: "primary.main" }}
+            />
+            <Typography
+              variant="overline"
+              sx={{
+                fontWeight: 800,
+                color: "primary.main",
+                letterSpacing: 1.2,
+              }}
+            >
+              {t.common.teacher}
+            </Typography>
+          </Stack>
+
+          <Box>
+            <Typography
+              id="teacher-classes-heading"
+              component="h1"
+              sx={{
+                fontWeight: 900,
+                letterSpacing: -1,
+                lineHeight: 1.15,
+                fontSize: { xs: "2rem", sm: "2.5rem", md: "3rem" },
+                mb: 1.5,
+              }}
+            >
+              {text.title}
+            </Typography>
+            <Typography
+              color="text.secondary"
+              sx={{
+                maxWidth: 600,
+                lineHeight: 1.8,
+                fontSize: { xs: "1rem", sm: "1.1rem" },
+              }}
+            >
+              {text.description}
+            </Typography>
+          </Box>
+
+          <Button
+            color="primary"
+            variant="contained"
+            disableElevation
+            startIcon={<AddRoundedIcon />}
+            disabled={loadState.status !== "ready"}
+            onClick={openDialog}
             sx={{
-              width: 48,
-              height: 48,
-              display: "grid",
-              placeItems: "center",
-              borderRadius: 4,
-              bgcolor: "primary.main",
-              color: "primary.contrastText",
-              boxShadow: 3,
-              flexShrink: 0,
+              ...classButtonSx,
+              alignSelf: "flex-start",
+              minHeight: 46,
+              px: 3,
             }}
           >
-            <SchoolOutlinedIcon />
-          </Box>
-          <Typography
-            id="teacher-classes-heading"
-            variant="h5"
-            component="h2"
-            sx={{ fontWeight: 900, letterSpacing: -0.4 }}
-          >
-            {text.title}
-          </Typography>
+            {text.create}
+          </Button>
         </Stack>
-        <Button
-          color="primary"
-          variant="contained"
-          startIcon={<AddRoundedIcon />}
-          disabled={loadState.status !== "ready"}
-          onClick={openDialog}
-          sx={classButtonSx}
-        >
-          {text.create}
-        </Button>
-      </Stack>
-      <Typography color="text.secondary" sx={{ mt: 2 }}>
-        {text.description}
-      </Typography>
-      <Divider sx={{ my: 3 }} />
+      </Paper>
 
-      {loadState.status === "loading" && (
-        <Stack
-          direction="row"
-          spacing={1.5}
-          role="status"
-          sx={{ alignItems: "center" }}
-        >
-          <CircularProgress size={22} />
-          <Typography>{text.loading}</Typography>
-        </Stack>
-      )}
-      {loadState.status === "error" && (
-        <Stack spacing={2} sx={{ alignItems: "flex-start" }}>
-          <Alert sx={{ borderRadius: 3 }} severity="error">
-            {text[loadState.error]}
-          </Alert>
-          {loadState.error === "verificationRequired" && (
+      <Box sx={{ minWidth: 0 }}>
+        {loadState.status === "loading" && (
+          <Stack
+            direction="row"
+            spacing={1.5}
+            role="status"
+            sx={{ alignItems: "center" }}
+          >
+            <CircularProgress size={22} />
+            <Typography>{text.loading}</Typography>
+          </Stack>
+        )}
+        {loadState.status === "error" && (
+          <Stack spacing={2} sx={{ alignItems: "flex-start" }}>
+            <Alert sx={{ borderRadius: 3 }} severity="error">
+              {text[loadState.error]}
+            </Alert>
+            {loadState.error === "verificationRequired" && (
+              <Button
+                color="primary"
+                sx={classButtonSx}
+                href="/profile"
+                variant="outlined"
+              >
+                {t.profile.title}
+              </Button>
+            )}
             <Button
               color="primary"
               sx={classButtonSx}
-              href="/profile"
-              variant="outlined"
+              onClick={() => {
+                setLoadState({ status: "loading" });
+                setLoadAttempt((attempt) => attempt + 1);
+              }}
             >
-              {t.profile.title}
+              {text.retry}
             </Button>
-          )}
-          <Button
-            color="primary"
-            sx={classButtonSx}
-            onClick={() => {
-              setLoadState({ status: "loading" });
-              setLoadAttempt((attempt) => attempt + 1);
-            }}
-          >
-            {text.retry}
-          </Button>
-        </Stack>
-      )}
-      {loadState.status === "ready" &&
-        (loadState.classes.length === 0 ? (
-          <Typography color="text.secondary">{text.empty}</Typography>
-        ) : (
-          <Stack
-            component="ul"
-            spacing={1.5}
-            sx={{ listStyle: "none", m: 0, p: 0 }}
-          >
-            {[...loadState.classes]
-              .sort(
-                (a, b) => a.name.localeCompare(b.name, language) || a.id - b.id,
-              )
-              .map((schoolClass) => (
-                <Paper
-                  component="li"
-                  key={schoolClass.id}
-                  elevation={1}
-                  sx={{
-                    borderRadius: 4,
-                    overflow: "hidden",
-                    border: 1,
-                    borderColor: "divider",
-                    bgcolor: "background.paper",
-                  }}
-                >
-                  <Stack
-                    direction="row"
-                    spacing={1.5}
-                    sx={{ p: 2.5, alignItems: "center" }}
-                  >
-                    <SchoolOutlinedIcon color="primary" />
-                    <Typography
-                      variant="subtitle1"
-                      sx={{
-                        fontWeight: 900,
-                        letterSpacing: -0.2,
-                        overflowWrap: "anywhere",
-                        minWidth: 0,
-                      }}
-                    >
-                      {schoolClass.name}
-                    </Typography>
-                  </Stack>
-                  <Stack
-                    direction={{ xs: "column", sm: "row" }}
-                    spacing={1}
+          </Stack>
+        )}
+        {loadState.status === "ready" &&
+          (loadState.classes.length === 0 ? (
+            <Typography color="text.secondary">{text.empty}</Typography>
+          ) : (
+            <Stack
+              component="ul"
+              spacing={1.5}
+              sx={{ listStyle: "none", m: 0, p: 0 }}
+            >
+              {[...loadState.classes]
+                .sort(
+                  (a, b) =>
+                    a.name.localeCompare(b.name, language) || a.id - b.id,
+                )
+                .map((schoolClass) => (
+                  <Paper
+                    component="li"
+                    key={schoolClass.id}
+                    elevation={1}
                     sx={{
-                      px: 2.5,
-                      py: 1.5,
-                      borderTop: 1,
+                      borderRadius: 4,
+                      overflow: "hidden",
+                      border: 1,
                       borderColor: "divider",
-                      bgcolor: "action.hover",
-                      justifyContent: "flex-end",
+                      bgcolor: "background.paper",
                     }}
                   >
-                    <Button
-                      variant="outlined"
-                      color="primary"
-                      size="small"
-                      startIcon={<RefreshOutlinedIcon />}
-                      onClick={() => setCodeClass(schoolClass)}
-                      aria-label={`${text.newCode}: ${schoolClass.name}`}
-                      sx={classButtonSx}
+                    <Stack
+                      direction="row"
+                      spacing={1.5}
+                      sx={{ p: 2.5, alignItems: "center" }}
                     >
-                      {text.newCode}
-                    </Button>
+                      <SchoolOutlinedIcon color="primary" />
+                      <Typography
+                        variant="subtitle1"
+                        sx={{
+                          fontWeight: 900,
+                          letterSpacing: -0.2,
+                          overflowWrap: "anywhere",
+                          minWidth: 0,
+                        }}
+                      >
+                        {schoolClass.name}
+                      </Typography>
+                    </Stack>
+                    <Stack
+                      direction={{ xs: "column", sm: "row" }}
+                      spacing={1}
+                      sx={{
+                        px: 2.5,
+                        py: 1.5,
+                        borderTop: 1,
+                        borderColor: "divider",
+                        bgcolor: "action.hover",
+                        justifyContent: "flex-end",
+                      }}
+                    >
+                      <Button
+                        variant="outlined"
+                        color="primary"
+                        size="small"
+                        startIcon={<RefreshOutlinedIcon />}
+                        onClick={() => setCodeClass(schoolClass)}
+                        aria-label={`${text.newCode}: ${schoolClass.name}`}
+                        sx={classButtonSx}
+                      >
+                        {text.newCode}
+                      </Button>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        startIcon={<GroupsOutlinedIcon />}
+                        onClick={() => setSelectedClass(schoolClass)}
+                        aria-label={`${text.viewStudents}: ${schoolClass.name}`}
+                        sx={classButtonSx}
+                      >
+                        {text.viewStudents}
+                      </Button>
+                    </Stack>
+                  </Paper>
+                ))}
+            </Stack>
+          ))}
+
+        {codeClass && (
+          <RegenerateClassCodeDialog
+            key={codeClass.id}
+            schoolClass={codeClass}
+            onClose={() => setCodeClass(null)}
+          />
+        )}
+
+        {selectedClass && (
+          <ClassStudentsDialog
+            key={selectedClass.id}
+            schoolClass={selectedClass}
+            onClose={() => setSelectedClass(null)}
+          />
+        )}
+
+        <Dialog
+          open={isOpen}
+          maxWidth="sm"
+          fullWidth
+          aria-labelledby="create-class-heading"
+          onClose={() => {
+            if (!created) closeDialog();
+          }}
+          slotProps={{ paper: { sx: classDialogPaperSx } }}
+        >
+          <Box component="form" onSubmit={handleCreate}>
+            <ClassDialogHeader
+              id="create-class-heading"
+              title={created ? text.created : text.create}
+              description={text.description}
+              icon={<SchoolOutlinedIcon />}
+            />
+            <DialogContent sx={{ p: { xs: 3, sm: 4 } }}>
+              <Stack spacing={3} sx={{ pt: 1 }}>
+                {error && (
+                  <Alert sx={{ borderRadius: 3 }} severity="error">
+                    {text[error]}
+                  </Alert>
+                )}
+                {created ? (
+                  <>
+                    <Typography
+                      sx={{ fontWeight: 750, overflowWrap: "anywhere" }}
+                    >
+                      {created.schoolClass.name}
+                    </Typography>
+                    <Alert sx={{ borderRadius: 3 }} severity="info">
+                      {text.codeNotice}
+                    </Alert>
+                    <TextField
+                      label={text.codeLabel}
+                      value={created.joinCode}
+                      fullWidth
+                      slotProps={{ input: { readOnly: true } }}
+                      onFocus={(event) => event.target.select()}
+                    />
                     <Button
                       variant="contained"
                       color="primary"
-                      size="small"
-                      startIcon={<GroupsOutlinedIcon />}
-                      onClick={() => setSelectedClass(schoolClass)}
-                      aria-label={`${text.viewStudents}: ${schoolClass.name}`}
                       sx={classButtonSx}
+                      startIcon={<ContentCopyOutlinedIcon />}
+                      onClick={copyCode}
                     >
-                      {text.viewStudents}
+                      {copyStatus === "copied" ? text.copied : text.copy}
                     </Button>
-                  </Stack>
-                </Paper>
-              ))}
-          </Stack>
-        ))}
-
-      {codeClass && (
-        <RegenerateClassCodeDialog
-          key={codeClass.id}
-          schoolClass={codeClass}
-          onClose={() => setCodeClass(null)}
-        />
-      )}
-
-      {selectedClass && (
-        <ClassStudentsDialog
-          key={selectedClass.id}
-          schoolClass={selectedClass}
-          onClose={() => setSelectedClass(null)}
-        />
-      )}
-
-      <Dialog
-        open={isOpen}
-        maxWidth="sm"
-        fullWidth
-        aria-labelledby="create-class-heading"
-        onClose={() => {
-          if (!created) closeDialog();
-        }}
-        slotProps={{ paper: { sx: classDialogPaperSx } }}
-      >
-        <Box component="form" onSubmit={handleCreate}>
-          <ClassDialogHeader
-            id="create-class-heading"
-            title={created ? text.created : text.create}
-            description={text.description}
-            icon={<SchoolOutlinedIcon />}
-          />
-          <DialogContent sx={{ p: { xs: 3, sm: 4 } }}>
-            <Stack spacing={3} sx={{ pt: 1 }}>
-              {error && (
-                <Alert sx={{ borderRadius: 3 }} severity="error">
-                  {text[error]}
-                </Alert>
-              )}
-              {created ? (
-                <>
-                  <Typography
-                    sx={{ fontWeight: 750, overflowWrap: "anywhere" }}
-                  >
-                    {created.schoolClass.name}
-                  </Typography>
-                  <Alert sx={{ borderRadius: 3 }} severity="info">
-                    {text.codeNotice}
-                  </Alert>
+                    {copyStatus === "failed" && (
+                      <Alert sx={{ borderRadius: 3 }} severity="warning">
+                        {text.copyFailed}
+                      </Alert>
+                    )}
+                  </>
+                ) : (
                   <TextField
-                    label={text.codeLabel}
-                    value={created.joinCode}
+                    autoFocus
+                    label={text.nameLabel}
+                    helperText={text.nameHelper}
+                    value={name}
+                    required
                     fullWidth
-                    slotProps={{ input: { readOnly: true } }}
-                    onFocus={(event) => event.target.select()}
+                    disabled={isCreating}
+                    error={error === "invalidName"}
+                    slotProps={{ htmlInput: { maxLength: 100 } }}
+                    onChange={(event) => {
+                      setName(event.target.value);
+                      setError(null);
+                    }}
                   />
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    sx={classButtonSx}
-                    startIcon={<ContentCopyOutlinedIcon />}
-                    onClick={copyCode}
-                  >
-                    {copyStatus === "copied" ? text.copied : text.copy}
-                  </Button>
-                  {copyStatus === "failed" && (
-                    <Alert sx={{ borderRadius: 3 }} severity="warning">
-                      {text.copyFailed}
-                    </Alert>
-                  )}
-                </>
-              ) : (
-                <TextField
-                  autoFocus
-                  label={text.nameLabel}
-                  helperText={text.nameHelper}
-                  value={name}
-                  required
-                  fullWidth
-                  disabled={isCreating}
-                  error={error === "invalidName"}
-                  slotProps={{ htmlInput: { maxLength: 100 } }}
-                  onChange={(event) => {
-                    setName(event.target.value);
-                    setError(null);
-                  }}
-                />
-              )}
-            </Stack>
-          </DialogContent>
-          <DialogActions
-            sx={{
-              px: { xs: 3, sm: 4 },
-              pb: { xs: 3, sm: 4 },
-              pt: 0,
-              gap: 1,
-              flexWrap: "wrap",
-            }}
-          >
-            {created ? (
-              <Button
-                variant="contained"
-                color="primary"
-                sx={classButtonSx}
-                onClick={closeDialog}
-              >
-                {text.done}
-              </Button>
-            ) : (
-              <>
+                )}
+              </Stack>
+            </DialogContent>
+            <DialogActions
+              sx={{
+                px: { xs: 3, sm: 4 },
+                pb: { xs: 3, sm: 4 },
+                pt: 0,
+                gap: 1,
+                flexWrap: "wrap",
+              }}
+            >
+              {created ? (
                 <Button
-                  color="primary"
-                  sx={classButtonSx}
-                  disabled={isCreating}
-                  onClick={closeDialog}
-                >
-                  {text.cancel}
-                </Button>
-                <Button
-                  type="submit"
                   variant="contained"
                   color="primary"
                   sx={classButtonSx}
-                  startIcon={<AddRoundedIcon />}
-                  disabled={isCreating || !name.trim()}
+                  onClick={closeDialog}
                 >
-                  {isCreating ? text.creating : text.create}
+                  {text.done}
                 </Button>
-              </>
-            )}
-          </DialogActions>
-        </Box>
-      </Dialog>
-    </Paper>
+              ) : (
+                <>
+                  <Button
+                    color="primary"
+                    sx={classButtonSx}
+                    disabled={isCreating}
+                    onClick={closeDialog}
+                  >
+                    {text.cancel}
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    color="primary"
+                    sx={classButtonSx}
+                    startIcon={<AddRoundedIcon />}
+                    disabled={isCreating || !name.trim()}
+                  >
+                    {isCreating ? text.creating : text.create}
+                  </Button>
+                </>
+              )}
+            </DialogActions>
+          </Box>
+        </Dialog>
+      </Box>
+    </Box>
   );
 }
