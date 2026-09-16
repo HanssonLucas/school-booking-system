@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   Alert,
   Box,
@@ -31,12 +32,24 @@ type SortOption = "dateAsc" | "dateDesc" | "availableFirst";
 
 export default function StudentPage() {
   const { user } = useAuth();
+  const { t } = useTranslations();
 
   return (
     <>
       <AppHeader />
+
       <StudentRouteGuard>
-        {user?.role === "student" && <StudentPageContent key={user.id} />}
+        <Suspense
+          fallback={
+            <Container sx={{ py: 4 }}>
+              <Typography color="text.secondary">
+                {t.auth.loadingUser}
+              </Typography>
+            </Container>
+          }
+        >
+          {user?.role === "student" && <StudentPageContent key={user.id} />}
+        </Suspense>
       </StudentRouteGuard>
     </>
   );
@@ -54,7 +67,34 @@ function StudentPageContent() {
     null,
   );
   const [cancelSessionId, setCancelSessionId] = useState<number | null>(null);
-  const [isMyBookingsDialogOpen, setIsMyBookingsDialogOpen] = useState(false);
+
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const isMyBookingsDialogOpen = searchParams.get("dialog") === "my-bookings";
+
+  const openMyBookingsDialog = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("dialog", "my-bookings");
+
+    router.push(`${pathname}?${params.toString()}${window.location.hash}`, {
+      scroll: false,
+    });
+  };
+
+  const closeMyBookingsDialog = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("dialog");
+
+    const query = params.toString();
+
+    router.replace(
+      `${pathname}${query ? `?${query}` : ""}${window.location.hash}`,
+      { scroll: false },
+    );
+  };
+
   const [searchQuery, setSearchQuery] = useState("");
   const [showOnlyAvailable, setShowOnlyAvailable] = useState(false);
   const [sortOption, setSortOption] = useState<SortOption>("dateAsc");
@@ -368,7 +408,7 @@ function StudentPageContent() {
         open={isMyBookingsDialogOpen}
         currentUser={currentUser}
         isAuthLoading={isAuthLoading}
-        onClose={() => setIsMyBookingsDialogOpen(false)}
+        onClose={closeMyBookingsDialog}
         onBookingCancelled={handleBookingCancelledFromLookup}
       />
 
@@ -470,7 +510,7 @@ function StudentPageContent() {
                 variant="contained"
                 size="large"
                 startIcon={<SearchOutlinedIcon />}
-                onClick={() => setIsMyBookingsDialogOpen(true)}
+                onClick={openMyBookingsDialog}
                 sx={{
                   borderRadius: 999,
                   textTransform: "none",
