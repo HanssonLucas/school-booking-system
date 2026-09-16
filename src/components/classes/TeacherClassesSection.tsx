@@ -194,6 +194,9 @@ export default function TeacherClassesSection() {
     <Paper
       component="section"
       aria-labelledby="teacher-classes-heading"
+      data-navigation-loading={
+        loadState.status === "loading" ? "true" : "false"
+      }
       variant="outlined"
       sx={{ p: { xs: 3, md: 4 }, mb: 5, borderRadius: 5, boxShadow: 1 }}
     >
