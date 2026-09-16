@@ -382,3 +382,48 @@ export const regenerateClassJoinCodeForTeacher = (
 ): RegenerateClassJoinCodeResult | null => {
   return regenerateClassJoinCodeTransaction.immediate(teacherId, classId);
 };
+
+export const renameClassForTeacher = (
+  teacherId: number,
+  classId: number,
+  name: unknown,
+): StudentClass | null => {
+  if (typeof name !== "string") {
+    throw new ClassManagementError("INVALID_CLASS_NAME");
+  }
+
+  const normalizedName = name.trim();
+
+  if (!normalizedName || normalizedName.length > MAX_CLASS_NAME_LENGTH) {
+    throw new ClassManagementError("INVALID_CLASS_NAME");
+  }
+
+  const result = db
+    .prepare(
+      `
+        UPDATE classes
+        SET name = ?
+        WHERE id = ?
+          AND EXISTS (
+            SELECT 1
+            FROM class_teachers
+            INNER JOIN users
+              ON users.id = class_teachers.teacher_id
+            WHERE class_teachers.class_id = classes.id
+              AND class_teachers.teacher_id = ?
+              AND users.role = 'teacher'
+              AND users.email_verified_at IS NOT NULL
+          )
+      `,
+    )
+    .run(normalizedName, classId, teacherId);
+
+  if (result.changes === 0) {
+    return null;
+  }
+
+  return {
+    id: classId,
+    name: normalizedName,
+  };
+};
