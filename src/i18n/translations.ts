@@ -18,6 +18,16 @@ export const translations = {
       navigationMenu: "Meny",
       viewProfile: "Visa profil",
     },
+    header: {
+      navigation: "Huvudnavigation",
+      howItWorks: "Så fungerar det",
+      examples: "Exempel",
+      bookSession: "Boka tid",
+      myBookings: "Mina bokningar",
+      mySessions: "Mina tillfällen",
+      myClasses: "Mina klasser",
+      createSession: "Skapa tillfälle",
+    },
     home: {
       gettingStarted: {
         title: "Från klasskod till bokad tid",
@@ -548,6 +558,16 @@ export const translations = {
       closeNavigationMenu: "Close navigation menu",
       navigationMenu: "Menu",
       viewProfile: "View profile",
+    },
+    header: {
+      navigation: "Main navigation",
+      howItWorks: "How it works",
+      examples: "Examples",
+      bookSession: "Book a session",
+      myBookings: "My bookings",
+      mySessions: "My sessions",
+      myClasses: "My classes",
+      createSession: "Create session",
     },
     home: {
       gettingStarted: {
