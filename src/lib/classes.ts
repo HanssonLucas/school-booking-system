@@ -427,3 +427,71 @@ export const renameClassForTeacher = (
     name: normalizedName,
   };
 };
+
+type DeleteClassResult =
+  | { status: "deleted"; deletedClassId: number }
+  | { status: "notFound" }
+  | { status: "notEmpty" };
+
+const deleteClassTransaction = db.transaction(
+  (teacherId: number, classId: number): DeleteClassResult => {
+    const schoolClass = db
+      .prepare(
+        `
+          SELECT classes.id
+          FROM classes
+          INNER JOIN class_teachers
+            ON class_teachers.class_id = classes.id
+          INNER JOIN users
+            ON users.id = class_teachers.teacher_id
+          WHERE classes.id = ?
+            AND class_teachers.teacher_id = ?
+            AND users.role = 'teacher'
+            AND users.email_verified_at IS NOT NULL
+        `,
+      )
+      .get(classId, teacherId) as { id: number } | undefined;
+
+    // Check access before revealing whether the class has any content.
+    if (!schoolClass) {
+      return { status: "notFound" };
+    }
+
+    const usage = db
+      .prepare(
+        `
+          SELECT
+            EXISTS (
+              SELECT 1 FROM class_students WHERE class_id = ?
+            ) AS hasStudents,
+            EXISTS (
+              SELECT 1 FROM booking_sessions WHERE class_id = ?
+            ) AS hasSessions
+        `,
+      )
+      .get(classId, classId) as {
+      hasStudents: number;
+      hasSessions: number;
+    };
+
+    if (usage.hasStudents || usage.hasSessions) {
+      return { status: "notEmpty" };
+    }
+
+    const result = db.prepare("DELETE FROM classes WHERE id = ?").run(classId);
+
+    if (result.changes !== 1) {
+      throw new Error("Failed to delete class");
+    }
+
+    return { status: "deleted", deletedClassId: classId };
+  },
+);
+
+export const deleteClassForTeacher = (
+  teacherId: number,
+  classId: number,
+): DeleteClassResult => {
+  // Keep the access check, usage check and deletion in one write transaction.
+  return deleteClassTransaction.immediate(teacherId, classId);
+};
