@@ -19,6 +19,14 @@ export const translations = {
       viewProfile: "Visa profil",
     },
     home: {
+      hero: {
+        eyebrow: "För studenter och lärare",
+        title: "Mer tid för handledning.",
+        titleAccent: "Mindre bokningskrångel.",
+        description:
+          "Samla handledning och muntliga redovisningar på ett ställe. Lärare skapar tillfällen för sina klasser och studenter bokar en tid.",
+        overviewButton: "Gå till min översikt",
+      },
       title: "Bokningssystem",
       description:
         "Ett enkelt system där studenter kan boka tider för handledning och muntliga redovisningar.",
@@ -483,6 +491,14 @@ export const translations = {
       viewProfile: "View profile",
     },
     home: {
+      hero: {
+        eyebrow: "For students and teachers",
+        title: "More time for learning.",
+        titleAccent: "Less booking hassle.",
+        description:
+          "Bring supervision and oral presentations together in one place. Teachers create sessions for their classes and students book a time.",
+        overviewButton: "Go to my overview",
+      },
       title: "Booking system",
       description:
         "A simple system where students can book sessions for supervision and oral presentations.",
