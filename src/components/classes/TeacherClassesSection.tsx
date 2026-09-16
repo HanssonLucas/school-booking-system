@@ -21,6 +21,8 @@ import ClassDialogHeader, {
   classButtonSx,
   classDialogPaperSx,
 } from "./ClassDialogHeader";
+import RenameClassDialog from "./RenameClassDialog";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import RegenerateClassCodeDialog from "./RegenerateClassCodeDialog";
 import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
 import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
@@ -72,6 +74,7 @@ export default function TeacherClassesSection() {
   const text = t.teacherClasses;
   const [loadState, setLoadState] = useState<LoadState>({ status: "loading" });
   const [loadAttempt, setLoadAttempt] = useState(0);
+  const [renameClass, setRenameClass] = useState<SchoolClass | null>(null);
   const [codeClass, setCodeClass] = useState<SchoolClass | null>(null);
   const [selectedClass, setSelectedClass] = useState<SchoolClass | null>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -399,6 +402,17 @@ export default function TeacherClassesSection() {
                         variant="outlined"
                         color="primary"
                         size="small"
+                        startIcon={<EditOutlinedIcon />}
+                        onClick={() => setRenameClass(schoolClass)}
+                        aria-label={`${text.rename}: ${schoolClass.name}`}
+                        sx={classButtonSx}
+                      >
+                        {text.rename}
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        color="primary"
+                        size="small"
                         startIcon={<RefreshOutlinedIcon />}
                         onClick={() => setCodeClass(schoolClass)}
                         aria-label={`${text.newCode}: ${schoolClass.name}`}
@@ -422,6 +436,29 @@ export default function TeacherClassesSection() {
                 ))}
             </Stack>
           ))}
+
+        {renameClass && (
+          <RenameClassDialog
+            key={renameClass.id}
+            schoolClass={renameClass}
+            onClose={() => setRenameClass(null)}
+            onSaved={(updatedClass) => {
+              setLoadState((current) =>
+                current.status === "ready"
+                  ? {
+                      status: "ready",
+                      classes: current.classes.map((item) =>
+                        item.id === updatedClass.id
+                          ? { ...item, name: updatedClass.name }
+                          : item,
+                      ),
+                    }
+                  : current,
+              );
+              setRenameClass(null);
+            }}
+          />
+        )}
 
         {codeClass && (
           <RegenerateClassCodeDialog

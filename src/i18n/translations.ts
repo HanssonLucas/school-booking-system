@@ -300,6 +300,17 @@ export const translations = {
         "Verifiera din e-postadress på profilsidan för att byta klasskod.",
     },
     teacherClasses: {
+      rename: "Byt namn",
+      renameTitle: "Byt klassnamn",
+      renameDescription:
+        "Ge klassen ett nytt namn som är enkelt att känna igen.",
+      saveName: "Spara namn",
+      savingName: "Sparar…",
+      renameFailed:
+        "Det gick inte att bekräfta namnbytet. Försök igen eller ladda om sidan för att kontrollera namnet.",
+      classNotFound:
+        "Klassen finns inte längre eller så har du inte längre tillgång till den.",
+
       newCode: "Ny klasskod",
       viewStudents: "Visa elever",
       title: "Mina klasser",
@@ -842,6 +853,16 @@ export const translations = {
         "Verify your email address on your profile to replace the class code.",
     },
     teacherClasses: {
+      rename: "Rename",
+      renameTitle: "Rename class",
+      renameDescription: "Give the class a new name that is easy to recognise.",
+      saveName: "Save name",
+      savingName: "Saving…",
+      renameFailed:
+        "Could not confirm the name change. Try again or reload the page to check the name.",
+      classNotFound:
+        "The class no longer exists or you no longer have access to it.",
+
       newCode: "New class code",
       viewStudents: "View students",
       title: "My classes",
