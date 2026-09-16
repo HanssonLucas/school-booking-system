@@ -111,7 +111,12 @@ export default function HomeGettingStarted() {
   const content = t.home.gettingStarted;
 
   return (
-    <Box component="section" aria-labelledby="getting-started-title">
+    <Box
+      id="getting-started"
+      component="section"
+      aria-labelledby="getting-started-title"
+      sx={{ scrollMarginTop: 104 }}
+    >
       <Box sx={{ mb: 3, maxWidth: 720 }}>
         <Typography
           id="getting-started-title"

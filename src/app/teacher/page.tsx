@@ -645,11 +645,13 @@ function TeacherPageContent() {
           </Box>
         </Paper>
 
-        {currentUser && (
-          <TeacherClassesSection
-            key={`${currentUser.id}:${currentUser.emailVerified}`}
-          />
-        )}
+        <Box id="teacher-classes" sx={{ scrollMarginTop: 104 }}>
+          {currentUser && (
+            <TeacherClassesSection
+              key={`${currentUser.id}:${currentUser.emailVerified}`}
+            />
+          )}
+        </Box>
 
         <Paper
           id="teacher-sessions"

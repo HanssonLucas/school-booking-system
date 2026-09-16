@@ -11,9 +11,11 @@ export default function HomeBookingPreview() {
 
   return (
     <Paper
+      id="booking-preview"
       component="section"
       aria-labelledby="booking-preview-title"
       sx={{
+        scrollMarginTop: 104,
         mt: 6,
         p: { xs: 2, sm: 3, md: 4 },
         borderRadius: 5,
