@@ -300,6 +300,17 @@ export const translations = {
         "Verifiera din e-postadress på profilsidan för att byta klasskod.",
     },
     teacherClasses: {
+      deleteClass: "Ta bort klass",
+      deleteTitle: "Ta bort klassen?",
+      deleteDescription: "Du är på väg att ta bort följande klass.",
+      deleteNotice:
+        "Borttagningen kan inte ångras. Endast klasser utan elever och bokningstillfällen kan tas bort.",
+      deleting: "Tar bort…",
+      classNotEmpty:
+        "Klassen kan inte tas bort eftersom den har elever eller bokningstillfällen.",
+      deleteFailed:
+        "Det gick inte att bekräfta borttagningen. Stäng dialogen och ladda om sidan för att kontrollera om klassen finns kvar.",
+
       rename: "Byt namn",
       renameTitle: "Byt klassnamn",
       renameDescription:
@@ -853,6 +864,17 @@ export const translations = {
         "Verify your email address on your profile to replace the class code.",
     },
     teacherClasses: {
+      deleteClass: "Delete class",
+      deleteTitle: "Delete this class?",
+      deleteDescription: "You are about to delete the following class.",
+      deleteNotice:
+        "Deletion cannot be undone. Only classes without students and booking sessions can be deleted.",
+      deleting: "Deleting…",
+      classNotEmpty:
+        "This class cannot be deleted because it has students or booking sessions.",
+      deleteFailed:
+        "Could not confirm the deletion. Close the dialog and reload the page to check whether the class still exists.",
+
       rename: "Rename",
       renameTitle: "Rename class",
       renameDescription: "Give the class a new name that is easy to recognise.",

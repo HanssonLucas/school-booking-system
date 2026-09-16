@@ -21,6 +21,8 @@ import ClassDialogHeader, {
   classButtonSx,
   classDialogPaperSx,
 } from "./ClassDialogHeader";
+import DeleteClassDialog from "./DeleteClassDialog";
+import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import RenameClassDialog from "./RenameClassDialog";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import RegenerateClassCodeDialog from "./RegenerateClassCodeDialog";
@@ -74,6 +76,7 @@ export default function TeacherClassesSection() {
   const text = t.teacherClasses;
   const [loadState, setLoadState] = useState<LoadState>({ status: "loading" });
   const [loadAttempt, setLoadAttempt] = useState(0);
+  const [deleteClass, setDeleteClass] = useState<SchoolClass | null>(null);
   const [renameClass, setRenameClass] = useState<SchoolClass | null>(null);
   const [codeClass, setCodeClass] = useState<SchoolClass | null>(null);
   const [selectedClass, setSelectedClass] = useState<SchoolClass | null>(null);
@@ -389,7 +392,9 @@ export default function TeacherClassesSection() {
                     <Stack
                       direction={{ xs: "column", sm: "row" }}
                       spacing={1}
+                      useFlexGap
                       sx={{
+                        flexWrap: "wrap",
                         px: 2.5,
                         py: 1.5,
                         borderTop: 1,
@@ -431,11 +436,43 @@ export default function TeacherClassesSection() {
                       >
                         {text.viewStudents}
                       </Button>
+                      <Button
+                        variant="outlined"
+                        color="error"
+                        size="small"
+                        startIcon={<DeleteOutlineOutlinedIcon />}
+                        onClick={() => setDeleteClass(schoolClass)}
+                        aria-label={`${text.deleteClass}: ${schoolClass.name}`}
+                        sx={classButtonSx}
+                      >
+                        {text.deleteClass}
+                      </Button>
                     </Stack>
                   </Paper>
                 ))}
             </Stack>
           ))}
+
+        {deleteClass && (
+          <DeleteClassDialog
+            key={deleteClass.id}
+            schoolClass={deleteClass}
+            onClose={() => setDeleteClass(null)}
+            onDeleted={(classId) => {
+              setLoadState((current) =>
+                current.status === "ready"
+                  ? {
+                      status: "ready",
+                      classes: current.classes.filter(
+                        (item) => item.id !== classId,
+                      ),
+                    }
+                  : current,
+              );
+              setDeleteClass(null);
+            }}
+          />
+        )}
 
         {renameClass && (
           <RenameClassDialog
