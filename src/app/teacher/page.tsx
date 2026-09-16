@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Box,
@@ -27,7 +27,7 @@ import EditBookingSessionDialog, {
 import BookingSessionList from "@/components/booking/BookingSessionList";
 import SessionFilterControls from "@/components/booking/SessionFilterControls";
 import { useTranslations } from "@/i18n/useTranslations";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
 import { useAuth } from "@/components/auth/useAuth";
 import type {
@@ -42,12 +42,24 @@ import TeacherClassesSection from "@/components/classes/TeacherClassesSection";
 type SortOption = "dateAsc" | "dateDesc" | "bookedFirst";
 
 export default function TeacherPage() {
+  const { t } = useTranslations();
+
   return (
     <>
       <AppHeader />
 
       <TeacherRouteGuard>
-        <TeacherPageContent />
+        <Suspense
+          fallback={
+            <Container sx={{ py: 4 }}>
+              <Typography color="text.secondary">
+                {t.auth.loadingUser}
+              </Typography>
+            </Container>
+          }
+        >
+          <TeacherPageContent />
+        </Suspense>
       </TeacherRouteGuard>
     </>
   );
@@ -59,7 +71,7 @@ function TeacherPageContent() {
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [editingSessionId, setEditingSessionId] = useState<number | null>(null);
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+
   const [viewBookingsSessionId, setViewBookingsSessionId] = useState<
     number | null
   >(null);
@@ -70,6 +82,31 @@ function TeacherPageContent() {
   const [sortOption, setSortOption] = useState<SortOption>("dateAsc");
 
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const isCreateDialogOpen = searchParams.get("dialog") === "create-session";
+
+  const openCreateDialog = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("dialog", "create-session");
+
+    router.push(`${pathname}?${params.toString()}${window.location.hash}`, {
+      scroll: false,
+    });
+  };
+
+  const closeCreateDialog = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("dialog");
+
+    const query = params.toString();
+
+    router.replace(
+      `${pathname}${query ? `?${query}` : ""}${window.location.hash}`,
+      { scroll: false },
+    );
+  };
   const { user: currentUser } = useAuth();
 
   const { t } = useTranslations();
@@ -187,7 +224,7 @@ function TeacherPageContent() {
     const createdSession: BookingSession = await response.json();
 
     setSessions((currentSessions) => [createdSession, ...currentSessions]);
-    setIsCreateDialogOpen(false);
+    closeCreateDialog();
     setErrorMessage("");
     setSuccessMessage(t.teacher.createSuccess);
   };
@@ -295,7 +332,7 @@ function TeacherPageContent() {
     <>
       <Dialog
         open={isCreateDialogOpen}
-        onClose={() => setIsCreateDialogOpen(false)}
+        onClose={closeCreateDialog}
         maxWidth={currentUser?.emailVerified === false ? "sm" : "md"}
         fullWidth
         slotProps={{
@@ -366,7 +403,7 @@ function TeacherPageContent() {
                   }}
                 >
                   <Button
-                    onClick={() => setIsCreateDialogOpen(false)}
+                    onClick={closeCreateDialog}
                     sx={{
                       borderRadius: 999,
                       textTransform: "none",
@@ -534,7 +571,7 @@ function TeacherPageContent() {
                 variant="contained"
                 size="large"
                 startIcon={<AddRoundedIcon />}
-                onClick={() => setIsCreateDialogOpen(true)}
+                onClick={openCreateDialog}
                 sx={{
                   borderRadius: 999,
                   textTransform: "none",
