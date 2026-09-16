@@ -19,6 +19,18 @@ export const translations = {
       viewProfile: "Visa profil",
     },
     home: {
+      preview: {
+        title: "Så kan dina bokningstillfällen se ut",
+        description:
+          "Se tid, längd och lediga platser direkt. Dina riktiga tillfällen hittar du i din student- eller lärarvy.",
+        notice: "Exempel – inga riktiga bokningar",
+        supervisionTitle: "Handledning i webbutveckling",
+        supervisionDescription:
+          "Gå igenom ditt projekt, ställ frågor och få hjälp med nästa steg.",
+        presentationTitle: "Muntlig redovisning",
+        presentationDescription:
+          "Presentera din lösning och diskutera dina tekniska val med läraren.",
+      },
       hero: {
         eyebrow: "För studenter och lärare",
         title: "Mer tid för handledning.",
@@ -491,6 +503,18 @@ export const translations = {
       viewProfile: "View profile",
     },
     home: {
+      preview: {
+        title: "A look at your booking sessions",
+        description:
+          "See session times, duration and available places at a glance. Find your actual sessions in your student or teacher view.",
+        notice: "Examples – not real bookings",
+        supervisionTitle: "Web development supervision",
+        supervisionDescription:
+          "Review your project, ask questions and get help with your next steps.",
+        presentationTitle: "Oral presentation",
+        presentationDescription:
+          "Present your solution and discuss your technical decisions with your teacher.",
+      },
       hero: {
         eyebrow: "For students and teachers",
         title: "More time for learning.",
