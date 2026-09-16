@@ -93,7 +93,7 @@ export default function AppHeader() {
           },
           {
             label: t.header.myClasses,
-            href: "/teacher#teacher-classes",
+            href: "/teacher/classes",
             icon: <GroupsOutlinedIcon />,
           },
         ]
@@ -129,7 +129,9 @@ export default function AppHeader() {
               key={link.href}
               component={Link}
               href={link.href}
-              scroll={false}
+              scroll={
+                !link.href.includes("#") && !link.href.includes("?dialog=")
+              }
               onClick={closeMenu}
               aria-current={active ? "location" : undefined}
               startIcon={link.icon}
