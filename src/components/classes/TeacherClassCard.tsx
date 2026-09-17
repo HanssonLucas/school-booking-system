@@ -1,0 +1,227 @@
+"use client";
+
+import { useId, useRef, useState } from "react";
+import {
+  Box,
+  Button,
+  Divider,
+  IconButton,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
+  Paper,
+  Stack,
+  Tooltip,
+  Typography,
+} from "@mui/material";
+import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
+import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
+import MoreHorizRoundedIcon from "@mui/icons-material/MoreHorizRounded";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
+import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
+import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
+import { useTranslations } from "@/i18n/useTranslations";
+import { classButtonSx } from "./ClassDialogHeader";
+
+type TeacherClassCardProps = {
+  schoolClass: { id: number; name: string };
+  onViewStudents: () => void;
+  onRename: () => void;
+  onRegenerateCode: () => void;
+  onDelete: () => void;
+};
+
+export default function TeacherClassCard({
+  schoolClass,
+  onViewStudents,
+  onRename,
+  onRegenerateCode,
+  onDelete,
+}: TeacherClassCardProps) {
+  const { t } = useTranslations();
+  const text = t.teacherClasses;
+  const id = useId();
+  const menuButton = useRef<HTMLButtonElement>(null);
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const menuOpen = Boolean(anchorEl);
+
+  const closeMenu = () => {
+    setAnchorEl(null);
+    menuButton.current?.focus();
+  };
+  const selectAction = (action: () => void) => {
+    // Restore focus to the persistent button before the dialog opens.
+    closeMenu();
+    action();
+  };
+
+  return (
+    <Paper
+      component="li"
+      elevation={0}
+      aria-labelledby={`${id}-title`}
+      sx={{
+        minWidth: 0,
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        border: 1,
+        borderColor: "divider",
+        borderRadius: 4,
+        bgcolor: "background.paper",
+        overflow: "hidden",
+        transition: "border-color 160ms ease, box-shadow 160ms ease",
+        "&:hover, &:focus-within": {
+          borderColor: "primary.main",
+          boxShadow: 2,
+        },
+        "@media (prefers-reduced-motion: reduce)": { transition: "none" },
+      }}
+    >
+      <Box
+        sx={{
+          position: "relative",
+          isolation: "isolate",
+          p: { xs: 2.5, sm: 3 },
+          flex: 1,
+          "&::before": {
+            content: '\"\"',
+            position: "absolute",
+            inset: 0,
+            zIndex: -1,
+            bgcolor: "primary.main",
+            opacity: 0.055,
+            pointerEvents: "none",
+          },
+        }}
+      >
+        <Stack
+          direction="row"
+          sx={{
+            alignItems: "flex-start",
+            justifyContent: "space-between",
+            mb: 2.5,
+          }}
+        >
+          <Box
+            sx={{
+              width: 52,
+              height: 52,
+              borderRadius: 3,
+              position: "relative",
+              display: "grid",
+              placeItems: "center",
+              color: "primary.main",
+              "&::before": {
+                content: '\"\"',
+                position: "absolute",
+                inset: 0,
+                borderRadius: "inherit",
+                bgcolor: "primary.main",
+                opacity: 0.12,
+              },
+            }}
+          >
+            <SchoolOutlinedIcon sx={{ fontSize: 28 }} />
+          </Box>
+          <Tooltip title={text.classActions}>
+            <IconButton
+              ref={menuButton}
+              id={`${id}-actions`}
+              aria-label={`${text.classActions}: ${schoolClass.name}`}
+              aria-haspopup="menu"
+              aria-expanded={menuOpen ? true : undefined}
+              aria-controls={menuOpen ? `${id}-menu` : undefined}
+              onClick={(event) => setAnchorEl(event.currentTarget)}
+              sx={{ width: 44, height: 44, color: "text.secondary" }}
+            >
+              <MoreHorizRoundedIcon />
+            </IconButton>
+          </Tooltip>
+        </Stack>
+        <Typography
+          variant="overline"
+          sx={{ color: "primary.main", fontWeight: 800, letterSpacing: 1.2 }}
+        >
+          {text.classLabel}
+        </Typography>
+        <Typography
+          id={`${id}-title`}
+          component="h2"
+          sx={{
+            fontSize: { xs: "1.25rem", sm: "1.45rem" },
+            fontWeight: 800,
+            letterSpacing: -0.4,
+            lineHeight: 1.35,
+            overflowWrap: "anywhere",
+            mt: 0.5,
+          }}
+        >
+          {schoolClass.name}
+        </Typography>
+      </Box>
+      <Box sx={{ p: { xs: 2.5, sm: 3 }, borderTop: 1, borderColor: "divider" }}>
+        <Button
+          variant="contained"
+          disableElevation
+          startIcon={<GroupsOutlinedIcon />}
+          endIcon={<ArrowForwardRoundedIcon />}
+          onClick={onViewStudents}
+          aria-label={`${text.viewStudents}: ${schoolClass.name}`}
+          sx={{ ...classButtonSx, minHeight: 44, px: 2.5 }}
+        >
+          {text.viewStudents}
+        </Button>
+      </Box>
+      <Menu
+        id={`${id}-menu`}
+        anchorEl={anchorEl}
+        open={menuOpen}
+        onClose={closeMenu}
+        disableRestoreFocus
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        transformOrigin={{ vertical: "top", horizontal: "right" }}
+        slotProps={{
+          list: { "aria-labelledby": `${id}-actions` },
+          paper: {
+            sx: {
+              minWidth: 220,
+              borderRadius: 3,
+              mt: 0.5,
+              border: 1,
+              borderColor: "divider",
+            },
+          },
+        }}
+      >
+        <MenuItem onClick={() => selectAction(onRename)} sx={{ minHeight: 44 }}>
+          <ListItemIcon>
+            <EditOutlinedIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>{text.rename}</ListItemText>
+        </MenuItem>
+        <MenuItem
+          onClick={() => selectAction(onRegenerateCode)}
+          sx={{ minHeight: 44 }}
+        >
+          <ListItemIcon>
+            <RefreshOutlinedIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>{text.newCode}</ListItemText>
+        </MenuItem>
+        <Divider />
+        <MenuItem
+          onClick={() => selectAction(onDelete)}
+          sx={{ minHeight: 44, color: "error.main" }}
+        >
+          <ListItemIcon sx={{ color: "error.main" }}>
+            <DeleteOutlineOutlinedIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>{text.deleteClass}</ListItemText>
+        </MenuItem>
+      </Menu>
+    </Paper>
+  );
+}

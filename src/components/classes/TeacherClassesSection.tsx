@@ -21,12 +21,10 @@ import ClassDialogHeader, {
   classButtonSx,
   classDialogPaperSx,
 } from "./ClassDialogHeader";
+import TeacherClassCard from "./TeacherClassCard";
 import DeleteClassDialog from "./DeleteClassDialog";
-import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import RenameClassDialog from "./RenameClassDialog";
-import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import RegenerateClassCodeDialog from "./RegenerateClassCodeDialog";
-import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
 import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
 import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
 import { useTranslations } from "@/i18n/useTranslations";
@@ -348,10 +346,19 @@ export default function TeacherClassesSection() {
           (loadState.classes.length === 0 ? (
             <Typography color="text.secondary">{text.empty}</Typography>
           ) : (
-            <Stack
+            <Box
               component="ul"
-              spacing={1.5}
-              sx={{ listStyle: "none", m: 0, p: 0 }}
+              sx={{
+                listStyle: "none",
+                m: 0,
+                p: 0,
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "minmax(0, 1fr)",
+                  md: "repeat(2, minmax(0, 1fr))",
+                },
+                gap: 3,
+              }}
             >
               {[...loadState.classes]
                 .sort(
@@ -359,98 +366,16 @@ export default function TeacherClassesSection() {
                     a.name.localeCompare(b.name, language) || a.id - b.id,
                 )
                 .map((schoolClass) => (
-                  <Paper
-                    component="li"
+                  <TeacherClassCard
                     key={schoolClass.id}
-                    elevation={1}
-                    sx={{
-                      borderRadius: 4,
-                      overflow: "hidden",
-                      border: 1,
-                      borderColor: "divider",
-                      bgcolor: "background.paper",
-                    }}
-                  >
-                    <Stack
-                      direction="row"
-                      spacing={1.5}
-                      sx={{ p: 2.5, alignItems: "center" }}
-                    >
-                      <SchoolOutlinedIcon color="primary" />
-                      <Typography
-                        variant="subtitle1"
-                        sx={{
-                          fontWeight: 900,
-                          letterSpacing: -0.2,
-                          overflowWrap: "anywhere",
-                          minWidth: 0,
-                        }}
-                      >
-                        {schoolClass.name}
-                      </Typography>
-                    </Stack>
-                    <Stack
-                      direction={{ xs: "column", sm: "row" }}
-                      spacing={1}
-                      useFlexGap
-                      sx={{
-                        flexWrap: "wrap",
-                        px: 2.5,
-                        py: 1.5,
-                        borderTop: 1,
-                        borderColor: "divider",
-                        bgcolor: "action.hover",
-                        justifyContent: "flex-end",
-                      }}
-                    >
-                      <Button
-                        variant="outlined"
-                        color="primary"
-                        size="small"
-                        startIcon={<EditOutlinedIcon />}
-                        onClick={() => setRenameClass(schoolClass)}
-                        aria-label={`${text.rename}: ${schoolClass.name}`}
-                        sx={classButtonSx}
-                      >
-                        {text.rename}
-                      </Button>
-                      <Button
-                        variant="outlined"
-                        color="primary"
-                        size="small"
-                        startIcon={<RefreshOutlinedIcon />}
-                        onClick={() => setCodeClass(schoolClass)}
-                        aria-label={`${text.newCode}: ${schoolClass.name}`}
-                        sx={classButtonSx}
-                      >
-                        {text.newCode}
-                      </Button>
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        size="small"
-                        startIcon={<GroupsOutlinedIcon />}
-                        onClick={() => setSelectedClass(schoolClass)}
-                        aria-label={`${text.viewStudents}: ${schoolClass.name}`}
-                        sx={classButtonSx}
-                      >
-                        {text.viewStudents}
-                      </Button>
-                      <Button
-                        variant="outlined"
-                        color="error"
-                        size="small"
-                        startIcon={<DeleteOutlineOutlinedIcon />}
-                        onClick={() => setDeleteClass(schoolClass)}
-                        aria-label={`${text.deleteClass}: ${schoolClass.name}`}
-                        sx={classButtonSx}
-                      >
-                        {text.deleteClass}
-                      </Button>
-                    </Stack>
-                  </Paper>
+                    schoolClass={schoolClass}
+                    onViewStudents={() => setSelectedClass(schoolClass)}
+                    onRename={() => setRenameClass(schoolClass)}
+                    onRegenerateCode={() => setCodeClass(schoolClass)}
+                    onDelete={() => setDeleteClass(schoolClass)}
+                  />
                 ))}
-            </Stack>
+            </Box>
           ))}
 
         {deleteClass && (

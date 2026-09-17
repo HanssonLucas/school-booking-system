@@ -300,6 +300,8 @@ export const translations = {
         "Verifiera din e-postadress på profilsidan för att byta klasskod.",
     },
     teacherClasses: {
+      classLabel: "Klass",
+      classActions: "Hantera klass",
       deleteClass: "Ta bort klass",
       deleteTitle: "Ta bort klassen?",
       deleteDescription: "Du är på väg att ta bort följande klass.",
@@ -864,6 +866,8 @@ export const translations = {
         "Verify your email address on your profile to replace the class code.",
     },
     teacherClasses: {
+      classLabel: "Class",
+      classActions: "Manage class",
       deleteClass: "Delete class",
       deleteTitle: "Delete this class?",
       deleteDescription: "You are about to delete the following class.",
