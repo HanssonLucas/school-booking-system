@@ -80,6 +80,7 @@ const createClassTransaction = db.transaction(
       id: classId,
       name,
       createdByUserId: teacherId,
+      studentCount: 0,
     };
   },
 );
@@ -115,6 +116,7 @@ export type TeacherClass = {
   name: string;
   createdByUserId: number;
   createdAt: string;
+  studentCount: number;
 };
 
 export const getClassesForTeacher = (teacherId: number): TeacherClass[] => {
@@ -125,7 +127,15 @@ export const getClassesForTeacher = (teacherId: number): TeacherClass[] => {
           classes.id,
           classes.name,
           classes.created_by_user_id AS createdByUserId,
-          classes.created_at AS createdAt
+          classes.created_at AS createdAt,
+          (
+            SELECT COUNT(*)
+            FROM class_students
+            INNER JOIN users
+              ON users.id = class_students.student_id
+            WHERE class_students.class_id = classes.id
+              AND users.role = 'student'
+          ) AS studentCount
         FROM classes
         INNER JOIN class_teachers
           ON class_teachers.class_id = classes.id
