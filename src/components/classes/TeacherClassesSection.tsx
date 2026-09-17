@@ -21,6 +21,8 @@ import ClassDialogHeader, {
   classButtonSx,
   classDialogPaperSx,
 } from "./ClassDialogHeader";
+import ClassesHelpDialog from "./ClassesHelpDialog";
+import HelpOutlineRoundedIcon from "@mui/icons-material/HelpOutlineRounded";
 import TeacherClassCard from "./TeacherClassCard";
 import DeleteClassDialog from "./DeleteClassDialog";
 import RenameClassDialog from "./RenameClassDialog";
@@ -82,6 +84,7 @@ export default function TeacherClassesSection() {
   const [renameClass, setRenameClass] = useState<SchoolClass | null>(null);
   const [codeClass, setCodeClass] = useState<SchoolClass | null>(null);
   const [selectedClass, setSelectedClass] = useState<SchoolClass | null>(null);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [name, setName] = useState("");
   const [isCreating, setIsCreating] = useState(false);
@@ -276,7 +279,7 @@ export default function TeacherClassesSection() {
               {text.title}
             </Typography>
             <Typography color="text.secondary" sx={{ lineHeight: 1.65 }}>
-              {text.description}
+              {text.overviewDescription}
             </Typography>
             {loadState.status === "ready" && (
               <Stack
@@ -314,25 +317,45 @@ export default function TeacherClassesSection() {
               </Stack>
             )}
           </Box>
-          <Button
-            color="primary"
-            variant="contained"
-            disableElevation
-            startIcon={<AddRoundedIcon />}
-            disabled={loadState.status !== "ready"}
-            onClick={openDialog}
+          <Stack
+            spacing={1}
             sx={{
-              ...classButtonSx,
-              alignSelf: { xs: "flex-start", md: "center" },
               flexShrink: 0,
-              minHeight: 46,
-              px: 3,
+              alignItems: { xs: "flex-start", md: "stretch" },
             }}
           >
-            {text.create}
-          </Button>
+            <Button
+              color="primary"
+              variant="contained"
+              disableElevation
+              startIcon={<AddRoundedIcon />}
+              disabled={loadState.status !== "ready"}
+              onClick={openDialog}
+              sx={{
+                ...classButtonSx,
+                alignSelf: { xs: "flex-start", md: "center" },
+                flexShrink: 0,
+                minHeight: 46,
+                px: 3,
+              }}
+            >
+              {text.create}
+            </Button>
+            <Button
+              variant="text"
+              color="primary"
+              startIcon={<HelpOutlineRoundedIcon />}
+              onClick={() => setIsHelpOpen(true)}
+              aria-haspopup="dialog"
+              sx={{ ...classButtonSx, minHeight: 44 }}
+            >
+              {text.helpButton}
+            </Button>
+          </Stack>
         </Stack>
       </Paper>
+
+      {isHelpOpen && <ClassesHelpDialog onClose={() => setIsHelpOpen(false)} />}
 
       <Box sx={{ minWidth: 0 }}>
         {loadState.status === "loading" && (

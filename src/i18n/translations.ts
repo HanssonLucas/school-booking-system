@@ -300,6 +300,28 @@ export const translations = {
         "Verifiera din e-postadress på profilsidan för att byta klasskod.",
     },
     teacherClasses: {
+      overviewDescription: "Överblick över dina klasser och elever.",
+      helpButton: "Så fungerar det",
+      help: {
+        title: "Så fungerar Mina klasser",
+        description: "En snabb guide till klassvyn.",
+        createTitle: "Skapa en klass",
+        createDescription:
+          "Välj Skapa klass och ange ett namn. När klassen har skapats visas en klasskod. Kopiera och spara den innan du stänger dialogen.",
+        joinTitle: "Låt elever ansluta",
+        joinDescription:
+          "Dela klasskoden med dina elever. De använder koden i studentvyn för att gå med. Ladda om klassvyn för att hämta aktuellt elevantal.",
+        studentsTitle: "Se vilka som är med",
+        studentsDescription:
+          "Välj Visa elever på klasskortet för att se klassens elevlista.",
+        manageTitle: "Byt namn eller klasskod",
+        manageDescription:
+          "Öppna trepunktsmenyn på kortet för att byta namn eller skapa en ny klasskod. En ny kod ersätter den gamla direkt. Elever som redan har anslutit är kvar i klassen.",
+        deleteTitle: "Ta bort en tom klass",
+        deleteDescription:
+          "Välj Ta bort klass i trepunktsmenyn och bekräfta. Klassen måste sakna både elever och bokningstillfällen. Borttagningen kan inte ångras.",
+      },
+
       classSingular: "klass",
       classPlural: "klasser",
       studentSingular: "elev",
@@ -872,6 +894,28 @@ export const translations = {
         "Verify your email address on your profile to replace the class code.",
     },
     teacherClasses: {
+      overviewDescription: "An overview of your classes and students.",
+      helpButton: "How it works",
+      help: {
+        title: "How My classes works",
+        description: "A quick guide to the class overview.",
+        createTitle: "Create a class",
+        createDescription:
+          "Choose Create class and enter a name. A class code is shown once the class is created. Copy and save it before closing the dialog.",
+        joinTitle: "Let students join",
+        joinDescription:
+          "Share the class code with your students. They enter it in the student view to join. Reload the class overview to fetch the latest student counts.",
+        studentsTitle: "See who has joined",
+        studentsDescription:
+          "Choose View students on a class card to open its student list.",
+        manageTitle: "Change the name or class code",
+        manageDescription:
+          "Open the three-dot menu on the card to rename the class or generate a new class code. A new code replaces the old one immediately. Students who have already joined remain in the class.",
+        deleteTitle: "Delete an empty class",
+        deleteDescription:
+          "Choose Delete class in the three-dot menu and confirm. The class must have no students or booking sessions. Deletion cannot be undone.",
+      },
+
       classSingular: "class",
       classPlural: "classes",
       studentSingular: "student",
