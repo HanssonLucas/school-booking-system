@@ -300,6 +300,12 @@ export const translations = {
         "Verifiera din e-postadress på profilsidan för att byta klasskod.",
     },
     teacherClasses: {
+      classSingular: "klass",
+      classPlural: "klasser",
+      studentSingular: "elev",
+      studentPlural: "elever",
+      emptyClassHint: "Inga elever ännu – dela klasskoden för att komma igång.",
+
       classLabel: "Klass",
       classActions: "Hantera klass",
       deleteClass: "Ta bort klass",
@@ -866,6 +872,12 @@ export const translations = {
         "Verify your email address on your profile to replace the class code.",
     },
     teacherClasses: {
+      classSingular: "class",
+      classPlural: "classes",
+      studentSingular: "student",
+      studentPlural: "students",
+      emptyClassHint: "No students yet – share the class code to get started.",
+
       classLabel: "Class",
       classActions: "Manage class",
       deleteClass: "Delete class",

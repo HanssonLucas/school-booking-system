@@ -26,7 +26,7 @@ import { useTranslations } from "@/i18n/useTranslations";
 import { classButtonSx } from "./ClassDialogHeader";
 
 type TeacherClassCardProps = {
-  schoolClass: { id: number; name: string };
+  schoolClass: { id: number; name: string; studentCount: number };
   onViewStudents: () => void;
   onRename: () => void;
   onRegenerateCode: () => void;
@@ -40,8 +40,12 @@ export default function TeacherClassCard({
   onRegenerateCode,
   onDelete,
 }: TeacherClassCardProps) {
-  const { t } = useTranslations();
+  const { t, language } = useTranslations();
   const text = t.teacherClasses;
+  // The ID stays the same when the class is renamed or the list is reordered.
+  const accent = ["#3685c4", "#16877f", "#8562ba"][schoolClass.id % 3];
+  const studentLabel =
+    schoolClass.studentCount === 1 ? text.studentSingular : text.studentPlural;
   const id = useId();
   const menuButton = useRef<HTMLButtonElement>(null);
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
@@ -69,6 +73,8 @@ export default function TeacherClassCard({
         flexDirection: "column",
         border: 1,
         borderColor: "divider",
+        borderTop: "4px solid",
+        borderTopColor: accent,
         borderRadius: 4,
         bgcolor: "background.paper",
         overflow: "hidden",
@@ -91,7 +97,7 @@ export default function TeacherClassCard({
             position: "absolute",
             inset: 0,
             zIndex: -1,
-            bgcolor: "primary.main",
+            bgcolor: accent,
             opacity: 0.055,
             pointerEvents: "none",
           },
@@ -113,13 +119,13 @@ export default function TeacherClassCard({
               position: "relative",
               display: "grid",
               placeItems: "center",
-              color: "primary.main",
+              color: accent,
               "&::before": {
                 content: '\"\"',
                 position: "absolute",
                 inset: 0,
                 borderRadius: "inherit",
-                bgcolor: "primary.main",
+                bgcolor: accent,
                 opacity: 0.12,
               },
             }}
@@ -142,12 +148,6 @@ export default function TeacherClassCard({
           </Tooltip>
         </Stack>
         <Typography
-          variant="overline"
-          sx={{ color: "primary.main", fontWeight: 800, letterSpacing: 1.2 }}
-        >
-          {text.classLabel}
-        </Typography>
-        <Typography
           id={`${id}-title`}
           component="h2"
           sx={{
@@ -161,6 +161,25 @@ export default function TeacherClassCard({
         >
           {schoolClass.name}
         </Typography>
+        <Stack direction="row" spacing={1} sx={{ alignItems: "center", mt: 2 }}>
+          <GroupsOutlinedIcon
+            fontSize="small"
+            sx={{ color: "text.secondary" }}
+          />
+          <Typography variant="body2" sx={{ fontWeight: 700 }}>
+            {new Intl.NumberFormat(language).format(schoolClass.studentCount)}{" "}
+            {studentLabel}
+          </Typography>
+        </Stack>
+        {schoolClass.studentCount === 0 && (
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ mt: 1, lineHeight: 1.6 }}
+          >
+            {text.emptyClassHint}
+          </Typography>
+        )}
       </Box>
       <Box sx={{ p: { xs: 2.5, sm: 3 }, borderTop: 1, borderColor: "divider" }}>
         <Button

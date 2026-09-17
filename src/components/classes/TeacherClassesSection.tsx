@@ -29,7 +29,7 @@ import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
 import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
 import { useTranslations } from "@/i18n/useTranslations";
 
-type SchoolClass = { id: number; name: string };
+type SchoolClass = { id: number; name: string; studentCount: number };
 type ErrorKey =
   | "loadFailed"
   | "createFailed"
@@ -51,7 +51,10 @@ const isSchoolClass = (value: unknown): value is SchoolClass =>
   typeof value.id === "number" &&
   Number.isSafeInteger(value.id) &&
   value.id > 0 &&
-  typeof value.name === "string";
+  typeof value.name === "string" &&
+  typeof value.studentCount === "number" &&
+  Number.isSafeInteger(value.studentCount) &&
+  value.studentCount >= 0;
 
 const getErrorKey = (body: unknown, fallback: ErrorKey): ErrorKey => {
   const code = isRecord(body) ? body.code : undefined;
@@ -72,6 +75,7 @@ const getErrorKey = (body: unknown, fallback: ErrorKey): ErrorKey => {
 export default function TeacherClassesSection() {
   const { t, language } = useTranslations();
   const text = t.teacherClasses;
+  const numberFormat = new Intl.NumberFormat(language);
   const [loadState, setLoadState] = useState<LoadState>({ status: "loading" });
   const [loadAttempt, setLoadAttempt] = useState(0);
   const [deleteClass, setDeleteClass] = useState<SchoolClass | null>(null);
@@ -193,6 +197,14 @@ export default function TeacherClassesSection() {
     }
   };
 
+  const totalStudents =
+    loadState.status === "ready"
+      ? loadState.classes.reduce(
+          (sum, schoolClass) => sum + schoolClass.studentCount,
+          0,
+        )
+      : 0;
+
   return (
     <Box
       component="section"
@@ -211,79 +223,97 @@ export default function TeacherClassesSection() {
           border: 1,
           borderColor: "divider",
           bgcolor: "background.paper",
-          p: { xs: 3, sm: 4, md: 5 },
-          mb: 4,
+          p: { xs: 3, md: 3.5 },
+          mb: 3,
           "&::before": {
             content: '""',
             position: "absolute",
             inset: 0,
             zIndex: -1,
             bgcolor: "primary.main",
-            opacity: 0.07,
+            opacity: 0.06,
             pointerEvents: "none",
           },
         }}
       >
-        <GroupsOutlinedIcon
-          aria-hidden="true"
+        <Stack
+          direction={{ xs: "column", md: "row" }}
+          spacing={3}
           sx={{
-            position: "absolute",
-            right: { sm: 32, md: 48 },
-            top: "50%",
-            transform: "translateY(-50%)",
-            fontSize: 180,
-            color: "primary.main",
-            opacity: 0.1,
-            display: { xs: "none", sm: "block" },
-            pointerEvents: "none",
-            zIndex: -1,
+            alignItems: { xs: "stretch", md: "center" },
+            justifyContent: "space-between",
           }}
-        />
-
-        <Stack spacing={2.5} sx={{ maxWidth: 720 }}>
-          <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-            <SchoolOutlinedIcon
-              fontSize="small"
-              sx={{ color: "primary.main" }}
-            />
-            <Typography
-              variant="overline"
-              sx={{
-                fontWeight: 800,
-                color: "primary.main",
-                letterSpacing: 1.2,
-              }}
+        >
+          <Box sx={{ minWidth: 0, maxWidth: 680 }}>
+            <Stack
+              direction="row"
+              spacing={1}
+              sx={{ alignItems: "center", mb: 1 }}
             >
-              {t.common.teacher}
-            </Typography>
-          </Stack>
-
-          <Box>
+              <SchoolOutlinedIcon fontSize="small" color="primary" />
+              <Typography
+                variant="overline"
+                sx={{
+                  fontWeight: 800,
+                  color: "primary.main",
+                  letterSpacing: 1.2,
+                }}
+              >
+                {t.common.teacher}
+              </Typography>
+            </Stack>
             <Typography
               id="teacher-classes-heading"
               component="h1"
               sx={{
                 fontWeight: 900,
-                letterSpacing: -1,
+                letterSpacing: -0.8,
                 lineHeight: 1.15,
-                fontSize: { xs: "2rem", sm: "2.5rem", md: "3rem" },
-                mb: 1.5,
+                fontSize: { xs: "1.9rem", md: "2.35rem" },
+                mb: 1,
               }}
             >
               {text.title}
             </Typography>
-            <Typography
-              color="text.secondary"
-              sx={{
-                maxWidth: 600,
-                lineHeight: 1.8,
-                fontSize: { xs: "1rem", sm: "1.1rem" },
-              }}
-            >
+            <Typography color="text.secondary" sx={{ lineHeight: 1.65 }}>
               {text.description}
             </Typography>
+            {loadState.status === "ready" && (
+              <Stack
+                direction="row"
+                spacing={2.5}
+                useFlexGap
+                sx={{ flexWrap: "wrap", mt: 2 }}
+              >
+                <Stack
+                  direction="row"
+                  spacing={0.75}
+                  sx={{ alignItems: "center" }}
+                >
+                  <SchoolOutlinedIcon fontSize="small" color="primary" />
+                  <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                    {numberFormat.format(loadState.classes.length)}{" "}
+                    {loadState.classes.length === 1
+                      ? text.classSingular
+                      : text.classPlural}
+                  </Typography>
+                </Stack>
+                <Stack
+                  direction="row"
+                  spacing={0.75}
+                  sx={{ alignItems: "center" }}
+                >
+                  <GroupsOutlinedIcon fontSize="small" color="primary" />
+                  <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                    {numberFormat.format(totalStudents)}{" "}
+                    {totalStudents === 1
+                      ? text.studentSingular
+                      : text.studentPlural}
+                  </Typography>
+                </Stack>
+              </Stack>
+            )}
           </Box>
-
           <Button
             color="primary"
             variant="contained"
@@ -293,7 +323,8 @@ export default function TeacherClassesSection() {
             onClick={openDialog}
             sx={{
               ...classButtonSx,
-              alignSelf: "flex-start",
+              alignSelf: { xs: "flex-start", md: "center" },
+              flexShrink: 0,
               minHeight: 46,
               px: 3,
             }}
