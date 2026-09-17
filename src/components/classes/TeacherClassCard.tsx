@@ -219,8 +219,8 @@ export default function TeacherClassCard({
         </Typography>
         <Box
           sx={{
-            mt: 2.5,
-            pt: 2,
+            mt: 1.5,
+            pt: 1.5,
             borderTop: 1,
             borderColor: "divider",
           }}
@@ -230,16 +230,26 @@ export default function TeacherClassCard({
               fontSize="small"
               sx={{ color: "text.secondary", flexShrink: 0 }}
             />
-            <Typography variant="body2" sx={{ fontWeight: 700 }}>
-              {new Intl.NumberFormat(language).format(
-                schoolClass.upcomingSessionCount,
-              )}{" "}
-              {schoolClass.upcomingSessionCount === 1
-                ? text.upcomingSessionSingular
-                : text.upcomingSessionPlural}
+            <Typography
+              variant="body2"
+              color={nextSession ? "text.primary" : "text.secondary"}
+              sx={{ fontWeight: nextSession ? 700 : 400, lineHeight: 1.6 }}
+            >
+              {nextSession ? (
+                <>
+                  {new Intl.NumberFormat(language).format(
+                    schoolClass.upcomingSessionCount,
+                  )}{" "}
+                  {schoolClass.upcomingSessionCount === 1
+                    ? text.upcomingSessionSingular
+                    : text.upcomingSessionPlural}
+                </>
+              ) : (
+                text.noUpcomingSessions
+              )}
             </Typography>
           </Stack>
-          {nextSession ? (
+          {nextSession && (
             <Box sx={{ mt: 1.5, minWidth: 0 }}>
               <Typography variant="caption" color="text.secondary">
                 {text.nextSessionLabel}
@@ -260,18 +270,17 @@ export default function TeacherClassCard({
                 {nextSession.startTime}–{nextSession.endTime}
               </Typography>
             </Box>
-          ) : (
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              sx={{ mt: 1.5, lineHeight: 1.6 }}
-            >
-              {text.noUpcomingSessions}
-            </Typography>
           )}
         </Box>
       </Box>
-      <Box sx={{ p: { xs: 2.5, sm: 3 }, borderTop: 1, borderColor: "divider" }}>
+      <Box
+        sx={{
+          px: { xs: 2.5, sm: 3 },
+          py: 1.5,
+          borderTop: 1,
+          borderColor: "divider",
+        }}
+      >
         <Button
           variant="contained"
           disableElevation
