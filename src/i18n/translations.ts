@@ -300,6 +300,19 @@ export const translations = {
         "Verifiera din e-postadress på profilsidan för att byta klasskod.",
     },
     teacherClasses: {
+      openClass: "Öppna klass",
+      classDialogDescription: "Klassens elever och dina kommande tillfällen.",
+      classDialogTabs: "Klassinformation",
+      overviewTab: "Översikt",
+      studentsTab: "Elever",
+      classDialogLoading: "Hämtar klassinformation…",
+      classDialogLoadFailed:
+        "Det gick inte att hämta klassinformationen. Försök igen.",
+      classSessionsLoading: "Hämtar kommande tillfällen…",
+      classSessionsLoadFailed:
+        "Det gick inte att hämta kommande tillfällen. Försök igen.",
+      yourUpcomingSessions: "Dina kommande tillfällen",
+
       upcomingSessionSingular: "kommande tillfälle",
       upcomingSessionPlural: "kommande tillfällen",
       nextSessionLabel: "Nästa tillfälle",
@@ -318,7 +331,7 @@ export const translations = {
           "Dela klasskoden med dina elever. De använder koden i studentvyn för att gå med. Ladda om klassvyn för att hämta aktuellt elevantal.",
         studentsTitle: "Se vilka som är med",
         studentsDescription:
-          "Välj Visa elever på klasskortet för att se klassens elevlista.",
+          "Välj Öppna klass och fliken Elever för att se klassens elevlista.",
         manageTitle: "Byt namn eller klasskod",
         manageDescription:
           "Öppna trepunktsmenyn på kortet för att byta namn eller skapa en ny klasskod. En ny kod ersätter den gamla direkt. Elever som redan har anslutit är kvar i klassen.",
@@ -899,6 +912,19 @@ export const translations = {
         "Verify your email address on your profile to replace the class code.",
     },
     teacherClasses: {
+      openClass: "Open class",
+      classDialogDescription: "The class students and your upcoming sessions.",
+      classDialogTabs: "Class information",
+      overviewTab: "Overview",
+      studentsTab: "Students",
+      classDialogLoading: "Loading class information…",
+      classDialogLoadFailed:
+        "Could not load the class information. Please try again.",
+      classSessionsLoading: "Loading upcoming sessions…",
+      classSessionsLoadFailed:
+        "Could not load upcoming sessions. Please try again.",
+      yourUpcomingSessions: "Your upcoming sessions",
+
       upcomingSessionSingular: "upcoming session",
       upcomingSessionPlural: "upcoming sessions",
       nextSessionLabel: "Next session",
@@ -917,7 +943,7 @@ export const translations = {
           "Share the class code with your students. They enter it in the student view to join. Reload the class overview to fetch the latest student counts.",
         studentsTitle: "See who has joined",
         studentsDescription:
-          "Choose View students on a class card to open its student list.",
+          "Choose Open class and the Students tab to see the class student list.",
         manageTitle: "Change the name or class code",
         manageDescription:
           "Open the three-dot menu on the card to rename the class or generate a new class code. A new code replaces the old one immediately. Students who have already joined remain in the class.",

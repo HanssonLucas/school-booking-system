@@ -42,7 +42,7 @@ export type TeacherClassCardData = {
 
 type TeacherClassCardProps = {
   schoolClass: TeacherClassCardData;
-  onViewStudents: () => void;
+  onOpenClass: () => void;
   onRename: () => void;
   onRegenerateCode: () => void;
   onDelete: () => void;
@@ -50,7 +50,7 @@ type TeacherClassCardProps = {
 
 export default function TeacherClassCard({
   schoolClass,
-  onViewStudents,
+  onOpenClass,
   onRename,
   onRegenerateCode,
   onDelete,
@@ -286,11 +286,11 @@ export default function TeacherClassCard({
           disableElevation
           startIcon={<GroupsOutlinedIcon />}
           endIcon={<ArrowForwardRoundedIcon />}
-          onClick={onViewStudents}
-          aria-label={`${text.viewStudents}: ${schoolClass.name}`}
+          onClick={onOpenClass}
+          aria-label={`${text.openClass}: ${schoolClass.name}`}
           sx={{ ...classButtonSx, minHeight: 44, px: 2.5 }}
         >
-          {text.viewStudents}
+          {text.openClass}
         </Button>
       </Box>
       <Menu

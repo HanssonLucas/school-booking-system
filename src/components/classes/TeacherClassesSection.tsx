@@ -16,7 +16,7 @@ import {
 } from "@mui/material";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import ContentCopyOutlinedIcon from "@mui/icons-material/ContentCopyOutlined";
-import ClassStudentsDialog from "@/components/classes/ClassStudentsDialog";
+import ClassOverviewDialog from "@/components/classes/ClassOverviewDialog";
 import ClassDialogHeader, {
   classButtonSx,
   classDialogPaperSx,
@@ -453,7 +453,7 @@ export default function TeacherClassesSection() {
                   <TeacherClassCard
                     key={schoolClass.id}
                     schoolClass={schoolClass}
-                    onViewStudents={() => setSelectedClass(schoolClass)}
+                    onOpenClass={() => setSelectedClass(schoolClass)}
                     onRename={() => setRenameClass(schoolClass)}
                     onRegenerateCode={() => setCodeClass(schoolClass)}
                     onDelete={() => setDeleteClass(schoolClass)}
@@ -515,7 +515,7 @@ export default function TeacherClassesSection() {
         )}
 
         {selectedClass && (
-          <ClassStudentsDialog
+          <ClassOverviewDialog
             key={selectedClass.id}
             schoolClass={selectedClass}
             onClose={() => setSelectedClass(null)}
