@@ -239,19 +239,16 @@ export default function TeacherClassesSection() {
           },
         }}
       >
-        <Stack
-          direction={{ xs: "column", md: "row" }}
-          spacing={3}
-          sx={{
-            alignItems: { xs: "stretch", md: "center" },
-            justifyContent: "space-between",
-          }}
-        >
-          <Box sx={{ minWidth: 0, maxWidth: 680 }}>
+        <Stack spacing={2}>
+          <Stack
+            direction="row"
+            spacing={2}
+            sx={{ alignItems: "center", justifyContent: "space-between" }}
+          >
             <Stack
               direction="row"
               spacing={1}
-              sx={{ alignItems: "center", mb: 1 }}
+              sx={{ alignItems: "center", flexShrink: 0 }}
             >
               <SchoolOutlinedIcon fontSize="small" color="primary" />
               <Typography
@@ -265,6 +262,24 @@ export default function TeacherClassesSection() {
                 {t.common.teacher}
               </Typography>
             </Stack>
+            <Button
+              variant="text"
+              color="primary"
+              startIcon={<HelpOutlineRoundedIcon />}
+              onClick={() => setIsHelpOpen(true)}
+              aria-haspopup="dialog"
+              sx={{
+                ...classButtonSx,
+                minHeight: 44,
+                fontWeight: 600,
+                px: 1,
+                minWidth: 0,
+              }}
+            >
+              {text.helpButton}
+            </Button>
+          </Stack>
+          <Box sx={{ minWidth: 0, maxWidth: 680 }}>
             <Typography
               id="teacher-classes-heading"
               component="h1"
@@ -281,49 +296,52 @@ export default function TeacherClassesSection() {
             <Typography color="text.secondary" sx={{ lineHeight: 1.65 }}>
               {text.overviewDescription}
             </Typography>
-            {loadState.status === "ready" && (
-              <Stack
-                direction="row"
-                spacing={2.5}
-                useFlexGap
-                sx={{ flexWrap: "wrap", mt: 2 }}
-              >
-                <Stack
-                  direction="row"
-                  spacing={0.75}
-                  sx={{ alignItems: "center" }}
-                >
-                  <SchoolOutlinedIcon fontSize="small" color="primary" />
-                  <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                    {numberFormat.format(loadState.classes.length)}{" "}
-                    {loadState.classes.length === 1
-                      ? text.classSingular
-                      : text.classPlural}
-                  </Typography>
-                </Stack>
-                <Stack
-                  direction="row"
-                  spacing={0.75}
-                  sx={{ alignItems: "center" }}
-                >
-                  <GroupsOutlinedIcon fontSize="small" color="primary" />
-                  <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                    {numberFormat.format(totalStudents)}{" "}
-                    {totalStudents === 1
-                      ? text.studentSingular
-                      : text.studentPlural}
-                  </Typography>
-                </Stack>
-              </Stack>
-            )}
           </Box>
           <Stack
-            spacing={1}
+            direction={{ xs: "column", md: "row" }}
+            spacing={2}
             sx={{
-              flexShrink: 0,
-              alignItems: { xs: "flex-start", md: "stretch" },
+              alignItems: { xs: "flex-start", md: "center" },
+              justifyContent: "space-between",
             }}
           >
+            <Box sx={{ minWidth: 0 }}>
+              {loadState.status === "ready" && (
+                <Stack
+                  direction="row"
+                  spacing={2.5}
+                  useFlexGap
+                  sx={{ flexWrap: "wrap" }}
+                >
+                  <Stack
+                    direction="row"
+                    spacing={0.75}
+                    sx={{ alignItems: "center" }}
+                  >
+                    <SchoolOutlinedIcon fontSize="small" color="primary" />
+                    <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                      {numberFormat.format(loadState.classes.length)}{" "}
+                      {loadState.classes.length === 1
+                        ? text.classSingular
+                        : text.classPlural}
+                    </Typography>
+                  </Stack>
+                  <Stack
+                    direction="row"
+                    spacing={0.75}
+                    sx={{ alignItems: "center" }}
+                  >
+                    <GroupsOutlinedIcon fontSize="small" color="primary" />
+                    <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                      {numberFormat.format(totalStudents)}{" "}
+                      {totalStudents === 1
+                        ? text.studentSingular
+                        : text.studentPlural}
+                    </Typography>
+                  </Stack>
+                </Stack>
+              )}
+            </Box>
             <Button
               color="primary"
               variant="contained"
@@ -333,23 +351,12 @@ export default function TeacherClassesSection() {
               onClick={openDialog}
               sx={{
                 ...classButtonSx,
-                alignSelf: { xs: "flex-start", md: "center" },
                 flexShrink: 0,
                 minHeight: 46,
                 px: 3,
               }}
             >
               {text.create}
-            </Button>
-            <Button
-              variant="text"
-              color="primary"
-              startIcon={<HelpOutlineRoundedIcon />}
-              onClick={() => setIsHelpOpen(true)}
-              aria-haspopup="dialog"
-              sx={{ ...classButtonSx, minHeight: 44 }}
-            >
-              {text.helpButton}
             </Button>
           </Stack>
         </Stack>
