@@ -23,7 +23,9 @@ import ClassDialogHeader, {
 } from "./ClassDialogHeader";
 import ClassesHelpDialog from "./ClassesHelpDialog";
 import HelpOutlineRoundedIcon from "@mui/icons-material/HelpOutlineRounded";
-import TeacherClassCard from "./TeacherClassCard";
+import TeacherClassCard, {
+  type TeacherClassCardData,
+} from "./TeacherClassCard";
 import DeleteClassDialog from "./DeleteClassDialog";
 import RenameClassDialog from "./RenameClassDialog";
 import RegenerateClassCodeDialog from "./RegenerateClassCodeDialog";
@@ -31,7 +33,7 @@ import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
 import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
 import { useTranslations } from "@/i18n/useTranslations";
 
-type SchoolClass = { id: number; name: string; studentCount: number };
+type SchoolClass = TeacherClassCardData;
 type ErrorKey =
   | "loadFailed"
   | "createFailed"
@@ -48,6 +50,21 @@ type CreatedClass = { schoolClass: SchoolClass; joinCode: string };
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
+const isNextSession = (
+  value: unknown,
+): value is NonNullable<SchoolClass["nextSession"]> =>
+  isRecord(value) &&
+  typeof value.id === "number" &&
+  Number.isSafeInteger(value.id) &&
+  value.id > 0 &&
+  typeof value.title === "string" &&
+  typeof value.date === "string" &&
+  /^\d{4}-\d{2}-\d{2}$/.test(value.date) &&
+  typeof value.startTime === "string" &&
+  /^([01]\d|2[0-3]):[0-5]\d$/.test(value.startTime) &&
+  typeof value.endTime === "string" &&
+  /^([01]\d|2[0-3]):[0-5]\d$/.test(value.endTime);
+
 const isSchoolClass = (value: unknown): value is SchoolClass =>
   isRecord(value) &&
   typeof value.id === "number" &&
@@ -56,7 +73,13 @@ const isSchoolClass = (value: unknown): value is SchoolClass =>
   typeof value.name === "string" &&
   typeof value.studentCount === "number" &&
   Number.isSafeInteger(value.studentCount) &&
-  value.studentCount >= 0;
+  value.studentCount >= 0 &&
+  typeof value.upcomingSessionCount === "number" &&
+  Number.isSafeInteger(value.upcomingSessionCount) &&
+  value.upcomingSessionCount >= 0 &&
+  (value.upcomingSessionCount === 0
+    ? value.nextSession === null
+    : isNextSession(value.nextSession));
 
 const getErrorKey = (body: unknown, fallback: ErrorKey): ErrorKey => {
   const code = isRecord(body) ? body.code : undefined;

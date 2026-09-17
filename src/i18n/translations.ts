@@ -300,6 +300,11 @@ export const translations = {
         "Verifiera din e-postadress på profilsidan för att byta klasskod.",
     },
     teacherClasses: {
+      upcomingSessionSingular: "kommande tillfälle",
+      upcomingSessionPlural: "kommande tillfällen",
+      nextSessionLabel: "Nästa tillfälle",
+      noUpcomingSessions: "Inga kommande tillfällen planerade.",
+
       overviewDescription: "Överblick över dina klasser och elever.",
       helpButton: "Så fungerar det",
       help: {
@@ -894,6 +899,11 @@ export const translations = {
         "Verify your email address on your profile to replace the class code.",
     },
     teacherClasses: {
+      upcomingSessionSingular: "upcoming session",
+      upcomingSessionPlural: "upcoming sessions",
+      nextSessionLabel: "Next session",
+      noUpcomingSessions: "No upcoming sessions scheduled.",
+
       overviewDescription: "An overview of your classes and students.",
       helpButton: "How it works",
       help: {

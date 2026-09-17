@@ -16,6 +16,7 @@ import {
   Typography,
 } from "@mui/material";
 import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
+import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
 import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
 import MoreHorizRoundedIcon from "@mui/icons-material/MoreHorizRounded";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
@@ -25,8 +26,22 @@ import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 import { useTranslations } from "@/i18n/useTranslations";
 import { classButtonSx } from "./ClassDialogHeader";
 
+export type TeacherClassCardData = {
+  id: number;
+  name: string;
+  studentCount: number;
+  upcomingSessionCount: number;
+  nextSession: {
+    id: number;
+    title: string;
+    date: string;
+    startTime: string;
+    endTime: string;
+  } | null;
+};
+
 type TeacherClassCardProps = {
-  schoolClass: { id: number; name: string; studentCount: number };
+  schoolClass: TeacherClassCardData;
   onViewStudents: () => void;
   onRename: () => void;
   onRegenerateCode: () => void;
@@ -46,6 +61,20 @@ export default function TeacherClassCard({
   const accent = ["#3685c4", "#16877f", "#8562ba"][schoolClass.id % 3];
   const studentLabel =
     schoolClass.studentCount === 1 ? text.studentSingular : text.studentPlural;
+  const nextSession = schoolClass.nextSession;
+  // Format a calendar date without shifting it to the browser's time zone.
+  const nextDate = nextSession
+    ? new Date(`${nextSession.date}T00:00:00Z`)
+    : null;
+  const formattedDate =
+    nextDate && Number.isFinite(nextDate.getTime())
+      ? new Intl.DateTimeFormat(language === "sv" ? "sv-SE" : "en-GB", {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+          timeZone: "UTC",
+        }).format(nextDate)
+      : nextSession?.date;
   const id = useId();
   const menuButton = useRef<HTMLButtonElement>(null);
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
@@ -171,15 +200,76 @@ export default function TeacherClassCard({
             {studentLabel}
           </Typography>
         </Stack>
-        {schoolClass.studentCount === 0 && (
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            sx={{ mt: 1, lineHeight: 1.6 }}
-          >
-            {text.emptyClassHint}
-          </Typography>
-        )}
+        {/* Keep the hint's natural height in the two-column layout. */}
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          aria-hidden={schoolClass.studentCount > 0 ? true : undefined}
+          sx={{
+            mt: 1,
+            lineHeight: 1.6,
+            display:
+              schoolClass.studentCount === 0
+                ? "block"
+                : { xs: "none", md: "block" },
+            visibility: schoolClass.studentCount === 0 ? "visible" : "hidden",
+          }}
+        >
+          {text.emptyClassHint}
+        </Typography>
+        <Box
+          sx={{
+            mt: 2.5,
+            pt: 2,
+            borderTop: 1,
+            borderColor: "divider",
+          }}
+        >
+          <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+            <CalendarMonthOutlinedIcon
+              fontSize="small"
+              sx={{ color: "text.secondary", flexShrink: 0 }}
+            />
+            <Typography variant="body2" sx={{ fontWeight: 700 }}>
+              {new Intl.NumberFormat(language).format(
+                schoolClass.upcomingSessionCount,
+              )}{" "}
+              {schoolClass.upcomingSessionCount === 1
+                ? text.upcomingSessionSingular
+                : text.upcomingSessionPlural}
+            </Typography>
+          </Stack>
+          {nextSession ? (
+            <Box sx={{ mt: 1.5, minWidth: 0 }}>
+              <Typography variant="caption" color="text.secondary">
+                {text.nextSessionLabel}
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{ mt: 0.25, fontWeight: 700, overflowWrap: "anywhere" }}
+              >
+                {nextSession.title}
+              </Typography>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ mt: 0.5, lineHeight: 1.6 }}
+              >
+                <time dateTime={nextSession.date}>{formattedDate}</time>
+                {" · "}
+                {nextSession.startTime}–{nextSession.endTime}
+              </Typography>
+            </Box>
+          ) : (
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ mt: 1.5, lineHeight: 1.6 }}
+            >
+              {text.noUpcomingSessions}
+            </Typography>
+          )}
+        </Box>
       </Box>
       <Box sx={{ p: { xs: 2.5, sm: 3 }, borderTop: 1, borderColor: "divider" }}>
         <Button
