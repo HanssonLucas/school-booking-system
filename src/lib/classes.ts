@@ -81,6 +81,8 @@ const createClassTransaction = db.transaction(
       name,
       createdByUserId: teacherId,
       studentCount: 0,
+      upcomingSessionCount: 0,
+      nextSession: null,
     };
   },
 );
@@ -111,18 +113,84 @@ export const createClassForTeacher = (teacherId: number, name: unknown) => {
   };
 };
 
+export type ClassUpcomingSession = {
+  id: number;
+  title: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+};
+
 export type TeacherClass = {
   id: number;
   name: string;
   createdByUserId: number;
   createdAt: string;
   studentCount: number;
+  upcomingSessionCount: number;
+  nextSession: ClassUpcomingSession | null;
+};
+
+type TeacherClassRow = Omit<TeacherClass, "nextSession"> & {
+  nextSessionId: number | null;
+  nextSessionTitle: string | null;
+  nextSessionDate: string | null;
+  nextSessionStartTime: string | null;
+  nextSessionEndTime: string | null;
+};
+
+// Session dates and times represent Swedish local time.
+// An explicit zone also works when the deployed server uses UTC.
+const schoolTimeFormatter = new Intl.DateTimeFormat("en-GB", {
+  timeZone: "Europe/Stockholm",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit",
+  hourCycle: "h23",
+});
+
+const getSchoolLocalTimestamp = (now: Date): string => {
+  const parts = schoolTimeFormatter.formatToParts(now);
+  const part = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((item) => item.type === type)!.value;
+
+  return `${part("year")}-${part("month")}-${part("day")} ${part("hour")}:${part("minute")}:${part("second")}`;
 };
 
 export const getClassesForTeacher = (teacherId: number): TeacherClass[] => {
-  return db
+  const now = getSchoolLocalTimestamp(new Date());
+
+  const rows = db
     .prepare(
       `
+        WITH upcoming AS (
+          SELECT
+            booking_sessions.id,
+            booking_sessions.class_id,
+            booking_sessions.title,
+            booking_sessions.date,
+            booking_sessions.start_time,
+            booking_sessions.end_time,
+            COUNT(*) OVER (
+              PARTITION BY booking_sessions.class_id
+            ) AS upcomingSessionCount,
+            ROW_NUMBER() OVER (
+              PARTITION BY booking_sessions.class_id
+              ORDER BY booking_sessions.date ASC,
+                booking_sessions.start_time ASC, booking_sessions.id ASC
+            ) AS position
+          FROM booking_sessions
+          INNER JOIN class_teachers
+            ON class_teachers.class_id = booking_sessions.class_id
+            AND class_teachers.teacher_id = booking_sessions.teacher_id
+          WHERE booking_sessions.teacher_id = ?
+            AND datetime(
+              booking_sessions.date || ' ' || booking_sessions.start_time
+            ) >= ?
+        )
         SELECT
           classes.id,
           classes.name,
@@ -135,15 +203,46 @@ export const getClassesForTeacher = (teacherId: number): TeacherClass[] => {
               ON users.id = class_students.student_id
             WHERE class_students.class_id = classes.id
               AND users.role = 'student'
-          ) AS studentCount
+          ) AS studentCount,
+          COALESCE(upcoming.upcomingSessionCount, 0) AS upcomingSessionCount,
+          upcoming.id AS nextSessionId,
+          upcoming.title AS nextSessionTitle,
+          upcoming.date AS nextSessionDate,
+          upcoming.start_time AS nextSessionStartTime,
+          upcoming.end_time AS nextSessionEndTime
         FROM classes
         INNER JOIN class_teachers
           ON class_teachers.class_id = classes.id
+        LEFT JOIN upcoming
+          ON upcoming.class_id = classes.id AND upcoming.position = 1
         WHERE class_teachers.teacher_id = ?
         ORDER BY classes.name COLLATE NOCASE ASC, classes.id ASC
       `,
     )
-    .all(teacherId) as TeacherClass[];
+    .all(teacherId, now, teacherId) as TeacherClassRow[];
+
+  return rows.map((row) => ({
+    id: row.id,
+    name: row.name,
+    createdByUserId: row.createdByUserId,
+    createdAt: row.createdAt,
+    studentCount: row.studentCount,
+    upcomingSessionCount: row.upcomingSessionCount,
+    nextSession:
+      row.nextSessionId !== null &&
+      row.nextSessionTitle !== null &&
+      row.nextSessionDate !== null &&
+      row.nextSessionStartTime !== null &&
+      row.nextSessionEndTime !== null
+        ? {
+            id: row.nextSessionId,
+            title: row.nextSessionTitle,
+            date: row.nextSessionDate,
+            startTime: row.nextSessionStartTime,
+            endTime: row.nextSessionEndTime,
+          }
+        : null,
+  }));
 };
 
 type StudentRoleRow = {
