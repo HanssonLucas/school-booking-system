@@ -19,13 +19,20 @@ import ClassDialogHeader, {
   classDialogPaperSx,
 } from "./ClassDialogHeader";
 
-type SchoolClass = { id: number; name: string };
+type SchoolClass = {
+  id: number;
+  name: string;
+  designation: string | null;
+  description: string | null;
+};
 type RenameClassDialogProps = {
   schoolClass: SchoolClass;
   onClose: () => void;
   onSaved: (schoolClass: SchoolClass) => void;
 };
 type ErrorKey =
+  | "invalidDesignation"
+  | "invalidDescription"
   | "invalidName"
   | "unauthorized"
   | "forbidden"
@@ -41,6 +48,10 @@ const getErrorKey = (body: unknown): ErrorKey => {
   switch (code) {
     case "INVALID_CLASS_NAME":
       return "invalidName";
+    case "INVALID_CLASS_DESIGNATION":
+      return "invalidDesignation";
+    case "INVALID_CLASS_DESCRIPTION":
+      return "invalidDescription";
     case "UNAUTHORIZED":
       return "unauthorized";
     case "FORBIDDEN":
@@ -62,11 +73,18 @@ export default function RenameClassDialog({
   const { t } = useTranslations();
   const text = t.teacherClasses;
   const [name, setName] = useState(schoolClass.name);
+  const [designation, setDesignation] = useState(schoolClass.designation ?? "");
+  const [description, setDescription] = useState(schoolClass.description ?? "");
   const [error, setError] = useState<ErrorKey | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const submitting = useRef(false);
   const trimmedName = name.trim();
-  const unchanged = trimmedName === schoolClass.name;
+  const trimmedDesignation = designation.trim() || null;
+  const trimmedDescription = description.trim() || null;
+  const unchanged =
+    trimmedName === schoolClass.name &&
+    trimmedDesignation === schoolClass.designation &&
+    trimmedDescription === schoolClass.description;
 
   const handleClose = () => {
     if (!submitting.current) onClose();
@@ -79,6 +97,14 @@ export default function RenameClassDialog({
       setError("invalidName");
       return;
     }
+    if (designation.trim().length > 40) {
+      setError("invalidDesignation");
+      return;
+    }
+    if (description.trim().length > 500) {
+      setError("invalidDescription");
+      return;
+    }
     if (unchanged) return;
     submitting.current = true;
     setIsSaving(true);
@@ -88,7 +114,11 @@ export default function RenameClassDialog({
       const response = await fetch(`/api/classes/${schoolClass.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: trimmedName }),
+        body: JSON.stringify({
+          name: trimmedName,
+          designation: trimmedDesignation,
+          description: trimmedDescription,
+        }),
       });
       const body: unknown = await response.json();
       if (!response.ok) {
@@ -101,11 +131,26 @@ export default function RenameClassDialog({
         body.schoolClass.id !== schoolClass.id ||
         typeof body.schoolClass.name !== "string" ||
         !body.schoolClass.name.trim() ||
-        body.schoolClass.name.length > 100
+        body.schoolClass.name.length > 100 ||
+        !(
+          body.schoolClass.designation === null ||
+          (typeof body.schoolClass.designation === "string" &&
+            body.schoolClass.designation.length <= 40)
+        ) ||
+        !(
+          body.schoolClass.description === null ||
+          (typeof body.schoolClass.description === "string" &&
+            body.schoolClass.description.length <= 500)
+        )
       ) {
-        throw new Error("Invalid rename class response");
+        throw new Error("Invalid update class response");
       }
-      savedClass = { id: schoolClass.id, name: body.schoolClass.name };
+      savedClass = {
+        id: schoolClass.id,
+        name: body.schoolClass.name,
+        designation: body.schoolClass.designation,
+        description: body.schoolClass.description,
+      };
     } catch {
       setError("renameFailed");
     } finally {
@@ -153,6 +198,36 @@ export default function RenameClassDialog({
                 setError(null);
               }}
             />
+            <TextField
+              label={text.designationLabel}
+              placeholder="FE25-LINK"
+              helperText={text.designationHelper}
+              value={designation}
+              fullWidth
+              disabled={isSaving}
+              error={error === "invalidDesignation"}
+              slotProps={{ htmlInput: { maxLength: 40 } }}
+              onChange={(event) => {
+                setDesignation(event.target.value);
+                setError(null);
+              }}
+            />
+            <TextField
+              label={text.detailsDescriptionLabel}
+              helperText={`${text.detailsDescriptionHelper} ${description.length}/500`}
+              value={description}
+              fullWidth
+              multiline
+              minRows={3}
+              maxRows={6}
+              disabled={isSaving}
+              error={error === "invalidDescription"}
+              slotProps={{ htmlInput: { maxLength: 500 } }}
+              onChange={(event) => {
+                setDescription(event.target.value);
+                setError(null);
+              }}
+            />
           </Stack>
         </DialogContent>
         <DialogActions
@@ -178,7 +253,12 @@ export default function RenameClassDialog({
             color="primary"
             sx={classButtonSx}
             disabled={
-              isSaving || !trimmedName || trimmedName.length > 100 || unchanged
+              isSaving ||
+              !trimmedName ||
+              trimmedName.length > 100 ||
+              designation.trim().length > 40 ||
+              description.trim().length > 500 ||
+              unchanged
             }
             startIcon={
               isSaving ? (

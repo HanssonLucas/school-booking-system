@@ -300,6 +300,14 @@ export const translations = {
         "Verifiera din e-postadress på profilsidan för att byta klasskod.",
     },
     teacherClasses: {
+      designationLabel: "Klassbeteckning (valfritt)",
+      designationHelper:
+        "Exempel: FE25-LINK. Högst 40 tecken. Beteckningen skiljer klasser åt; elever ansluter med klasskoden.",
+      detailsDescriptionLabel: "Beskrivning (valfritt)",
+      detailsDescriptionHelper:
+        "Kort information om exempelvis inriktning, studieort eller termin.",
+      invalidDesignation: "Klassbeteckningen får innehålla högst 40 tecken.",
+      invalidDescription: "Beskrivningen får innehålla högst 500 tecken.",
       viewAllClassSessions: "Visa alla tillfällen",
       selectedClassLabel: "Klass",
       clearClassFilter: "Visa alla klasser",
@@ -335,16 +343,16 @@ export const translations = {
         description: "En snabb guide till klassvyn.",
         createTitle: "Skapa en klass",
         createDescription:
-          "Välj Skapa klass och ange ett namn. När klassen har skapats visas en klasskod. Kopiera och spara den innan du stänger dialogen.",
+          "Välj Skapa klass och ange ett namn. Lägg gärna till en klassbeteckning och beskrivning. När klassen har skapats visas en klasskod. Kopiera och spara den innan du stänger dialogen.",
         joinTitle: "Låt elever ansluta",
         joinDescription:
           "Dela klasskoden med dina elever. De använder koden i studentvyn för att gå med. Ladda om klassvyn för att hämta aktuellt elevantal.",
         studentsTitle: "Se vilka som är med",
         studentsDescription:
           "Välj Öppna klass och fliken Elever för att se klassens elevlista.",
-        manageTitle: "Byt namn eller klasskod",
+        manageTitle: "Redigera klass eller byt klasskod",
         manageDescription:
-          "Öppna trepunktsmenyn på kortet för att byta namn eller skapa en ny klasskod. En ny kod ersätter den gamla direkt. Elever som redan har anslutit är kvar i klassen.",
+          "Välj Redigera klass i trepunktsmenyn för att ändra namn, beteckning och beskrivning. Välj Ny klasskod för att ersätta anslutningskoden. Elever som redan har anslutit är kvar i klassen.",
         deleteTitle: "Ta bort en tom klass",
         deleteDescription:
           "Välj Ta bort klass i trepunktsmenyn och bekräfta. Klassen måste sakna både elever och bokningstillfällen. Borttagningen kan inte ångras.",
@@ -369,14 +377,13 @@ export const translations = {
       deleteFailed:
         "Det gick inte att bekräfta borttagningen. Stäng dialogen och ladda om sidan för att kontrollera om klassen finns kvar.",
 
-      rename: "Byt namn",
-      renameTitle: "Byt klassnamn",
-      renameDescription:
-        "Ge klassen ett nytt namn som är enkelt att känna igen.",
-      saveName: "Spara namn",
+      rename: "Redigera klass",
+      renameTitle: "Redigera klass",
+      renameDescription: "Ändra klassens namn, beteckning och beskrivning.",
+      saveName: "Spara ändringar",
       savingName: "Sparar…",
       renameFailed:
-        "Det gick inte att bekräfta namnbytet. Försök igen eller ladda om sidan för att kontrollera namnet.",
+        "Det gick inte att bekräfta ändringarna. Försök igen eller ladda om sidan för att kontrollera klassens uppgifter.",
       classNotFound:
         "Klassen finns inte längre eller så har du inte längre tillgång till den.",
 
@@ -922,6 +929,15 @@ export const translations = {
         "Verify your email address on your profile to replace the class code.",
     },
     teacherClasses: {
+      designationLabel: "Class designation (optional)",
+      designationHelper:
+        "Example: FE25-LINK. Maximum 40 characters. The designation distinguishes classes; students join using the class code.",
+      detailsDescriptionLabel: "Description (optional)",
+      detailsDescriptionHelper:
+        "Brief information such as specialisation, location or term.",
+      invalidDesignation:
+        "The class designation must not exceed 40 characters.",
+      invalidDescription: "The description must not exceed 500 characters.",
       viewAllClassSessions: "View all sessions",
       selectedClassLabel: "Class",
       clearClassFilter: "Show all classes",
@@ -957,16 +973,16 @@ export const translations = {
         description: "A quick guide to the class overview.",
         createTitle: "Create a class",
         createDescription:
-          "Choose Create class and enter a name. A class code is shown once the class is created. Copy and save it before closing the dialog.",
+          "Choose Create class and enter a name. You can also add a class designation and description. A class code is shown once the class is created. Copy and save it before closing the dialog.",
         joinTitle: "Let students join",
         joinDescription:
           "Share the class code with your students. They enter it in the student view to join. Reload the class overview to fetch the latest student counts.",
         studentsTitle: "See who has joined",
         studentsDescription:
           "Choose Open class and the Students tab to see the class student list.",
-        manageTitle: "Change the name or class code",
+        manageTitle: "Edit the class or change its code",
         manageDescription:
-          "Open the three-dot menu on the card to rename the class or generate a new class code. A new code replaces the old one immediately. Students who have already joined remain in the class.",
+          "Choose Edit class in the three-dot menu to update the name, designation and description. Choose New class code to replace the joining code. Students who have already joined remain in the class.",
         deleteTitle: "Delete an empty class",
         deleteDescription:
           "Choose Delete class in the three-dot menu and confirm. The class must have no students or booking sessions. Deletion cannot be undone.",
@@ -991,13 +1007,13 @@ export const translations = {
       deleteFailed:
         "Could not confirm the deletion. Close the dialog and reload the page to check whether the class still exists.",
 
-      rename: "Rename",
-      renameTitle: "Rename class",
-      renameDescription: "Give the class a new name that is easy to recognise.",
-      saveName: "Save name",
+      rename: "Edit class",
+      renameTitle: "Edit class",
+      renameDescription: "Update the class name, designation and description.",
+      saveName: "Save changes",
       savingName: "Saving…",
       renameFailed:
-        "Could not confirm the name change. Try again or reload the page to check the name.",
+        "Could not confirm the changes. Try again or reload the page to check the class details.",
       classNotFound:
         "The class no longer exists or you no longer have access to it.",
 

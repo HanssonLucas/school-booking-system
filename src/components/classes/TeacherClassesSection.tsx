@@ -33,11 +33,16 @@ import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
 import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
 import { useTranslations } from "@/i18n/useTranslations";
 
-type SchoolClass = TeacherClassCardData;
+type SchoolClass = TeacherClassCardData & {
+  designation: string | null;
+  description: string | null;
+};
 type ErrorKey =
   | "loadFailed"
   | "createFailed"
   | "invalidName"
+  | "invalidDesignation"
+  | "invalidDescription"
   | "unauthorized"
   | "forbidden"
   | "verificationRequired";
@@ -71,6 +76,12 @@ const isSchoolClass = (value: unknown): value is SchoolClass =>
   Number.isSafeInteger(value.id) &&
   value.id > 0 &&
   typeof value.name === "string" &&
+  (value.designation === null ||
+    (typeof value.designation === "string" &&
+      value.designation.length <= 40)) &&
+  (value.description === null ||
+    (typeof value.description === "string" &&
+      value.description.length <= 500)) &&
   typeof value.studentCount === "number" &&
   Number.isSafeInteger(value.studentCount) &&
   value.studentCount >= 0 &&
@@ -86,6 +97,10 @@ const getErrorKey = (body: unknown, fallback: ErrorKey): ErrorKey => {
   switch (code) {
     case "INVALID_CLASS_NAME":
       return "invalidName";
+    case "INVALID_CLASS_DESIGNATION":
+      return "invalidDesignation";
+    case "INVALID_CLASS_DESCRIPTION":
+      return "invalidDescription";
     case "UNAUTHORIZED":
       return "unauthorized";
     case "FORBIDDEN":
@@ -110,6 +125,8 @@ export default function TeacherClassesSection() {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [name, setName] = useState("");
+  const [designation, setDesignation] = useState("");
+  const [description, setDescription] = useState("");
   const [isCreating, setIsCreating] = useState(false);
   const submitting = useRef(false);
   const [error, setError] = useState<ErrorKey | null>(null);
@@ -155,6 +172,8 @@ export default function TeacherClassesSection() {
 
   const openDialog = () => {
     setName("");
+    setDesignation("");
+    setDescription("");
     setError(null);
     setCreated(null);
     setCopyStatus("idle");
@@ -176,6 +195,14 @@ export default function TeacherClassesSection() {
       setError("invalidName");
       return;
     }
+    if (designation.trim().length > 40) {
+      setError("invalidDesignation");
+      return;
+    }
+    if (description.trim().length > 500) {
+      setError("invalidDescription");
+      return;
+    }
     submitting.current = true;
     setIsCreating(true);
     setError(null);
@@ -183,7 +210,11 @@ export default function TeacherClassesSection() {
       const response = await fetch("/api/classes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: trimmedName }),
+        body: JSON.stringify({
+          name: trimmedName,
+          designation: designation.trim() || null,
+          description: description.trim() || null,
+        }),
       });
       const body: unknown = await response.json();
       if (!response.ok) {
@@ -495,7 +526,7 @@ export default function TeacherClassesSection() {
                       status: "ready",
                       classes: current.classes.map((item) =>
                         item.id === updatedClass.id
-                          ? { ...item, name: updatedClass.name }
+                          ? { ...item, ...updatedClass }
                           : item,
                       ),
                     }
@@ -579,21 +610,53 @@ export default function TeacherClassesSection() {
                     )}
                   </>
                 ) : (
-                  <TextField
-                    autoFocus
-                    label={text.nameLabel}
-                    helperText={text.nameHelper}
-                    value={name}
-                    required
-                    fullWidth
-                    disabled={isCreating}
-                    error={error === "invalidName"}
-                    slotProps={{ htmlInput: { maxLength: 100 } }}
-                    onChange={(event) => {
-                      setName(event.target.value);
-                      setError(null);
-                    }}
-                  />
+                  <>
+                    <TextField
+                      autoFocus
+                      label={text.nameLabel}
+                      helperText={text.nameHelper}
+                      value={name}
+                      required
+                      fullWidth
+                      disabled={isCreating}
+                      error={error === "invalidName"}
+                      slotProps={{ htmlInput: { maxLength: 100 } }}
+                      onChange={(event) => {
+                        setName(event.target.value);
+                        setError(null);
+                      }}
+                    />
+                    <TextField
+                      label={text.designationLabel}
+                      placeholder="FE25-LINK"
+                      helperText={text.designationHelper}
+                      value={designation}
+                      fullWidth
+                      disabled={isCreating}
+                      error={error === "invalidDesignation"}
+                      slotProps={{ htmlInput: { maxLength: 40 } }}
+                      onChange={(event) => {
+                        setDesignation(event.target.value);
+                        setError(null);
+                      }}
+                    />
+                    <TextField
+                      label={text.detailsDescriptionLabel}
+                      helperText={`${text.detailsDescriptionHelper} ${description.length}/500`}
+                      value={description}
+                      fullWidth
+                      multiline
+                      minRows={3}
+                      maxRows={6}
+                      disabled={isCreating}
+                      error={error === "invalidDescription"}
+                      slotProps={{ htmlInput: { maxLength: 500 } }}
+                      onChange={(event) => {
+                        setDescription(event.target.value);
+                        setError(null);
+                      }}
+                    />
+                  </>
                 )}
               </Stack>
             </DialogContent>
@@ -631,7 +694,13 @@ export default function TeacherClassesSection() {
                     color="primary"
                     sx={classButtonSx}
                     startIcon={<AddRoundedIcon />}
-                    disabled={isCreating || !name.trim()}
+                    disabled={
+                      isCreating ||
+                      !name.trim() ||
+                      name.trim().length > 100 ||
+                      designation.trim().length > 40 ||
+                      description.trim().length > 500
+                    }
                   >
                     {isCreating ? text.creating : text.create}
                   </Button>
