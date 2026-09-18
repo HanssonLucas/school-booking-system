@@ -5,6 +5,9 @@ const MAX_CLASS_NAME_LENGTH = 100;
 
 type ClassManagementErrorCode =
   | "INVALID_CLASS_NAME"
+  | "INVALID_CLASS_DESIGNATION"
+  | "INVALID_CLASS_DESCRIPTION"
+  | "INVALID_REQUEST_BODY"
   | "INVALID_CLASS_CODE"
   | "ALREADY_IN_CLASS"
   | "UNAUTHORIZED"
@@ -17,6 +20,34 @@ export class ClassManagementError extends Error {
     this.name = "ClassManagementError";
   }
 }
+
+const normalizeClassName = (name: unknown): string => {
+  if (
+    typeof name !== "string" ||
+    !name.trim() ||
+    name.trim().length > MAX_CLASS_NAME_LENGTH
+  ) {
+    throw new ClassManagementError("INVALID_CLASS_NAME");
+  }
+  return name.trim();
+};
+
+const normalizeOptionalClassText = (
+  value: unknown,
+  maxLength: number,
+  code: "INVALID_CLASS_DESIGNATION" | "INVALID_CLASS_DESCRIPTION",
+): string | null => {
+  if (value === undefined || value === null) return null;
+  if (typeof value !== "string") throw new ClassManagementError(code);
+  const normalized = value.trim();
+  if (normalized.length > maxLength) throw new ClassManagementError(code);
+  return normalized || null;
+};
+
+type ClassDetailsInput = {
+  designation?: unknown;
+  description?: unknown;
+};
 
 type ClassCreatorRow = {
   role: string;
@@ -43,9 +74,11 @@ const insertClass = db.prepare(`
   INSERT INTO classes (
     name,
     created_by_user_id,
-    join_code_hash
+    join_code_hash,
+    designation,
+    description
   )
-  VALUES (?, ?, ?)
+  VALUES (?, ?, ?, ?, ?)
 `);
 
 const insertClassTeacher = db.prepare(`
@@ -54,7 +87,13 @@ const insertClassTeacher = db.prepare(`
 `);
 
 const createClassTransaction = db.transaction(
-  (name: string, teacherId: number, joinCodeHash: string) => {
+  (
+    name: string,
+    teacherId: number,
+    joinCodeHash: string,
+    designation: string | null,
+    description: string | null,
+  ) => {
     const teacher = findClassCreator.get(teacherId) as
       | ClassCreatorRow
       | undefined;
@@ -71,7 +110,13 @@ const createClassTransaction = db.transaction(
       throw new ClassManagementError("EMAIL_NOT_VERIFIED");
     }
 
-    const result = insertClass.run(name, teacherId, joinCodeHash);
+    const result = insertClass.run(
+      name,
+      teacherId,
+      joinCodeHash,
+      designation,
+      description,
+    );
     const classId = Number(result.lastInsertRowid);
 
     insertClassTeacher.run(classId, teacherId);
@@ -79,6 +124,8 @@ const createClassTransaction = db.transaction(
     return {
       id: classId,
       name,
+      designation,
+      description,
       createdByUserId: teacherId,
       studentCount: 0,
       upcomingSessionCount: 0,
@@ -87,16 +134,22 @@ const createClassTransaction = db.transaction(
   },
 );
 
-export const createClassForTeacher = (teacherId: number, name: unknown) => {
-  if (typeof name !== "string") {
-    throw new ClassManagementError("INVALID_CLASS_NAME");
-  }
-
-  const normalizedName = name.trim();
-
-  if (!normalizedName || normalizedName.length > MAX_CLASS_NAME_LENGTH) {
-    throw new ClassManagementError("INVALID_CLASS_NAME");
-  }
+export const createClassForTeacher = (
+  teacherId: number,
+  name: unknown,
+  details: ClassDetailsInput = {},
+) => {
+  const normalizedName = normalizeClassName(name);
+  const designation = normalizeOptionalClassText(
+    details.designation,
+    40,
+    "INVALID_CLASS_DESIGNATION",
+  );
+  const description = normalizeOptionalClassText(
+    details.description,
+    500,
+    "INVALID_CLASS_DESCRIPTION",
+  );
 
   const joinCode = randomBytes(8).toString("hex").toUpperCase();
   const joinCodeHash = hashClassJoinCode(joinCode);
@@ -105,6 +158,8 @@ export const createClassForTeacher = (teacherId: number, name: unknown) => {
     normalizedName,
     teacherId,
     joinCodeHash,
+    designation,
+    description,
   );
 
   return {
@@ -124,6 +179,8 @@ export type ClassUpcomingSession = {
 export type TeacherClass = {
   id: number;
   name: string;
+  designation: string | null;
+  description: string | null;
   createdByUserId: number;
   createdAt: string;
   studentCount: number;
@@ -194,6 +251,8 @@ export const getClassesForTeacher = (teacherId: number): TeacherClass[] => {
         SELECT
           classes.id,
           classes.name,
+          classes.designation,
+          classes.description,
           classes.created_by_user_id AS createdByUserId,
           classes.created_at AS createdAt,
           (
@@ -224,6 +283,8 @@ export const getClassesForTeacher = (teacherId: number): TeacherClass[] => {
   return rows.map((row) => ({
     id: row.id,
     name: row.name,
+    designation: row.designation,
+    description: row.description,
     createdByUserId: row.createdByUserId,
     createdAt: row.createdAt,
     studentCount: row.studentCount,
@@ -249,10 +310,7 @@ type StudentRoleRow = {
   role: string;
 };
 
-type ClassByCodeRow = {
-  id: number;
-  name: string;
-};
+type ClassByCodeRow = StudentClass;
 
 type StudentMembershipRow = {
   class_id: number;
@@ -265,7 +323,7 @@ const findStudentRole = db.prepare(`
 `);
 
 const findClassByCodeHash = db.prepare(`
-  SELECT id, name
+  SELECT id, name, designation, description
   FROM classes
   WHERE join_code_hash = ?
 `);
@@ -346,6 +404,8 @@ export const joinClassForStudent = (studentId: number, code: unknown) => {
 export type StudentClass = {
   id: number;
   name: string;
+  designation: string | null;
+  description: string | null;
 };
 
 export const getClassForStudent = (studentId: number): StudentClass | null => {
@@ -354,7 +414,9 @@ export const getClassForStudent = (studentId: number): StudentClass | null => {
       `
         SELECT
           classes.id,
-          classes.name
+          classes.name,
+          classes.designation,
+          classes.description
         FROM class_students
         INNER JOIN classes
           ON classes.id = class_students.class_id
@@ -383,7 +445,7 @@ const getClassStudentsTransaction = db.transaction(
     const schoolClass = db
       .prepare(
         `
-          SELECT classes.id, classes.name
+          SELECT classes.id, classes.name, classes.designation, classes.description
           FROM classes
           INNER JOIN class_teachers
             ON class_teachers.class_id = classes.id
@@ -443,7 +505,7 @@ const regenerateClassJoinCodeTransaction = db.transaction(
     const schoolClass = db
       .prepare(
         `
-          SELECT classes.id, classes.name
+          SELECT classes.id, classes.name, classes.designation, classes.description
           FROM classes
           INNER JOIN class_teachers
             ON class_teachers.class_id = classes.id
@@ -492,50 +554,78 @@ export const regenerateClassJoinCodeForTeacher = (
   return regenerateClassJoinCodeTransaction.immediate(teacherId, classId);
 };
 
+type UpdateClassInput = ClassDetailsInput & { name?: unknown };
+
+const updateClassTransaction = db.transaction(
+  (
+    teacherId: number,
+    classId: number,
+    changes: UpdateClassInput,
+  ): StudentClass | null => {
+    const schoolClass = db
+      .prepare(
+        `
+      SELECT classes.id, classes.name, classes.designation, classes.description
+      FROM classes
+      INNER JOIN class_teachers ON class_teachers.class_id = classes.id
+      INNER JOIN users ON users.id = class_teachers.teacher_id
+      WHERE classes.id = ? AND class_teachers.teacher_id = ?
+        AND users.role = 'teacher' AND users.email_verified_at IS NOT NULL
+    `,
+      )
+      .get(classId, teacherId) as StudentClass | undefined;
+
+    if (!schoolClass) return null;
+
+    const has = (key: keyof UpdateClassInput) =>
+      Object.prototype.hasOwnProperty.call(changes, key);
+    if (!has("name") && !has("designation") && !has("description")) {
+      throw new ClassManagementError("INVALID_REQUEST_BODY");
+    }
+
+    // Omitted PATCH fields retain their stored value; null/empty optional
+    // fields explicitly clear that value. Name is always required/nonempty.
+    const updated: StudentClass = {
+      id: schoolClass.id,
+      name: has("name") ? normalizeClassName(changes.name) : schoolClass.name,
+      designation: has("designation")
+        ? normalizeOptionalClassText(
+            changes.designation,
+            40,
+            "INVALID_CLASS_DESIGNATION",
+          )
+        : schoolClass.designation,
+      description: has("description")
+        ? normalizeOptionalClassText(
+            changes.description,
+            500,
+            "INVALID_CLASS_DESCRIPTION",
+          )
+        : schoolClass.description,
+    };
+
+    db.prepare(
+      `
+      UPDATE classes SET name = ?, designation = ?, description = ? WHERE id = ?
+    `,
+    ).run(updated.name, updated.designation, updated.description, classId);
+    return updated;
+  },
+);
+
+export const updateClassForTeacher = (
+  teacherId: number,
+  classId: number,
+  changes: UpdateClassInput,
+): StudentClass | null =>
+  updateClassTransaction.immediate(teacherId, classId, changes);
+
+// Keep the existing service function available for name-only callers.
 export const renameClassForTeacher = (
   teacherId: number,
   classId: number,
   name: unknown,
-): StudentClass | null => {
-  if (typeof name !== "string") {
-    throw new ClassManagementError("INVALID_CLASS_NAME");
-  }
-
-  const normalizedName = name.trim();
-
-  if (!normalizedName || normalizedName.length > MAX_CLASS_NAME_LENGTH) {
-    throw new ClassManagementError("INVALID_CLASS_NAME");
-  }
-
-  const result = db
-    .prepare(
-      `
-        UPDATE classes
-        SET name = ?
-        WHERE id = ?
-          AND EXISTS (
-            SELECT 1
-            FROM class_teachers
-            INNER JOIN users
-              ON users.id = class_teachers.teacher_id
-            WHERE class_teachers.class_id = classes.id
-              AND class_teachers.teacher_id = ?
-              AND users.role = 'teacher'
-              AND users.email_verified_at IS NOT NULL
-          )
-      `,
-    )
-    .run(normalizedName, classId, teacherId);
-
-  if (result.changes === 0) {
-    return null;
-  }
-
-  return {
-    id: classId,
-    name: normalizedName,
-  };
-};
+): StudentClass | null => updateClassForTeacher(teacherId, classId, { name });
 
 type DeleteClassResult =
   | { status: "deleted"; deletedClassId: number }

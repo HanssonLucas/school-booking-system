@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { requireVerifiedUserOrResponse } from "@/lib/apiAuth";
 import {
   ClassManagementError,
-  renameClassForTeacher,
+  updateClassForTeacher,
   deleteClassForTeacher,
 } from "@/lib/classes";
 
@@ -44,12 +44,12 @@ export async function PATCH(request: Request, { params }: RouteContext) {
       { status: 400, headers },
     );
   }
-  const { name } = body as Record<string, unknown>;
+  const changes = body as Record<string, unknown>;
   try {
-    const schoolClass = renameClassForTeacher(
+    const schoolClass = updateClassForTeacher(
       auth.user.id,
       parsedClassId,
-      name,
+      changes,
     );
     if (!schoolClass) {
       return NextResponse.json(
@@ -61,14 +61,16 @@ export async function PATCH(request: Request, { params }: RouteContext) {
   } catch (error) {
     if (
       error instanceof ClassManagementError &&
-      error.code === "INVALID_CLASS_NAME"
+      [
+        "INVALID_CLASS_NAME",
+        "INVALID_CLASS_DESIGNATION",
+        "INVALID_CLASS_DESCRIPTION",
+        "INVALID_REQUEST_BODY",
+      ].includes(error.code)
     ) {
-      return NextResponse.json(
-        { code: "INVALID_CLASS_NAME" },
-        { status: 400, headers },
-      );
+      return NextResponse.json({ code: error.code }, { status: 400, headers });
     }
-    console.error("Failed to rename class:", error);
+    console.error("Failed to update class:", error);
     return NextResponse.json(
       { code: "CLASS_RENAME_FAILED" },
       { status: 500, headers },
