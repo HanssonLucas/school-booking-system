@@ -11,7 +11,6 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
 import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import TitleOutlinedIcon from "@mui/icons-material/TitleOutlined";
@@ -36,6 +35,7 @@ type FormValues = {
 type FormErrors = Partial<Record<keyof FormValues, string>>;
 
 type CreateBookingSessionFormProps = {
+  initialClassId?: number | null;
   onCreateSession: (session: CreateBookingSessionInput) => void | Promise<void>;
 };
 
@@ -85,8 +85,17 @@ const getClassLoadError = (value: unknown): ClassLoadError => {
 
 export default function CreateBookingSessionForm({
   onCreateSession,
+  initialClassId = null,
 }: CreateBookingSessionFormProps) {
-  const [formValues, setFormValues] = useState<FormValues>(initialFormValues);
+  const [formValues, setFormValues] = useState<FormValues>(() => ({
+    ...initialFormValues,
+    classId:
+      initialClassId !== null &&
+      Number.isSafeInteger(initialClassId) &&
+      initialClassId > 0
+        ? String(initialClassId)
+        : "",
+  }));
   const [formErrors, setFormErrors] = useState<FormErrors>({});
 
   const { t } = useTranslations();
@@ -139,7 +148,6 @@ export default function CreateBookingSessionForm({
 
   const reloadClasses = () => {
     setClassState({ status: "loading" });
-    setFormValues((values) => ({ ...values, classId: "" }));
     setLoadAttempt((attempt) => attempt + 1);
   };
 
@@ -333,22 +341,24 @@ export default function CreateBookingSessionForm({
                 {text.empty}
               </Alert>
               <Button
-                variant="contained"
-                color="primary"
-                startIcon={<RefreshOutlinedIcon />}
                 onClick={reloadClasses}
                 sx={{
                   borderRadius: 999,
                   textTransform: "none",
                   fontWeight: 800,
-                  px: 2.5,
-                  py: 1.1,
                 }}
               >
                 {text.refresh}
               </Button>
             </Stack>
           )}
+          {classState.status === "ready" &&
+            formValues.classId !== "" &&
+            !hasSelectedClass && (
+              <Alert severity="warning" sx={{ borderRadius: 3 }}>
+                {t.teacherClasses.classFilterUnavailable}
+              </Alert>
+            )}
           {submitFailed && (
             <Alert severity="error" sx={{ borderRadius: 3 }}>
               {text.submitFailed}
@@ -358,7 +368,7 @@ export default function CreateBookingSessionForm({
             select
             label={text.label}
             fullWidth
-            value={formValues.classId}
+            value={hasSelectedClass ? formValues.classId : ""}
             onChange={(event) => handleChange("classId", event.target.value)}
             disabled={
               isSubmitting ||

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 import { useEffect, useId, useState } from "react";
 import {
@@ -456,15 +457,31 @@ function ClassSessionOverview({
           {studentCount === 1 ? text.studentSingular : text.studentPlural}
         </Typography>
       </Stack>
-      <Button
-        component={Link}
-        href={`/teacher?classId=${classId}`}
-        variant="outlined"
-        endIcon={<ArrowForwardRoundedIcon />}
-        sx={{ ...classButtonSx, alignSelf: "flex-start", minHeight: 44 }}
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        spacing={1.5}
+        sx={{ alignItems: { xs: "stretch", sm: "center" } }}
       >
-        {text.viewAllClassSessions}
-      </Button>
+        <Button
+          component={Link}
+          href={`/teacher?classId=${classId}&dialog=create-session`}
+          variant="contained"
+          disableElevation
+          startIcon={<AddRoundedIcon />}
+          sx={{ ...classButtonSx, minHeight: 44 }}
+        >
+          {t.teacher.createSessionButton}
+        </Button>
+        <Button
+          component={Link}
+          href={`/teacher?classId=${classId}`}
+          variant="outlined"
+          endIcon={<ArrowForwardRoundedIcon />}
+          sx={{ ...classButtonSx, minHeight: 44 }}
+        >
+          {text.viewAllClassSessions}
+        </Button>
+      </Stack>
       <Typography component="h3" variant="h6" sx={{ fontWeight: 800 }}>
         {text.yourUpcomingSessions}
         {state.status === "ready" &&

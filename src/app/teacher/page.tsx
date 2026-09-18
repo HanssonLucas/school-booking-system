@@ -512,7 +512,11 @@ function TeacherPageContent() {
           </>
         ) : (
           <DialogContent>
-            <CreateBookingSessionForm onCreateSession={handleCreateSession} />
+            <CreateBookingSessionForm
+              key={selectedClassId ?? "no-class"}
+              initialClassId={selectedClassId}
+              onCreateSession={handleCreateSession}
+            />
           </DialogContent>
         )}
       </Dialog>
