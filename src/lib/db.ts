@@ -1,5 +1,6 @@
 import Database from "better-sqlite3";
 import path from "path";
+import { migrateClassDetails } from "@/lib/migrateClassDetails";
 
 const dbPath = path.join(process.cwd(), "booking-system.db");
 
@@ -221,3 +222,5 @@ const migrateBookingSessionRelations = db.transaction(() => {
 });
 
 migrateBookingSessionRelations.immediate();
+
+migrateClassDetails(db);
