@@ -300,6 +300,16 @@ export const translations = {
         "Verifiera din e-postadress på profilsidan för att byta klasskod.",
     },
     teacherClasses: {
+      viewAllClassSessions: "Visa alla tillfällen",
+      selectedClassLabel: "Klass",
+      clearClassFilter: "Visa alla klasser",
+      classFilterLoading: "Hämtar klassnamn…",
+      classFilterUnavailable:
+        "Klassen finns inte eller är inte tillgänglig för dig.",
+      classFilterLoadFailed:
+        "Klassnamnet kunde inte hämtas. Klassfiltret är fortfarande aktivt.",
+      invalidClassFilter: "Länken innehåller ett ogiltigt klassfilter.",
+
       openClass: "Öppna klass",
       classDialogDescription: "Klassens elever och dina kommande tillfällen.",
       classDialogTabs: "Klassinformation",
@@ -912,6 +922,16 @@ export const translations = {
         "Verify your email address on your profile to replace the class code.",
     },
     teacherClasses: {
+      viewAllClassSessions: "View all sessions",
+      selectedClassLabel: "Class",
+      clearClassFilter: "Show all classes",
+      classFilterLoading: "Loading class name…",
+      classFilterUnavailable:
+        "The class does not exist or is not available to you.",
+      classFilterLoadFailed:
+        "Could not load the class name. The class filter is still active.",
+      invalidClassFilter: "The link contains an invalid class filter.",
+
       openClass: "Open class",
       classDialogDescription: "The class students and your upcoming sessions.",
       classDialogTabs: "Class information",

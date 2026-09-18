@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 import { useEffect, useId, useState } from "react";
 import {
   Alert,
@@ -454,6 +456,15 @@ function ClassSessionOverview({
           {studentCount === 1 ? text.studentSingular : text.studentPlural}
         </Typography>
       </Stack>
+      <Button
+        component={Link}
+        href={`/teacher?classId=${classId}`}
+        variant="outlined"
+        endIcon={<ArrowForwardRoundedIcon />}
+        sx={{ ...classButtonSx, alignSelf: "flex-start", minHeight: 44 }}
+      >
+        {text.viewAllClassSessions}
+      </Button>
       <Typography component="h3" variant="h6" sx={{ fontWeight: 800 }}>
         {text.yourUpcomingSessions}
         {state.status === "ready" &&

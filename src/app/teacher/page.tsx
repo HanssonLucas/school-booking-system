@@ -38,7 +38,36 @@ import ViewBookingsDialog from "@/components/booking/ViewBookingsDialog";
 import DeleteBookingSessionDialog from "@/components/booking/DeleteBookingSessionDialog";
 import TeacherRouteGuard from "@/components/auth/TeacherRouteGuard";
 
+type TeacherSession = BookingSession & { classId: number };
+
 type SortOption = "dateAsc" | "dateDesc" | "bookedFirst";
+
+function parseSortOption(value: string | null): SortOption {
+  return value === "dateDesc" || value === "bookedFirst" ? value : "dateAsc";
+}
+
+// Read the current URL for every edit so rapid filter changes cannot overwrite
+// each other. Next.js syncs native history updates with useSearchParams.
+function updateTeacherFilter(
+  key: "q" | "sort" | "onlyFull" | "onlyWithBookings",
+  value: string | null,
+  replace = false,
+) {
+  const url = new URL(window.location.href);
+  if (value === null || value === "") {
+    url.searchParams.delete(key);
+  } else {
+    url.searchParams.set(key, value);
+  }
+  if (url.href === window.location.href) return;
+
+  const href = `${url.pathname}${url.search}${url.hash}`;
+  if (replace) {
+    window.history.replaceState(null, "", href);
+  } else {
+    window.history.pushState(null, "", href);
+  }
+}
 
 export default function TeacherPage() {
   const { t } = useTranslations();
@@ -65,7 +94,7 @@ export default function TeacherPage() {
 }
 
 function TeacherPageContent() {
-  const [sessions, setSessions] = useState<BookingSession[]>([]);
+  const [sessions, setSessions] = useState<TeacherSession[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -75,19 +104,64 @@ function TeacherPageContent() {
     number | null
   >(null);
   const [deleteSessionId, setDeleteSessionId] = useState<number | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [showOnlyFull, setShowOnlyFull] = useState(false);
-  const [showOnlyWithBookings, setShowOnlyWithBookings] = useState(false);
-  const [sortOption, setSortOption] = useState<SortOption>("dateAsc");
 
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
+  const searchQuery = searchParams.get("q") ?? "";
+  const showOnlyFull = searchParams.get("onlyFull") === "1";
+  const showOnlyWithBookings = searchParams.get("onlyWithBookings") === "1";
+  const sortOption = parseSortOption(searchParams.get("sort"));
+
+  const setSearchQuery = (value: string) => {
+    // Replace keeps typing out of browser history and persists even an
+    // immediate refresh. Filtering is local, so no request/debounce is needed.
+    updateTeacherFilter("q", value, true);
+  };
+  const setShowOnlyFull = (value: boolean) => {
+    updateTeacherFilter("onlyFull", value ? "1" : null);
+  };
+  const setShowOnlyWithBookings = (value: boolean) => {
+    updateTeacherFilter("onlyWithBookings", value ? "1" : null);
+  };
+  const setSortOption = (value: string) => {
+    const sort = parseSortOption(value);
+    updateTeacherFilter("sort", sort === "dateAsc" ? null : sort);
+  };
+
+  const classFilterValues = searchParams.getAll("classId");
+  const hasClassFilter = classFilterValues.length > 0;
+  const rawClassId = classFilterValues[0] ?? "";
+  const selectedClassId =
+    classFilterValues.length === 1 &&
+    /^[1-9]\d*$/.test(rawClassId) &&
+    Number.isSafeInteger(Number(rawClassId))
+      ? Number(rawClassId)
+      : null;
+
+  const clearClassFilter = () => {
+    const params = new URLSearchParams(window.location.search);
+    params.delete("classId");
+    const query = params.toString();
+    router.push(
+      `${pathname}${query ? `?${query}` : ""}${window.location.hash}`,
+      { scroll: false },
+    );
+  };
+
+  const classSessions = useMemo(
+    () =>
+      hasClassFilter
+        ? sessions.filter((session) => session.classId === selectedClassId)
+        : sessions,
+    [sessions, hasClassFilter, selectedClassId],
+  );
+
   const isCreateDialogOpen = searchParams.get("dialog") === "create-session";
 
   const openCreateDialog = () => {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams(window.location.search);
     params.set("dialog", "create-session");
 
     router.push(`${pathname}?${params.toString()}${window.location.hash}`, {
@@ -96,7 +170,7 @@ function TeacherPageContent() {
   };
 
   const closeCreateDialog = () => {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams(window.location.search);
     params.delete("dialog");
 
     const query = params.toString();
@@ -125,7 +199,7 @@ function TeacherPageContent() {
   const filteredSessions = useMemo(() => {
     const normalizedSearchQuery = searchQuery.trim().toLowerCase();
 
-    return [...sessions]
+    return [...classSessions]
       .filter((session) => {
         const slotsLeft = session.maxParticipants - session.bookedParticipants;
         const isFull = slotsLeft === 0;
@@ -172,7 +246,13 @@ function TeacherPageContent() {
 
         return firstDateTime.localeCompare(secondDateTime);
       });
-  }, [sessions, searchQuery, showOnlyFull, showOnlyWithBookings, sortOption]);
+  }, [
+    classSessions,
+    searchQuery,
+    showOnlyFull,
+    showOnlyWithBookings,
+    sortOption,
+  ]);
 
   const fetchSessions = async () => {
     try {
@@ -183,7 +263,7 @@ function TeacherPageContent() {
         return;
       }
 
-      const data: BookingSession[] = await response.json();
+      const data: TeacherSession[] = await response.json();
       setSessions(data);
     } finally {
       setIsLoading(false);
@@ -220,7 +300,7 @@ function TeacherPageContent() {
       return;
     }
 
-    const createdSession: BookingSession = await response.json();
+    const createdSession: TeacherSession = await response.json();
 
     setSessions((currentSessions) => [createdSession, ...currentSessions]);
     closeCreateDialog();
@@ -488,161 +568,163 @@ function TeacherPageContent() {
       </Snackbar>
 
       <Container sx={{ py: { xs: 4, md: 7 } }}>
-        <Paper
-          sx={{
-            position: "relative",
-            overflow: "hidden",
-            borderRadius: 6,
-            p: { xs: 3, sm: 5 },
-            mb: 5,
-            border: 1,
-            borderColor: "divider",
-            background:
-              "linear-gradient(135deg, rgba(156, 39, 176, 0.14), rgba(25, 118, 210, 0.08))",
-          }}
-        >
-          <Box
+        {!hasClassFilter && (
+          <Paper
             sx={{
-              position: "absolute",
-              width: 220,
-              height: 220,
-              borderRadius: "50%",
-              bgcolor: "secondary.main",
-              opacity: 0.12,
-              right: -70,
-              top: -80,
+              position: "relative",
+              overflow: "hidden",
+              borderRadius: 6,
+              p: { xs: 3, sm: 5 },
+              mb: 5,
+              border: 1,
+              borderColor: "divider",
+              background:
+                "linear-gradient(135deg, rgba(156, 39, 176, 0.14), rgba(25, 118, 210, 0.08))",
             }}
-          />
-
-          <Box
-            sx={{
-              position: "absolute",
-              width: 160,
-              height: 160,
-              borderRadius: "50%",
-              bgcolor: "primary.main",
-              opacity: 0.1,
-              right: 120,
-              bottom: -80,
-            }}
-          />
-
-          <Box sx={{ position: "relative", maxWidth: 760 }}>
-            <Chip
-              icon={<EditCalendarOutlinedIcon />}
-              label={t.common.teacher}
+          >
+            <Box
               sx={{
-                mb: 3,
-                borderRadius: 999,
-                fontWeight: 800,
-                bgcolor: "background.paper",
+                position: "absolute",
+                width: 220,
+                height: 220,
+                borderRadius: "50%",
+                bgcolor: "secondary.main",
+                opacity: 0.12,
+                right: -70,
+                top: -80,
               }}
             />
 
-            <Typography
-              variant="h2"
-              component="h1"
+            <Box
               sx={{
-                fontWeight: 900,
-                letterSpacing: -1.3,
-                lineHeight: 1.05,
-                fontSize: { xs: "2.25rem", md: "3.5rem" },
-                mb: 2,
+                position: "absolute",
+                width: 160,
+                height: 160,
+                borderRadius: "50%",
+                bgcolor: "primary.main",
+                opacity: 0.1,
+                right: 120,
+                bottom: -80,
               }}
-            >
-              {t.teacher.title}
-            </Typography>
+            />
 
-            <Typography
-              variant="h6"
-              color="text.secondary"
-              sx={{
-                lineHeight: 1.7,
-                maxWidth: 680,
-                mb: 4,
-              }}
-            >
-              {t.teacher.description}
-            </Typography>
-
-            <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-              <Button
-                variant="contained"
-                size="large"
-                startIcon={<AddRoundedIcon />}
-                onClick={openCreateDialog}
+            <Box sx={{ position: "relative", maxWidth: 760 }}>
+              <Chip
+                icon={<EditCalendarOutlinedIcon />}
+                label={t.common.teacher}
                 sx={{
+                  mb: 3,
                   borderRadius: 999,
-                  textTransform: "none",
                   fontWeight: 800,
-                  px: 3,
-                  py: 1.3,
-                }}
-              >
-                {t.teacher.createSessionButton}
-              </Button>
-
-              <Button
-                variant="outlined"
-                size="large"
-                startIcon={<VisibilityOutlinedIcon />}
-                onClick={() => {
-                  document
-                    .getElementById("teacher-sessions")
-                    ?.scrollIntoView({ behavior: "smooth" });
-                }}
-                sx={{
-                  borderRadius: 999,
-                  textTransform: "none",
-                  fontWeight: 800,
-                  px: 3,
-                  py: 1.3,
                   bgcolor: "background.paper",
                 }}
+              />
+
+              <Typography
+                variant="h2"
+                component="h1"
+                sx={{
+                  fontWeight: 900,
+                  letterSpacing: -1.3,
+                  lineHeight: 1.05,
+                  fontSize: { xs: "2.25rem", md: "3.5rem" },
+                  mb: 2,
+                }}
               >
-                {t.teacher.sessionsTitle}
-              </Button>
-            </Stack>
+                {t.teacher.title}
+              </Typography>
 
-            <Stack
-              direction="row"
-              spacing={1}
-              useFlexGap
-              sx={{
-                flexWrap: "wrap",
-                mt: 4,
-              }}
-            >
-              <Chip
-                icon={<AddRoundedIcon />}
-                label={t.teacher.createSessionButton}
-                variant="outlined"
-                sx={{ borderRadius: 999, bgcolor: "background.paper" }}
-              />
+              <Typography
+                variant="h6"
+                color="text.secondary"
+                sx={{
+                  lineHeight: 1.7,
+                  maxWidth: 680,
+                  mb: 4,
+                }}
+              >
+                {t.teacher.description}
+              </Typography>
 
-              <Chip
-                icon={<EditOutlinedIcon />}
-                label={t.bookingSession.editButton}
-                variant="outlined"
-                sx={{ borderRadius: 999, bgcolor: "background.paper" }}
-              />
+              <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+                <Button
+                  variant="contained"
+                  size="large"
+                  startIcon={<AddRoundedIcon />}
+                  onClick={openCreateDialog}
+                  sx={{
+                    borderRadius: 999,
+                    textTransform: "none",
+                    fontWeight: 800,
+                    px: 3,
+                    py: 1.3,
+                  }}
+                >
+                  {t.teacher.createSessionButton}
+                </Button>
 
-              <Chip
-                icon={<VisibilityOutlinedIcon />}
-                label={t.bookingSession.viewBookingsButton}
-                variant="outlined"
-                sx={{ borderRadius: 999, bgcolor: "background.paper" }}
-              />
+                <Button
+                  variant="outlined"
+                  size="large"
+                  startIcon={<VisibilityOutlinedIcon />}
+                  onClick={() => {
+                    document
+                      .getElementById("teacher-sessions")
+                      ?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  sx={{
+                    borderRadius: 999,
+                    textTransform: "none",
+                    fontWeight: 800,
+                    px: 3,
+                    py: 1.3,
+                    bgcolor: "background.paper",
+                  }}
+                >
+                  {t.teacher.sessionsTitle}
+                </Button>
+              </Stack>
 
-              <Chip
-                icon={<DeleteOutlineOutlinedIcon />}
-                label={t.bookingSession.deleteButton}
-                variant="outlined"
-                sx={{ borderRadius: 999, bgcolor: "background.paper" }}
-              />
-            </Stack>
-          </Box>
-        </Paper>
+              <Stack
+                direction="row"
+                spacing={1}
+                useFlexGap
+                sx={{
+                  flexWrap: "wrap",
+                  mt: 4,
+                }}
+              >
+                <Chip
+                  icon={<AddRoundedIcon />}
+                  label={t.teacher.createSessionButton}
+                  variant="outlined"
+                  sx={{ borderRadius: 999, bgcolor: "background.paper" }}
+                />
+
+                <Chip
+                  icon={<EditOutlinedIcon />}
+                  label={t.bookingSession.editButton}
+                  variant="outlined"
+                  sx={{ borderRadius: 999, bgcolor: "background.paper" }}
+                />
+
+                <Chip
+                  icon={<VisibilityOutlinedIcon />}
+                  label={t.bookingSession.viewBookingsButton}
+                  variant="outlined"
+                  sx={{ borderRadius: 999, bgcolor: "background.paper" }}
+                />
+
+                <Chip
+                  icon={<DeleteOutlineOutlinedIcon />}
+                  label={t.bookingSession.deleteButton}
+                  variant="outlined"
+                  sx={{ borderRadius: 999, bgcolor: "background.paper" }}
+                />
+              </Stack>
+            </Box>
+          </Paper>
+        )}
 
         <Paper
           id="teacher-sessions"
@@ -669,11 +751,19 @@ function TeacherPageContent() {
             </Typography>
           </Box>
 
+          {hasClassFilter && (
+            <SelectedClassFilter
+              key={searchParams.getAll("classId").join(":")}
+              classId={selectedClassId}
+              onClear={clearClassFilter}
+            />
+          )}
+
           <SessionFilterControls
             searchQuery={searchQuery}
             onSearchQueryChange={setSearchQuery}
             sortOption={sortOption}
-            onSortOptionChange={(value) => setSortOption(value as SortOption)}
+            onSortOptionChange={setSortOption}
             sortOptions={[
               {
                 value: "dateAsc",
@@ -703,7 +793,7 @@ function TeacherPageContent() {
               },
             ]}
             visibleCount={filteredSessions.length}
-            totalCount={sessions.length}
+            totalCount={classSessions.length}
           />
 
           {isLoading ? (
@@ -720,7 +810,7 @@ function TeacherPageContent() {
               onViewBookingsSession={handleViewBookings}
               onDeleteSession={handleDeleteSessionClick}
               emptyMessage={
-                sessions.length === 0
+                classSessions.length === 0
                   ? t.teacher.emptySessions
                   : t.sessionFilters.noMatchingSessions
               }
@@ -729,5 +819,110 @@ function TeacherPageContent() {
         </Paper>
       </Container>
     </>
+  );
+}
+
+// The URL owns the filter, so refresh and Back/Forward preserve the selection.
+function SelectedClassFilter({
+  classId,
+  onClear,
+}: {
+  classId: number | null;
+  onClear: () => void;
+}) {
+  const { t } = useTranslations();
+  const text = t.teacherClasses;
+  const [state, setState] = useState<
+    | { status: "loading" }
+    | { status: "ready"; name: string }
+    | { status: "unavailable" }
+    | { status: "error" }
+  >({ status: "loading" });
+
+  useEffect(() => {
+    if (classId === null) return;
+    const controller = new AbortController();
+    const loadClass = async () => {
+      try {
+        const response = await fetch("/api/classes", {
+          cache: "no-store",
+          signal: controller.signal,
+        });
+        const body: unknown = await response.json();
+        if (controller.signal.aborted) return;
+        if (
+          !response.ok ||
+          typeof body !== "object" ||
+          body === null ||
+          !("classes" in body) ||
+          !Array.isArray(body.classes)
+        ) {
+          throw new Error("Invalid class response");
+        }
+        const schoolClass = body.classes.find(
+          (item: unknown) =>
+            typeof item === "object" &&
+            item !== null &&
+            "id" in item &&
+            item.id === classId,
+        );
+        if (!schoolClass) {
+          setState({ status: "unavailable" });
+        } else if (typeof schoolClass.name === "string") {
+          setState({ status: "ready", name: schoolClass.name });
+        } else {
+          setState({ status: "error" });
+        }
+      } catch {
+        if (!controller.signal.aborted) setState({ status: "error" });
+      }
+    };
+    void loadClass();
+    return () => controller.abort();
+  }, [classId]);
+
+  return (
+    <Stack spacing={1.5} sx={{ mb: 3 }}>
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        spacing={1.5}
+        sx={{
+          alignItems: { xs: "flex-start", sm: "center" },
+          justifyContent: "space-between",
+        }}
+      >
+        <Typography sx={{ fontWeight: 800, overflowWrap: "anywhere" }}>
+          {text.selectedClassLabel}:{" "}
+          {classId === null
+            ? text.invalidClassFilter
+            : state.status === "ready"
+              ? state.name
+              : state.status === "loading"
+                ? text.classFilterLoading
+                : `#${classId}`}
+        </Typography>
+        <Button
+          onClick={onClear}
+          variant="outlined"
+          sx={{
+            borderRadius: 999,
+            textTransform: "none",
+            fontWeight: 700,
+            flexShrink: 0,
+            minHeight: 44,
+          }}
+        >
+          {text.clearClassFilter}
+        </Button>
+      </Stack>
+      {classId !== null &&
+        (state.status === "error" || state.status === "unavailable") && (
+          <Alert severity="warning" sx={{ borderRadius: 3 }}>
+            {state.status === "error"
+              ? text.classFilterLoadFailed
+              : text.classFilterUnavailable}
+          </Alert>
+        )}
+    </Stack>
   );
 }
