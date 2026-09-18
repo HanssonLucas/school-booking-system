@@ -300,6 +300,8 @@ export const translations = {
         "Verifiera din e-postadress på profilsidan för att byta klasskod.",
     },
     teacherClasses: {
+      designationTitle: "Klassbeteckning",
+      detailsDescriptionTitle: "Om klassen",
       designationLabel: "Klassbeteckning (valfritt)",
       designationHelper:
         "Exempel: FE25-LINK. Högst 40 tecken. Beteckningen skiljer klasser åt; elever ansluter med klasskoden.",
@@ -929,6 +931,8 @@ export const translations = {
         "Verify your email address on your profile to replace the class code.",
     },
     teacherClasses: {
+      designationTitle: "Class designation",
+      detailsDescriptionTitle: "About this class",
       designationLabel: "Class designation (optional)",
       designationHelper:
         "Example: FE25-LINK. Maximum 40 characters. The designation distinguishes classes; students join using the class code.",

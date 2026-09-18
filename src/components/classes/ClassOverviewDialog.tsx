@@ -28,7 +28,12 @@ import ClassDialogHeader, {
 } from "./ClassDialogHeader";
 import { useTranslations } from "@/i18n/useTranslations";
 
-type SchoolClass = { id: number; name: string };
+type SchoolClass = {
+  id: number;
+  name: string;
+  designation: string | null;
+  description: string | null;
+};
 type Student = { id: number; name: string; email: string };
 type ErrorKey =
   | "loadFailed"
@@ -104,6 +109,16 @@ export default function ClassOverviewDialog({ schoolClass, onClose }: Props) {
           !isRecord(body.schoolClass) ||
           body.schoolClass.id !== classId ||
           typeof body.schoolClass.name !== "string" ||
+          !(
+            body.schoolClass.designation === null ||
+            (typeof body.schoolClass.designation === "string" &&
+              body.schoolClass.designation.length <= 40)
+          ) ||
+          !(
+            body.schoolClass.description === null ||
+            (typeof body.schoolClass.description === "string" &&
+              body.schoolClass.description.length <= 500)
+          ) ||
           !Array.isArray(body.students) ||
           !body.students.every(isStudent) ||
           body.studentCount !== body.students.length
@@ -113,7 +128,12 @@ export default function ClassOverviewDialog({ schoolClass, onClose }: Props) {
 
         setState({
           status: "ready",
-          schoolClass: { id: classId, name: body.schoolClass.name },
+          schoolClass: {
+            id: classId,
+            name: body.schoolClass.name,
+            designation: body.schoolClass.designation,
+            description: body.schoolClass.description,
+          },
           students: body.students,
         });
       } catch {
@@ -231,6 +251,67 @@ export default function ClassOverviewDialog({ schoolClass, onClose }: Props) {
                 hidden={tab !== 0}
                 tabIndex={0}
               >
+                {(state.schoolClass.designation ||
+                  state.schoolClass.description) && (
+                  <Box
+                    component="dl"
+                    sx={{
+                      m: 0,
+                      mb: 3,
+                      pb: 3,
+                      borderBottom: 1,
+                      borderColor: "divider",
+                    }}
+                  >
+                    {state.schoolClass.designation && (
+                      <Box>
+                        <Typography
+                          component="dt"
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{ fontWeight: 700 }}
+                        >
+                          {overview.designationTitle}
+                        </Typography>
+                        <Typography
+                          component="dd"
+                          sx={{
+                            m: 0,
+                            mt: 0.5,
+                            fontWeight: 700,
+                            overflowWrap: "anywhere",
+                          }}
+                        >
+                          {state.schoolClass.designation}
+                        </Typography>
+                      </Box>
+                    )}
+                    {state.schoolClass.description && (
+                      <Box sx={{ mt: state.schoolClass.designation ? 2 : 0 }}>
+                        <Typography
+                          component="dt"
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{ fontWeight: 700 }}
+                        >
+                          {overview.detailsDescriptionTitle}
+                        </Typography>
+                        <Typography
+                          component="dd"
+                          sx={{
+                            m: 0,
+                            mt: 0.5,
+                            lineHeight: 1.7,
+                            whiteSpace: "pre-wrap",
+                            overflowWrap: "anywhere",
+                          }}
+                        >
+                          {state.schoolClass.description}
+                        </Typography>
+                      </Box>
+                    )}
+                  </Box>
+                )}
                 <ClassSessionOverview
                   classId={classId}
                   studentCount={state.students.length}

@@ -29,6 +29,8 @@ import { classButtonSx } from "./ClassDialogHeader";
 export type TeacherClassCardData = {
   id: number;
   name: string;
+  designation: string | null;
+  description: string | null;
   studentCount: number;
   upcomingSessionCount: number;
   nextSession: {
@@ -57,6 +59,9 @@ export default function TeacherClassCard({
 }: TeacherClassCardProps) {
   const { t, language } = useTranslations();
   const text = t.teacherClasses;
+  const accessibleClassName = schoolClass.designation
+    ? `${schoolClass.name} (${schoolClass.designation})`
+    : schoolClass.name;
   // The ID stays the same when the class is renamed or the list is reordered.
   const accent = ["#3685c4", "#16877f", "#8562ba"][schoolClass.id % 3];
   const studentLabel =
@@ -165,7 +170,7 @@ export default function TeacherClassCard({
             <IconButton
               ref={menuButton}
               id={`${id}-actions`}
-              aria-label={`${text.classActions}: ${schoolClass.name}`}
+              aria-label={`${text.classActions}: ${accessibleClassName}`}
               aria-haspopup="menu"
               aria-expanded={menuOpen ? true : undefined}
               aria-controls={menuOpen ? `${id}-menu` : undefined}
@@ -190,6 +195,47 @@ export default function TeacherClassCard({
         >
           {schoolClass.name}
         </Typography>
+        {schoolClass.designation && (
+          <Typography
+            component="p"
+            variant="body2"
+            sx={{
+              mt: 1,
+              px: 1.25,
+              py: 0.5,
+              width: "fit-content",
+              maxWidth: "100%",
+              boxSizing: "border-box",
+              borderRadius: 1.5,
+              border: 1,
+              borderColor: "divider",
+              bgcolor: "background.paper",
+              color: "text.primary",
+              fontWeight: 700,
+              letterSpacing: 0.3,
+              overflowWrap: "anywhere",
+            }}
+          >
+            {schoolClass.designation}
+          </Typography>
+        )}
+        {schoolClass.description && (
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{
+              mt: 1.25,
+              lineHeight: 1.6,
+              overflowWrap: "anywhere",
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+            }}
+          >
+            {schoolClass.description}
+          </Typography>
+        )}
         <Stack direction="row" spacing={1} sx={{ alignItems: "center", mt: 2 }}>
           <GroupsOutlinedIcon
             fontSize="small"
@@ -287,7 +333,7 @@ export default function TeacherClassCard({
           startIcon={<GroupsOutlinedIcon />}
           endIcon={<ArrowForwardRoundedIcon />}
           onClick={onOpenClass}
-          aria-label={`${text.openClass}: ${schoolClass.name}`}
+          aria-label={`${text.openClass}: ${accessibleClassName}`}
           sx={{ ...classButtonSx, minHeight: 44, px: 2.5 }}
         >
           {text.openClass}
