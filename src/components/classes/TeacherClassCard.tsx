@@ -126,6 +126,8 @@ export default function TeacherClassCard({
           isolation: "isolate",
           p: { xs: 2.5, sm: 3 },
           flex: 1,
+          display: "flex",
+          flexDirection: "column",
           "&::before": {
             content: '\"\"',
             position: "absolute",
@@ -137,135 +139,133 @@ export default function TeacherClassCard({
           },
         }}
       >
-        <Stack
-          direction="row"
-          sx={{
-            alignItems: "flex-start",
-            justifyContent: "space-between",
-            mb: 2.5,
-          }}
-        >
-          <Box
+        <Box sx={{ flex: 1, minWidth: 0, pb: 1.5 }}>
+          <Stack
+            direction="row"
             sx={{
-              width: 52,
-              height: 52,
-              borderRadius: 3,
-              position: "relative",
-              display: "grid",
-              placeItems: "center",
-              color: accent,
-              "&::before": {
-                content: '\"\"',
-                position: "absolute",
-                inset: 0,
-                borderRadius: "inherit",
-                bgcolor: accent,
-                opacity: 0.12,
-              },
+              alignItems: "flex-start",
+              justifyContent: "space-between",
+              mb: 2.5,
             }}
           >
-            <SchoolOutlinedIcon sx={{ fontSize: 28 }} />
-          </Box>
-          <Tooltip title={text.classActions}>
-            <IconButton
-              ref={menuButton}
-              id={`${id}-actions`}
-              aria-label={`${text.classActions}: ${accessibleClassName}`}
-              aria-haspopup="menu"
-              aria-expanded={menuOpen ? true : undefined}
-              aria-controls={menuOpen ? `${id}-menu` : undefined}
-              onClick={(event) => setAnchorEl(event.currentTarget)}
-              sx={{ width: 44, height: 44, color: "text.secondary" }}
+            <Box
+              sx={{
+                width: 52,
+                height: 52,
+                borderRadius: 3,
+                position: "relative",
+                display: "grid",
+                placeItems: "center",
+                color: accent,
+                "&::before": {
+                  content: '\"\"',
+                  position: "absolute",
+                  inset: 0,
+                  borderRadius: "inherit",
+                  bgcolor: accent,
+                  opacity: 0.12,
+                },
+              }}
             >
-              <MoreHorizRoundedIcon />
-            </IconButton>
-          </Tooltip>
-        </Stack>
-        <Typography
-          id={`${id}-title`}
-          component="h2"
-          sx={{
-            fontSize: { xs: "1.25rem", sm: "1.45rem" },
-            fontWeight: 800,
-            letterSpacing: -0.4,
-            lineHeight: 1.35,
-            overflowWrap: "anywhere",
-            mt: 0.5,
-          }}
-        >
-          {schoolClass.name}
-        </Typography>
-        {schoolClass.designation && (
+              <SchoolOutlinedIcon sx={{ fontSize: 28 }} />
+            </Box>
+            <Tooltip title={text.classActions}>
+              <IconButton
+                ref={menuButton}
+                id={`${id}-actions`}
+                aria-label={`${text.classActions}: ${accessibleClassName}`}
+                aria-haspopup="menu"
+                aria-expanded={menuOpen ? true : undefined}
+                aria-controls={menuOpen ? `${id}-menu` : undefined}
+                onClick={(event) => setAnchorEl(event.currentTarget)}
+                sx={{ width: 44, height: 44, color: "text.secondary" }}
+              >
+                <MoreHorizRoundedIcon />
+              </IconButton>
+            </Tooltip>
+          </Stack>
           <Typography
-            component="p"
-            variant="body2"
+            id={`${id}-title`}
+            component="h2"
             sx={{
-              mt: 1,
-              px: 1.25,
-              py: 0.5,
-              width: "fit-content",
-              maxWidth: "100%",
-              boxSizing: "border-box",
-              borderRadius: 1.5,
-              border: 1,
-              borderColor: "divider",
-              bgcolor: "background.paper",
-              color: "text.primary",
-              fontWeight: 700,
-              letterSpacing: 0.3,
+              fontSize: { xs: "1.25rem", sm: "1.45rem" },
+              fontWeight: 800,
+              letterSpacing: -0.4,
+              lineHeight: 1.35,
               overflowWrap: "anywhere",
+              mt: 0.5,
             }}
           >
-            {schoolClass.designation}
+            {schoolClass.name}
           </Typography>
-        )}
-        {schoolClass.description && (
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            sx={{
-              mt: 1.25,
-              lineHeight: 1.6,
-              overflowWrap: "anywhere",
-              display: "-webkit-box",
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: "vertical",
-              overflow: "hidden",
-            }}
+          {schoolClass.designation && (
+            <Typography
+              component="p"
+              variant="body2"
+              sx={{
+                mt: 1,
+                px: 1.25,
+                py: 0.5,
+                width: "fit-content",
+                maxWidth: "100%",
+                boxSizing: "border-box",
+                borderRadius: 1.5,
+                border: 1,
+                borderColor: "divider",
+                bgcolor: "background.paper",
+                color: "text.primary",
+                fontWeight: 700,
+                letterSpacing: 0.3,
+                overflowWrap: "anywhere",
+              }}
+            >
+              {schoolClass.designation}
+            </Typography>
+          )}
+          {schoolClass.description && (
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{
+                mt: 1.25,
+                lineHeight: 1.6,
+                overflowWrap: "anywhere",
+                display: "-webkit-box",
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: "vertical",
+                overflow: "hidden",
+              }}
+            >
+              {schoolClass.description}
+            </Typography>
+          )}
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{ alignItems: "center", mt: 2 }}
           >
-            {schoolClass.description}
-          </Typography>
-        )}
-        <Stack direction="row" spacing={1} sx={{ alignItems: "center", mt: 2 }}>
-          <GroupsOutlinedIcon
-            fontSize="small"
-            sx={{ color: "text.secondary" }}
-          />
-          <Typography variant="body2" sx={{ fontWeight: 700 }}>
-            {new Intl.NumberFormat(language).format(schoolClass.studentCount)}{" "}
-            {studentLabel}
-          </Typography>
-        </Stack>
-        {/* Keep the hint's natural height in the two-column layout. */}
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          aria-hidden={schoolClass.studentCount > 0 ? true : undefined}
-          sx={{
-            mt: 1,
-            lineHeight: 1.6,
-            display:
-              schoolClass.studentCount === 0
-                ? "block"
-                : { xs: "none", md: "block" },
-            visibility: schoolClass.studentCount === 0 ? "visible" : "hidden",
-          }}
-        >
-          {text.emptyClassHint}
-        </Typography>
+            <GroupsOutlinedIcon
+              fontSize="small"
+              sx={{ color: "text.secondary" }}
+            />
+            <Typography variant="body2" sx={{ fontWeight: 700 }}>
+              {new Intl.NumberFormat(language).format(schoolClass.studentCount)}{" "}
+              {studentLabel}
+            </Typography>
+          </Stack>
+          {schoolClass.studentCount === 0 && (
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ mt: 1, lineHeight: 1.6 }}
+            >
+              {text.emptyClassHint}
+            </Typography>
+          )}
+        </Box>
         <Box
           sx={{
-            mt: 1.5,
+            flexShrink: 0,
             pt: 1.5,
             borderTop: 1,
             borderColor: "divider",
