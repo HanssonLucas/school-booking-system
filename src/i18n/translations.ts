@@ -631,6 +631,9 @@ export const translations = {
       closeButton: "Stäng",
       participantsTitle: "Bokade deltagare",
       bookedSlotsSummary: "{booked} av {total} tider bokade",
+      emptyTitle: "Inga bokningar ännu",
+      emptyDescription:
+        "Här visas deltagare och deras bokade tider när det finns bokningar.",
     },
     myBookingsDialog: {
       openButton: "Hitta mina bokningar",
@@ -1321,6 +1324,9 @@ export const translations = {
       closeButton: "Close",
       participantsTitle: "Booked participants",
       bookedSlotsSummary: "{booked} of {total} slots booked",
+      emptyTitle: "No bookings yet",
+      emptyDescription:
+        "Participants and their booked times will appear here when bookings are available.",
     },
     myBookingsDialog: {
       openButton: "Find my bookings",

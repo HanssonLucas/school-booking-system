@@ -16,7 +16,7 @@ import {
 import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import EventOutlinedIcon from "@mui/icons-material/EventOutlined";
 import { useRouter } from "next/navigation";
 import type { BookingSession, BookingWithSlotTime } from "@/types/booking";
 import { useAuth } from "@/components/auth/useAuth";
@@ -274,13 +274,59 @@ export default function ViewBookingsDialog({
             {t.bookingsDialog.loading}
           </Alert>
         ) : bookings.length === 0 ? (
-          <Alert
-            severity="info"
-            icon={<InfoOutlinedIcon />}
-            sx={{ borderRadius: 3 }}
+          <Stack
+            spacing={1}
+            sx={{
+              alignItems: "center",
+              textAlign: "center",
+              px: 1,
+              py: 3,
+            }}
           >
-            {t.bookingsDialog.empty}
-          </Alert>
+            <Box
+              sx={{
+                width: 56,
+                height: 56,
+                display: "grid",
+                placeItems: "center",
+                borderRadius: 3,
+                color: "primary.main",
+                position: "relative",
+                isolation: "isolate",
+                mb: 1,
+                "&::before": {
+                  content: '""',
+                  position: "absolute",
+                  inset: 0,
+                  zIndex: -1,
+                  borderRadius: "inherit",
+                  bgcolor: "primary.main",
+                  opacity: 0.1,
+                },
+              }}
+            >
+              <EventOutlinedIcon sx={{ fontSize: 28 }} />
+            </Box>
+
+            <Typography
+              component="h3"
+              sx={{
+                fontSize: "1.1rem",
+                fontWeight: 800,
+                letterSpacing: -0.2,
+              }}
+            >
+              {t.bookingsDialog.emptyTitle}
+            </Typography>
+
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ maxWidth: 360, lineHeight: 1.6 }}
+            >
+              {t.bookingsDialog.emptyDescription}
+            </Typography>
+          </Stack>
         ) : (
           <Stack spacing={2}>
             <Stack
