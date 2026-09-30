@@ -629,6 +629,8 @@ export const translations = {
       email: "Email",
       assignedTime: "Tilldelad tid",
       closeButton: "Stäng",
+      participantsTitle: "Bokade deltagare",
+      bookedSlotsSummary: "{booked} av {total} tider bokade",
     },
     myBookingsDialog: {
       openButton: "Hitta mina bokningar",
@@ -1317,6 +1319,8 @@ export const translations = {
       email: "Email",
       assignedTime: "Assigned time",
       closeButton: "Close",
+      participantsTitle: "Booked participants",
+      bookedSlotsSummary: "{booked} of {total} slots booked",
     },
     myBookingsDialog: {
       openButton: "Find my bookings",

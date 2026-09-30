@@ -283,6 +283,38 @@ export default function ViewBookingsDialog({
           </Alert>
         ) : (
           <Stack spacing={2}>
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={0.5}
+              sx={{
+                justifyContent: "space-between",
+                alignItems: { xs: "flex-start", sm: "center" },
+              }}
+            >
+              <Typography
+                component="h3"
+                variant="subtitle2"
+                sx={{ fontWeight: 800 }}
+              >
+                {t.bookingsDialog.participantsTitle}
+              </Typography>
+
+              {session && (
+                <Typography variant="body2" color="text.secondary">
+                  {t.bookingsDialog.bookedSlotsSummary
+                    .replace(
+                      "{booked}",
+                      new Intl.NumberFormat(language).format(bookings.length),
+                    )
+                    .replace(
+                      "{total}",
+                      new Intl.NumberFormat(language).format(
+                        session.maxParticipants,
+                      ),
+                    )}
+                </Typography>
+              )}
+            </Stack>
             {bookings.map((booking) => (
               <Paper
                 key={booking.id}
