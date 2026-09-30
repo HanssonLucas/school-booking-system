@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import {
   Alert,
+  Avatar,
   Box,
   Button,
-  Chip,
   Dialog,
   DialogActions,
   DialogContent,
@@ -15,7 +15,6 @@ import {
 } from "@mui/material";
 import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
-import EventAvailableOutlinedIcon from "@mui/icons-material/EventAvailableOutlined";
 import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { useRouter } from "next/navigation";
@@ -99,13 +98,15 @@ export default function ViewBookingsDialog({
             borderColor: "divider",
             bgcolor: "background.paper",
             backgroundImage: "none",
+            maxWidth: isEmailUnverified ? 600 : 720,
           },
         },
       }}
     >
       <Box
         sx={{
-          p: { xs: 3, sm: 4 },
+          px: { xs: 2.5, sm: 3 },
+          py: 2.5,
           position: "relative",
           isolation: "isolate",
           borderBottom: 1,
@@ -129,9 +130,9 @@ export default function ViewBookingsDialog({
           {session && (
             <Box
               sx={{
-                width: { xs: 64, sm: 80 },
+                width: { xs: 64, sm: 72 },
                 flexShrink: 0,
-                py: 1.5,
+                py: 1,
                 borderRadius: 3,
                 textAlign: "center",
                 color: "primary.main",
@@ -225,7 +226,7 @@ export default function ViewBookingsDialog({
         </Stack>
       </Box>
 
-      <DialogContent sx={{ p: { xs: 3, sm: 4 } }}>
+      <DialogContent sx={{ px: { xs: 2.5, sm: 3 }, py: 2.5 }}>
         {isEmailUnverified ? (
           <Stack spacing={3}>
             <Alert severity="warning" sx={{ borderRadius: 3 }}>
@@ -303,69 +304,102 @@ export default function ViewBookingsDialog({
                       alignItems: { xs: "flex-start", sm: "center" },
                     }}
                   >
-                    <Stack spacing={0.5}>
-                      <Typography
-                        variant="subtitle1"
-                        sx={{ fontWeight: 900, letterSpacing: -0.2 }}
-                      >
-                        {booking.studentName}
-                      </Typography>
-
-                      <Stack
-                        direction="row"
-                        spacing={1}
+                    <Stack
+                      direction="row"
+                      spacing={1.5}
+                      sx={{ alignItems: "center", minWidth: 0 }}
+                    >
+                      <Avatar
+                        aria-hidden="true"
                         sx={{
-                          alignItems: "center",
-                          color: "text.secondary",
+                          width: 44,
+                          height: 44,
+                          bgcolor: "transparent",
+                          color: "primary.main",
+                          fontSize: "0.9rem",
+                          fontWeight: 800,
+                          flexShrink: 0,
+                          isolation: "isolate",
+                          "&::before": {
+                            content: '""',
+                            position: "absolute",
+                            inset: 0,
+                            zIndex: -1,
+                            bgcolor: "primary.main",
+                            opacity: 0.12,
+                          },
                         }}
                       >
-                        <EmailOutlinedIcon sx={{ fontSize: 18 }} />
-                        <Typography variant="body2">
-                          {booking.studentEmail}
+                        {booking.studentName
+                          .trim()
+                          .split(/\s+/)
+                          .filter(Boolean)
+                          .filter(
+                            (_, index, parts) =>
+                              index === 0 || index === parts.length - 1,
+                          )
+                          .map((part) => Array.from(part)[0])
+                          .join("")
+                          .toLocaleUpperCase(language)}
+                      </Avatar>
+
+                      <Stack spacing={0.5} sx={{ minWidth: 0 }}>
+                        <Typography
+                          variant="subtitle1"
+                          sx={{
+                            fontWeight: 900,
+                            letterSpacing: -0.2,
+                            overflowWrap: "anywhere",
+                          }}
+                        >
+                          {booking.studentName}
                         </Typography>
+
+                        <Stack
+                          direction="row"
+                          spacing={1}
+                          sx={{
+                            alignItems: "center",
+                            color: "text.secondary",
+                            minWidth: 0,
+                          }}
+                        >
+                          <EmailOutlinedIcon
+                            sx={{ fontSize: 18, flexShrink: 0 }}
+                          />
+                          <Typography
+                            variant="body2"
+                            sx={{ minWidth: 0, overflowWrap: "anywhere" }}
+                          >
+                            {booking.studentEmail}
+                          </Typography>
+                        </Stack>
                       </Stack>
                     </Stack>
 
-                    <Chip
-                      icon={<EventAvailableOutlinedIcon />}
-                      label={`${booking.slotStartTime}–${booking.slotEndTime}`}
-                      color="success"
+                    <Stack
+                      direction="row"
+                      spacing={0.75}
                       sx={{
-                        borderRadius: 999,
-                        fontWeight: 800,
+                        alignItems: "center",
+                        color: "primary.main",
+                        flexShrink: 0,
                       }}
-                    />
-                  </Stack>
+                    >
+                      <AccessTimeOutlinedIcon sx={{ fontSize: 18 }} />
 
-                  <Stack
-                    direction="row"
-                    spacing={1}
-                    useFlexGap
-                    sx={{
-                      flexWrap: "wrap",
-                    }}
-                  >
-                    <Chip
-                      icon={<PersonOutlineOutlinedIcon />}
-                      label={`${t.bookingsDialog.name}: ${booking.studentName}`}
-                      variant="outlined"
-                      size="small"
-                      sx={{
-                        borderRadius: 999,
-                        bgcolor: "action.hover",
-                      }}
-                    />
-
-                    <Chip
-                      icon={<AccessTimeOutlinedIcon />}
-                      label={`${t.bookingsDialog.assignedTime}: ${booking.slotStartTime}–${booking.slotEndTime}`}
-                      variant="outlined"
-                      size="small"
-                      sx={{
-                        borderRadius: 999,
-                        bgcolor: "action.hover",
-                      }}
-                    />
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontWeight: 800,
+                          fontVariantNumeric: "tabular-nums",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {booking.slotStartTime.slice(0, 5)}–
+                        {booking.slotEndTime.slice(0, 5)}
+                      </Typography>
+                    </Stack>
                   </Stack>
                 </Stack>
               </Paper>
@@ -377,8 +411,8 @@ export default function ViewBookingsDialog({
       {!isEmailUnverified && (
         <DialogActions
           sx={{
-            px: { xs: 3, sm: 4 },
-            pb: { xs: 3, sm: 4 },
+            px: { xs: 2.5, sm: 3 },
+            pb: 2,
             pt: 0,
           }}
         >
