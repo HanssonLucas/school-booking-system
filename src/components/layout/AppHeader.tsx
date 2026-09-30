@@ -122,8 +122,13 @@ export default function AppHeader() {
         <Skeleton width={mobile ? "100%" : 220} height={44} />
       ) : (
         links.map((link) => {
-          const active =
-            location === link.href && pathname === link.href.split(/[?#]/)[0];
+          const linkPath = link.href.split(/[?#]/)[0];
+          const isTeacherView =
+            linkPath === "/teacher" || linkPath === "/teacher/classes";
+
+          const active = isTeacherView
+            ? pathname === linkPath
+            : location === link.href && pathname === linkPath;
           return (
             <Button
               key={link.href}
