@@ -13,6 +13,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
 import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
@@ -330,36 +331,67 @@ export default function ViewBookingsDialog({
         ) : (
           <Stack spacing={2}>
             <Stack
-              direction={{ xs: "column", sm: "row" }}
-              spacing={0.5}
-              sx={{
-                justifyContent: "space-between",
-                alignItems: { xs: "flex-start", sm: "center" },
-              }}
+              direction="row"
+              spacing={1.5}
+              sx={{ alignItems: "center", py: 1 }}
             >
-              <Typography
-                component="h3"
-                variant="subtitle2"
-                sx={{ fontWeight: 800 }}
+              <Box
+                sx={{
+                  width: 48,
+                  height: 48,
+                  flexShrink: 0,
+                  display: "grid",
+                  placeItems: "center",
+                  borderRadius: 3,
+                  color: "primary.main",
+                  position: "relative",
+                  isolation: "isolate",
+                  "&::before": {
+                    content: '""',
+                    position: "absolute",
+                    inset: 0,
+                    zIndex: -1,
+                    borderRadius: "inherit",
+                    bgcolor: "primary.main",
+                    opacity: 0.1,
+                  },
+                }}
               >
-                {t.bookingsDialog.participantsTitle}
-              </Typography>
+                <GroupsOutlinedIcon sx={{ fontSize: 26 }} />
+              </Box>
 
-              {session && (
-                <Typography variant="body2" color="text.secondary">
-                  {t.bookingsDialog.bookedSlotsSummary
-                    .replace(
-                      "{booked}",
-                      new Intl.NumberFormat(language).format(bookings.length),
-                    )
-                    .replace(
-                      "{total}",
-                      new Intl.NumberFormat(language).format(
-                        session.maxParticipants,
-                      ),
-                    )}
+              <Box sx={{ minWidth: 0 }}>
+                <Typography
+                  component="h3"
+                  sx={{
+                    fontSize: "1.1rem",
+                    fontWeight: 800,
+                    letterSpacing: -0.2,
+                  }}
+                >
+                  {t.bookingsDialog.participantsTitle}
                 </Typography>
-              )}
+
+                {session && (
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ mt: 0.5, lineHeight: 1.6 }}
+                  >
+                    {t.bookingsDialog.bookedSlotsSummary
+                      .replace(
+                        "{booked}",
+                        new Intl.NumberFormat(language).format(bookings.length),
+                      )
+                      .replace(
+                        "{total}",
+                        new Intl.NumberFormat(language).format(
+                          session.maxParticipants,
+                        ),
+                      )}
+                  </Typography>
+                )}
+              </Box>
             </Stack>
             {bookings.map((booking) => (
               <Paper
