@@ -136,10 +136,13 @@ function EditBookingSessionDialogContent({
       slotProps={{
         paper: {
           sx: {
-            borderRadius: 5,
+            borderRadius: 4,
             overflow: "hidden",
             border: 1,
             borderColor: "divider",
+            bgcolor: "background.paper",
+            backgroundImage: "none",
+            maxWidth: currentUser?.emailVerified === false ? 600 : 720,
           },
         },
       }}

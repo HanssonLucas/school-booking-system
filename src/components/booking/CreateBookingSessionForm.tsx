@@ -6,7 +6,6 @@ import {
   Box,
   Button,
   MenuItem,
-  Paper,
   Stack,
   TextField,
   Typography,
@@ -249,15 +248,7 @@ export default function CreateBookingSessionForm({
   };
 
   return (
-    <Paper
-      elevation={0}
-      sx={{
-        overflow: "hidden",
-        borderRadius: 5,
-        border: 1,
-        borderColor: "divider",
-      }}
-    >
+    <Box>
       <Box
         sx={{
           p: { xs: 3, sm: 4 },
@@ -581,6 +572,6 @@ export default function CreateBookingSessionForm({
           </Box>
         </Stack>
       </Box>
-    </Paper>
+    </Box>
   );
 }
