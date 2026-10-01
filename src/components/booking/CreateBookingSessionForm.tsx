@@ -35,6 +35,7 @@ type FormErrors = Partial<Record<keyof FormValues, string>>;
 type CreateBookingSessionFormProps = {
   initialClassId?: number | null;
   onCreateSession: (session: CreateBookingSessionInput) => void | Promise<void>;
+  onClose?: () => void;
 };
 
 const initialFormValues: FormValues = {
@@ -84,6 +85,7 @@ const getClassLoadError = (value: unknown): ClassLoadError => {
 export default function CreateBookingSessionForm({
   onCreateSession,
   initialClassId = null,
+  onClose,
 }: CreateBookingSessionFormProps) {
   const [formValues, setFormValues] = useState<FormValues>(() => ({
     ...initialFormValues,
@@ -252,6 +254,7 @@ export default function CreateBookingSessionForm({
         title={t.createSessionForm.title}
         description={t.bookingSession.formDescription}
         icon={<AddRoundedIcon />}
+        onClose={onClose}
       />
 
       <Box

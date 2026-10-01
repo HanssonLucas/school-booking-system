@@ -1,17 +1,23 @@
 import type { ReactNode } from "react";
-import { Box, Stack, Typography } from "@mui/material";
+import { Box, IconButton, Stack, Typography } from "@mui/material";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import { useTranslations } from "@/i18n/useTranslations";
 
 type SessionDialogHeaderProps = {
   title: string;
   description?: string;
   icon: ReactNode;
+  onClose?: () => void;
 };
 
 export default function SessionDialogHeader({
   title,
   description,
   icon,
+  onClose,
 }: SessionDialogHeaderProps) {
+  const { t } = useTranslations();
+
   return (
     <Box
       sx={{
@@ -59,7 +65,7 @@ export default function SessionDialogHeader({
           {icon}
         </Box>
 
-        <Box sx={{ minWidth: 0 }}>
+        <Box sx={{ minWidth: 0, flex: 1 }}>
           <Typography
             variant="h5"
             component="h2"
@@ -81,6 +87,27 @@ export default function SessionDialogHeader({
             </Typography>
           )}
         </Box>
+
+        {onClose && (
+          <IconButton
+            type="button"
+            onClick={onClose}
+            aria-label={t.common.close}
+            sx={{
+              width: 44,
+              height: 44,
+              flexShrink: 0,
+              alignSelf: "flex-start",
+              color: "text.secondary",
+              "&:hover": {
+                bgcolor: "action.hover",
+                color: "text.primary",
+              },
+            }}
+          >
+            <CloseRoundedIcon />
+          </IconButton>
+        )}
       </Stack>
     </Box>
   );

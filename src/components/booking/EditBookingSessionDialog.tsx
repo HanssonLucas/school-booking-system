@@ -142,6 +142,7 @@ function EditBookingSessionDialogContent({
         title={t.editSessionDialog.title}
         description={t.bookingSession.formDescription}
         icon={<EditOutlinedIcon />}
+        onClose={onClose}
       />
 
       <DialogContent sx={{ p: { xs: 3, sm: 4 } }}>

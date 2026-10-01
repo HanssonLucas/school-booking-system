@@ -324,6 +324,7 @@ function TeacherPageContent() {
             <SessionDialogHeader
               title={t.teacher.createSessionButton}
               icon={<AddRoundedIcon />}
+              onClose={closeCreateDialog}
             />
 
             <DialogContent sx={{ p: { xs: 3, sm: 4 } }}>
@@ -375,6 +376,7 @@ function TeacherPageContent() {
               key={selectedClassId ?? "no-class"}
               initialClassId={selectedClassId}
               onCreateSession={handleCreateSession}
+              onClose={closeCreateDialog}
             />
           </DialogContent>
         )}
