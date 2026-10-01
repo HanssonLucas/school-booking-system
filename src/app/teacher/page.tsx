@@ -3,7 +3,6 @@
 import { Suspense, useEffect, useState } from "react";
 import {
   Alert,
-  Box,
   Button,
   Container,
   Dialog,
@@ -30,6 +29,7 @@ import type {
 import ViewBookingsDialog from "@/components/booking/ViewBookingsDialog";
 import DeleteBookingSessionDialog from "@/components/booking/DeleteBookingSessionDialog";
 import TeacherRouteGuard from "@/components/auth/TeacherRouteGuard";
+import SessionDialogHeader from "@/components/booking/SessionDialogHeader";
 
 type TeacherSession = BookingSession & { classId: number };
 
@@ -321,45 +321,10 @@ function TeacherPageContent() {
       >
         {currentUser && !currentUser.emailVerified ? (
           <>
-            <Box
-              sx={{
-                p: { xs: 3, sm: 4 },
-                pb: 2,
-                background:
-                  "linear-gradient(135deg, rgba(156, 39, 176, 0.14), rgba(25, 118, 210, 0.08))",
-                borderBottom: 1,
-                borderColor: "divider",
-              }}
-            >
-              <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
-                <Box
-                  sx={{
-                    width: 48,
-                    height: 48,
-                    borderRadius: 4,
-                    display: "grid",
-                    placeItems: "center",
-                    bgcolor: "secondary.main",
-                    color: "secondary.contrastText",
-                    boxShadow: 3,
-                    flexShrink: 0,
-                  }}
-                >
-                  <AddRoundedIcon />
-                </Box>
-
-                <Typography
-                  variant="h5"
-                  component="h2"
-                  sx={{
-                    fontWeight: 900,
-                    letterSpacing: -0.4,
-                  }}
-                >
-                  {t.teacher.createSessionButton}
-                </Typography>
-              </Stack>
-            </Box>
+            <SessionDialogHeader
+              title={t.teacher.createSessionButton}
+              icon={<AddRoundedIcon />}
+            />
 
             <DialogContent sx={{ p: { xs: 3, sm: 4 } }}>
               <Stack spacing={3}>

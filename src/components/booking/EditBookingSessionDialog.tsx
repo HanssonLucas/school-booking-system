@@ -11,7 +11,6 @@ import {
   MenuItem,
   Stack,
   TextField,
-  Typography,
 } from "@mui/material";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import TitleOutlinedIcon from "@mui/icons-material/TitleOutlined";
@@ -25,6 +24,7 @@ import type { BookingSession } from "@/types/booking";
 import { useTranslations } from "@/i18n/useTranslations";
 import { getSlotCount, SLOT_DURATION_OPTIONS } from "@/lib/bookingSlots";
 import { useAuth } from "@/components/auth/useAuth";
+import SessionDialogHeader from "@/components/booking/SessionDialogHeader";
 
 export type EditFormValues = {
   title: string;
@@ -147,42 +147,10 @@ function EditBookingSessionDialogContent({
         },
       }}
     >
-      <Box
-        sx={{
-          p: { xs: 3, sm: 4 },
-          pb: 2,
-          background:
-            "linear-gradient(135deg, rgba(156, 39, 176, 0.14), rgba(25, 118, 210, 0.08))",
-          borderBottom: 1,
-          borderColor: "divider",
-        }}
-      >
-        <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
-          <Box
-            sx={{
-              width: 48,
-              height: 48,
-              borderRadius: 4,
-              display: "grid",
-              placeItems: "center",
-              bgcolor: "secondary.main",
-              color: "secondary.contrastText",
-              boxShadow: 3,
-              flexShrink: 0,
-            }}
-          >
-            <EditOutlinedIcon />
-          </Box>
-
-          <Typography
-            variant="h5"
-            component="h2"
-            sx={{ fontWeight: 900, letterSpacing: -0.4 }}
-          >
-            {t.editSessionDialog.title}
-          </Typography>
-        </Stack>
-      </Box>
+      <SessionDialogHeader
+        title={t.editSessionDialog.title}
+        icon={<EditOutlinedIcon />}
+      />
 
       <DialogContent sx={{ p: { xs: 3, sm: 4 } }}>
         {currentUser && !currentUser.emailVerified ? (
