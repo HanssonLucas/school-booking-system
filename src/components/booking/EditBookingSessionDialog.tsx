@@ -9,6 +9,7 @@ import {
   DialogActions,
   DialogContent,
   Stack,
+  Typography,
 } from "@mui/material";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
@@ -139,6 +140,7 @@ function EditBookingSessionDialogContent({
     >
       <SessionDialogHeader
         title={t.editSessionDialog.title}
+        description={t.bookingSession.formDescription}
         icon={<EditOutlinedIcon />}
       />
 
@@ -188,6 +190,14 @@ function EditBookingSessionDialogContent({
         ) : (
           <Box component="form" onSubmit={handleSubmit}>
             <Stack spacing={3}>
+              <Typography
+                component="h3"
+                variant="subtitle1"
+                sx={{ fontWeight: 800, letterSpacing: -0.2 }}
+              >
+                {t.bookingSession.detailsHeading}
+              </Typography>
+
               <SessionDetailsFields
                 title={formValues.title}
                 description={formValues.description}
@@ -198,6 +208,18 @@ function EditBookingSessionDialogContent({
                   handleChange("description", value)
                 }
               />
+
+              <Typography
+                component="h3"
+                variant="subtitle1"
+                sx={{
+                  pt: 1,
+                  fontWeight: 800,
+                  letterSpacing: -0.2,
+                }}
+              >
+                {t.bookingSession.scheduleHeading}
+              </Typography>
 
               <SessionDateTimeFields
                 values={formValues}

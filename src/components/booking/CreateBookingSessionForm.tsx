@@ -1,7 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Alert, Box, Button, MenuItem, Stack, TextField } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  MenuItem,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
 import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import type { CreateBookingSessionInput } from "@/types/booking";
@@ -242,7 +250,7 @@ export default function CreateBookingSessionForm({
     <Box>
       <SessionDialogHeader
         title={t.createSessionForm.title}
-        description={t.bookingSession.slotDuration}
+        description={t.bookingSession.formDescription}
         icon={<AddRoundedIcon />}
       />
 
@@ -303,6 +311,13 @@ export default function CreateBookingSessionForm({
               {text.submitFailed}
             </Alert>
           )}
+          <Typography
+            component="h3"
+            variant="subtitle1"
+            sx={{ fontWeight: 800, letterSpacing: -0.2 }}
+          >
+            {t.bookingSession.detailsHeading}
+          </Typography>
           <TextField
             select
             label={text.label}
@@ -346,6 +361,17 @@ export default function CreateBookingSessionForm({
             titleError={formErrors.title}
             descriptionError={formErrors.description}
           />
+          <Typography
+            component="h3"
+            variant="subtitle1"
+            sx={{
+              pt: 1,
+              fontWeight: 800,
+              letterSpacing: -0.2,
+            }}
+          >
+            {t.bookingSession.scheduleHeading}
+          </Typography>
 
           <SessionDateTimeFields
             values={formValues}

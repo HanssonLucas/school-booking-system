@@ -598,6 +598,10 @@ export const translations = {
       viewBookingsButton: "Visa bokningar",
       deleteButton: "Ta bort",
       of: "av",
+      formDescription:
+        "Ange vad tillfället gäller och när eleverna kan boka tid.",
+      detailsHeading: "Om tillfället",
+      scheduleHeading: "Datum och tider",
     },
     bookSessionDialog: {
       title: "Boka tid",
@@ -1291,6 +1295,10 @@ export const translations = {
       viewBookingsButton: "View bookings",
       deleteButton: "Delete",
       of: "of",
+      formDescription:
+        "Set the session details and when students can book a time.",
+      detailsHeading: "Session details",
+      scheduleHeading: "Date and times",
     },
     bookSessionDialog: {
       title: "Book time",
