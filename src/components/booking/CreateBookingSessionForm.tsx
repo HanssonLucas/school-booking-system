@@ -4,13 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import { Alert, Box, Button, MenuItem, Stack, TextField } from "@mui/material";
 import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
-import TimerOutlinedIcon from "@mui/icons-material/TimerOutlined";
 import type { CreateBookingSessionInput } from "@/types/booking";
 import { useTranslations } from "@/i18n/useTranslations";
-import { getSlotCount, SLOT_DURATION_OPTIONS } from "@/lib/bookingSlots";
+import { getSlotCount } from "@/lib/bookingSlots";
 import SessionDialogHeader from "@/components/booking/SessionDialogHeader";
 import SessionDetailsFields from "@/components/booking/SessionDetailsField";
 import SessionDateTimeFields from "@/components/booking/SessionDateTimeFields";
+import SessionSlotFields from "@/components/booking/SessionSlotFields";
 
 type FormValues = {
   classId: string;
@@ -358,40 +358,11 @@ export default function CreateBookingSessionForm({
             onChange={handleChange}
           />
 
-          <TextField
-            select
-            label={t.bookingSession.slotDuration}
-            fullWidth
+          <SessionSlotFields
             value={formValues.slotDurationMinutes}
-            onChange={(event) =>
-              handleChange("slotDurationMinutes", event.target.value)
-            }
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <TimerOutlinedIcon sx={{ mr: 1, color: "text.secondary" }} />
-                ),
-              },
-            }}
-            sx={textFieldSx}
-          >
-            {SLOT_DURATION_OPTIONS.map((duration) => (
-              <MenuItem key={duration} value={String(duration)}>
-                {duration} minuter
-              </MenuItem>
-            ))}
-          </TextField>
-
-          <Alert
-            severity={calculatedSlotCount > 0 ? "info" : "warning"}
-            icon={<TimerOutlinedIcon />}
-            sx={{ borderRadius: 3 }}
-          >
-            {t.createSessionForm.calculatedSlotsLabel}{" "}
-            <Box component="span" sx={{ fontWeight: 900 }}>
-              {calculatedSlotCount > 0 ? calculatedSlotCount : "-"}
-            </Box>
-          </Alert>
+            calculatedSlotCount={calculatedSlotCount}
+            onChange={(value) => handleChange("slotDurationMinutes", value)}
+          />
 
           <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
             <Button
