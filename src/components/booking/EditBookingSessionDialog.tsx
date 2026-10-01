@@ -145,7 +145,12 @@ function EditBookingSessionDialogContent({
         onClose={onClose}
       />
 
-      <DialogContent sx={{ p: { xs: 3, sm: 4 } }}>
+      <DialogContent
+        sx={{
+          px: { xs: 2.5, sm: 4 },
+          py: 3,
+        }}
+      >
         {currentUser && !currentUser.emailVerified ? (
           <Stack spacing={3}>
             <Alert severity="warning" sx={{ borderRadius: 3 }}>
@@ -190,7 +195,7 @@ function EditBookingSessionDialogContent({
           </Stack>
         ) : (
           <Box component="form" onSubmit={handleSubmit}>
-            <Stack spacing={3}>
+            <Stack spacing={2}>
               <Typography
                 component="h3"
                 variant="subtitle1"

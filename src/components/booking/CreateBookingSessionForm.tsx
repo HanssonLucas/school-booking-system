@@ -260,9 +260,12 @@ export default function CreateBookingSessionForm({
       <Box
         component="form"
         onSubmit={handleSubmit}
-        sx={{ p: { xs: 3, sm: 4 } }}
+        sx={{
+          px: { xs: 2.5, sm: 4 },
+          py: 3,
+        }}
       >
-        <Stack spacing={3}>
+        <Stack spacing={2}>
           {classState.status === "loading" && (
             <Alert severity="info" sx={{ borderRadius: 3 }}>
               {text.loading}
