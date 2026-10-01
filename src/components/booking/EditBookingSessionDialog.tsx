@@ -13,8 +13,6 @@ import {
   TextField,
 } from "@mui/material";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
-import TitleOutlinedIcon from "@mui/icons-material/TitleOutlined";
-import NotesOutlinedIcon from "@mui/icons-material/NotesOutlined";
 import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
 import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
 import TimerOutlinedIcon from "@mui/icons-material/TimerOutlined";
@@ -25,6 +23,7 @@ import { useTranslations } from "@/i18n/useTranslations";
 import { getSlotCount, SLOT_DURATION_OPTIONS } from "@/lib/bookingSlots";
 import { useAuth } from "@/components/auth/useAuth";
 import SessionDialogHeader from "@/components/booking/SessionDialogHeader";
+import SessionDetailsFields from "@/components/booking/SessionDetailsField";
 
 export type EditFormValues = {
   title: string;
@@ -198,47 +197,15 @@ function EditBookingSessionDialogContent({
         ) : (
           <Box component="form" onSubmit={handleSubmit}>
             <Stack spacing={3}>
-              <TextField
-                label={t.editSessionDialog.titleLabel}
-                fullWidth
-                value={formValues.title}
-                onChange={(event) => handleChange("title", event.target.value)}
-                slotProps={{
-                  input: {
-                    startAdornment: (
-                      <TitleOutlinedIcon
-                        sx={{ mr: 1, color: "text.secondary" }}
-                      />
-                    ),
-                  },
-                }}
-                sx={textFieldSx}
-              />
-
-              <TextField
-                label={t.editSessionDialog.descriptionLabel}
-                fullWidth
-                multiline
-                minRows={3}
-                value={formValues.description}
-                onChange={(event) =>
-                  handleChange("description", event.target.value)
+              <SessionDetailsFields
+                title={formValues.title}
+                description={formValues.description}
+                titleLabel={t.editSessionDialog.titleLabel}
+                descriptionLabel={t.editSessionDialog.descriptionLabel}
+                onTitleChange={(value) => handleChange("title", value)}
+                onDescriptionChange={(value) =>
+                  handleChange("description", value)
                 }
-                slotProps={{
-                  input: {
-                    startAdornment: (
-                      <NotesOutlinedIcon
-                        sx={{
-                          mr: 1,
-                          mt: 1,
-                          color: "text.secondary",
-                          alignSelf: "flex-start",
-                        }}
-                      />
-                    ),
-                  },
-                }}
-                sx={textFieldSx}
               />
 
               <Stack

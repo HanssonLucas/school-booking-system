@@ -4,8 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import { Alert, Box, Button, MenuItem, Stack, TextField } from "@mui/material";
 import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
-import TitleOutlinedIcon from "@mui/icons-material/TitleOutlined";
-import NotesOutlinedIcon from "@mui/icons-material/NotesOutlined";
 import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
 import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
 import TimerOutlinedIcon from "@mui/icons-material/TimerOutlined";
@@ -13,6 +11,7 @@ import type { CreateBookingSessionInput } from "@/types/booking";
 import { useTranslations } from "@/i18n/useTranslations";
 import { getSlotCount, SLOT_DURATION_OPTIONS } from "@/lib/bookingSlots";
 import SessionDialogHeader from "@/components/booking/SessionDialogHeader";
+import SessionDetailsFields from "@/components/booking/SessionDetailsField";
 
 type FormValues = {
   classId: string;
@@ -338,49 +337,15 @@ export default function CreateBookingSessionForm({
               ))}
           </TextField>
 
-          <TextField
-            label={t.createSessionForm.titleLabel}
-            fullWidth
-            value={formValues.title}
-            onChange={(event) => handleChange("title", event.target.value)}
-            error={Boolean(formErrors.title)}
-            helperText={formErrors.title}
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <TitleOutlinedIcon sx={{ mr: 1, color: "text.secondary" }} />
-                ),
-              },
-            }}
-            sx={textFieldSx}
-          />
-
-          <TextField
-            label={t.createSessionForm.descriptionLabel}
-            fullWidth
-            multiline
-            minRows={3}
-            value={formValues.description}
-            onChange={(event) =>
-              handleChange("description", event.target.value)
-            }
-            error={Boolean(formErrors.description)}
-            helperText={formErrors.description}
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <NotesOutlinedIcon
-                    sx={{
-                      mr: 1,
-                      mt: 1,
-                      color: "text.secondary",
-                      alignSelf: "flex-start",
-                    }}
-                  />
-                ),
-              },
-            }}
-            sx={textFieldSx}
+          <SessionDetailsFields
+            title={formValues.title}
+            description={formValues.description}
+            titleLabel={t.createSessionForm.titleLabel}
+            descriptionLabel={t.createSessionForm.descriptionLabel}
+            onTitleChange={(value) => handleChange("title", value)}
+            onDescriptionChange={(value) => handleChange("description", value)}
+            titleError={formErrors.title}
+            descriptionError={formErrors.description}
           />
 
           <Stack
