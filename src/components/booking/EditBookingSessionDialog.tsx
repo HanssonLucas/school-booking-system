@@ -13,8 +13,6 @@ import {
   TextField,
 } from "@mui/material";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
-import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
-import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
 import TimerOutlinedIcon from "@mui/icons-material/TimerOutlined";
 import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
 import { useRouter } from "next/navigation";
@@ -24,6 +22,7 @@ import { getSlotCount, SLOT_DURATION_OPTIONS } from "@/lib/bookingSlots";
 import { useAuth } from "@/components/auth/useAuth";
 import SessionDialogHeader from "@/components/booking/SessionDialogHeader";
 import SessionDetailsFields from "@/components/booking/SessionDetailsField";
+import SessionDateTimeFields from "@/components/booking/SessionDateTimeFields";
 
 export type EditFormValues = {
   title: string;
@@ -208,72 +207,15 @@ function EditBookingSessionDialogContent({
                 }
               />
 
-              <Stack
-                direction={{ xs: "column", sm: "row" }}
-                spacing={2}
-                sx={{ alignItems: "flex-start" }}
-              >
-                <TextField
-                  label={t.editSessionDialog.dateLabel}
-                  type="date"
-                  fullWidth
-                  value={formValues.date}
-                  onChange={(event) => handleChange("date", event.target.value)}
-                  slotProps={{
-                    inputLabel: { shrink: true },
-                    input: {
-                      startAdornment: (
-                        <CalendarMonthOutlinedIcon
-                          sx={{ mr: 1, color: "text.secondary" }}
-                        />
-                      ),
-                    },
-                  }}
-                  sx={textFieldSx}
-                />
-
-                <TextField
-                  label={t.editSessionDialog.startTimeLabel}
-                  type="time"
-                  fullWidth
-                  value={formValues.startTime}
-                  onChange={(event) =>
-                    handleChange("startTime", event.target.value)
-                  }
-                  slotProps={{
-                    inputLabel: { shrink: true },
-                    input: {
-                      startAdornment: (
-                        <AccessTimeOutlinedIcon
-                          sx={{ mr: 1, color: "text.secondary" }}
-                        />
-                      ),
-                    },
-                  }}
-                  sx={textFieldSx}
-                />
-
-                <TextField
-                  label={t.editSessionDialog.endTimeLabel}
-                  type="time"
-                  fullWidth
-                  value={formValues.endTime}
-                  onChange={(event) =>
-                    handleChange("endTime", event.target.value)
-                  }
-                  slotProps={{
-                    inputLabel: { shrink: true },
-                    input: {
-                      startAdornment: (
-                        <AccessTimeOutlinedIcon
-                          sx={{ mr: 1, color: "text.secondary" }}
-                        />
-                      ),
-                    },
-                  }}
-                  sx={textFieldSx}
-                />
-              </Stack>
+              <SessionDateTimeFields
+                values={formValues}
+                labels={{
+                  date: t.editSessionDialog.dateLabel,
+                  startTime: t.editSessionDialog.startTimeLabel,
+                  endTime: t.editSessionDialog.endTimeLabel,
+                }}
+                onChange={handleChange}
+              />
 
               <TextField
                 select

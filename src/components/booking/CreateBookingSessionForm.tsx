@@ -4,14 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import { Alert, Box, Button, MenuItem, Stack, TextField } from "@mui/material";
 import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
-import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
-import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
 import TimerOutlinedIcon from "@mui/icons-material/TimerOutlined";
 import type { CreateBookingSessionInput } from "@/types/booking";
 import { useTranslations } from "@/i18n/useTranslations";
 import { getSlotCount, SLOT_DURATION_OPTIONS } from "@/lib/bookingSlots";
 import SessionDialogHeader from "@/components/booking/SessionDialogHeader";
 import SessionDetailsFields from "@/components/booking/SessionDetailsField";
+import SessionDateTimeFields from "@/components/booking/SessionDateTimeFields";
 
 type FormValues = {
   classId: string;
@@ -348,84 +347,16 @@ export default function CreateBookingSessionForm({
             descriptionError={formErrors.description}
           />
 
-          <Stack
-            direction={{ xs: "column", sm: "row" }}
-            spacing={2}
-            sx={{
-              alignItems: "flex-start",
+          <SessionDateTimeFields
+            values={formValues}
+            labels={{
+              date: t.createSessionForm.dateLabel,
+              startTime: t.createSessionForm.startTimeLabel,
+              endTime: t.createSessionForm.endTimeLabel,
             }}
-          >
-            <TextField
-              label={t.createSessionForm.dateLabel}
-              type="date"
-              fullWidth
-              value={formValues.date}
-              onChange={(event) => handleChange("date", event.target.value)}
-              slotProps={{
-                inputLabel: {
-                  shrink: true,
-                },
-                input: {
-                  startAdornment: (
-                    <CalendarMonthOutlinedIcon
-                      sx={{ mr: 1, color: "text.secondary" }}
-                    />
-                  ),
-                },
-              }}
-              error={Boolean(formErrors.date)}
-              helperText={formErrors.date}
-              sx={textFieldSx}
-            />
-
-            <TextField
-              label={t.createSessionForm.startTimeLabel}
-              type="time"
-              fullWidth
-              value={formValues.startTime}
-              onChange={(event) =>
-                handleChange("startTime", event.target.value)
-              }
-              slotProps={{
-                inputLabel: {
-                  shrink: true,
-                },
-                input: {
-                  startAdornment: (
-                    <AccessTimeOutlinedIcon
-                      sx={{ mr: 1, color: "text.secondary" }}
-                    />
-                  ),
-                },
-              }}
-              error={Boolean(formErrors.startTime)}
-              helperText={formErrors.startTime}
-              sx={textFieldSx}
-            />
-
-            <TextField
-              label={t.createSessionForm.endTimeLabel}
-              type="time"
-              fullWidth
-              value={formValues.endTime}
-              onChange={(event) => handleChange("endTime", event.target.value)}
-              slotProps={{
-                inputLabel: {
-                  shrink: true,
-                },
-                input: {
-                  startAdornment: (
-                    <AccessTimeOutlinedIcon
-                      sx={{ mr: 1, color: "text.secondary" }}
-                    />
-                  ),
-                },
-              }}
-              error={Boolean(formErrors.endTime)}
-              helperText={formErrors.endTime}
-              sx={textFieldSx}
-            />
-          </Stack>
+            errors={formErrors}
+            onChange={handleChange}
+          />
 
           <TextField
             select
