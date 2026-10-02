@@ -1,6 +1,4 @@
 import { Stack, TextField } from "@mui/material";
-import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
-import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
 
 type DateTimeField = "date" | "startTime" | "endTime";
 
@@ -41,18 +39,6 @@ export default function SessionDateTimeFields({
           helperText={errors?.[name]}
           slotProps={{
             inputLabel: { shrink: true },
-            input: {
-              startAdornment:
-                type === "date" ? (
-                  <CalendarMonthOutlinedIcon
-                    sx={{ mr: 1, color: "text.secondary" }}
-                  />
-                ) : (
-                  <AccessTimeOutlinedIcon
-                    sx={{ mr: 1, color: "text.secondary" }}
-                  />
-                ),
-            },
           }}
           sx={{
             "& .MuiOutlinedInput-root": {
