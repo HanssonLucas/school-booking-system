@@ -239,6 +239,8 @@ function EditBookingSessionDialogContent({
 
               <SessionSlotFields
                 value={formValues.slotDurationMinutes}
+                startTime={formValues.startTime}
+                endTime={formValues.endTime}
                 calculatedSlotCount={calculatedSlotCount}
                 onChange={(value) => handleChange("slotDurationMinutes", value)}
               />

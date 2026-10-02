@@ -605,6 +605,11 @@ export const translations = {
       titlePlaceholder: "Exempel: Handledning inför projektinlämning",
       descriptionPlaceholder: "Vad behöver eleverna veta eller förbereda?",
       optionalLabel: "valfritt",
+      slotsPending:
+        "Ange starttid och sluttid för att se antalet bokningsbara tider.",
+      slotsSingular: "bokningsbar tid",
+      slotsPlural: "bokningsbara tider",
+      minutesPerBooking: "minuter per bokning",
     },
     bookSessionDialog: {
       title: "Boka tid",
@@ -1305,6 +1310,11 @@ export const translations = {
       titlePlaceholder: "Example: Project assignment guidance",
       descriptionPlaceholder: "What should students know or prepare?",
       optionalLabel: "optional",
+      slotsPending:
+        "Enter a start and end time to see the number of bookable slots.",
+      slotsSingular: "bookable slot",
+      slotsPlural: "bookable slots",
+      minutesPerBooking: "minutes per booking",
     },
     bookSessionDialog: {
       title: "Book time",
