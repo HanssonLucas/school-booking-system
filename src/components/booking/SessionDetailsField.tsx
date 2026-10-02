@@ -1,8 +1,7 @@
 import { TextField } from "@mui/material";
-import TitleOutlinedIcon from "@mui/icons-material/TitleOutlined";
-import NotesOutlinedIcon from "@mui/icons-material/NotesOutlined";
+import { useTranslations } from "@/i18n/useTranslations";
 
-type SessionDetailsFieldsProps = {
+type Props = {
   title: string;
   description: string;
   titleLabel: string;
@@ -28,28 +27,28 @@ export default function SessionDetailsFields({
   onDescriptionChange,
   titleError,
   descriptionError,
-}: SessionDetailsFieldsProps) {
+}: Props) {
+  const { t } = useTranslations();
+
   return (
     <>
       <TextField
         label={titleLabel}
+        placeholder={t.bookingSession.titlePlaceholder}
         fullWidth
         value={title}
         onChange={(event) => onTitleChange(event.target.value)}
         error={Boolean(titleError)}
         helperText={titleError}
         slotProps={{
-          input: {
-            startAdornment: (
-              <TitleOutlinedIcon sx={{ mr: 1, color: "text.secondary" }} />
-            ),
-          },
+          inputLabel: { shrink: true },
         }}
         sx={textFieldSx}
       />
 
       <TextField
-        label={descriptionLabel}
+        label={`${descriptionLabel} (${t.bookingSession.optionalLabel})`}
+        placeholder={t.bookingSession.descriptionPlaceholder}
         fullWidth
         multiline
         minRows={3}
@@ -58,18 +57,7 @@ export default function SessionDetailsFields({
         error={Boolean(descriptionError)}
         helperText={descriptionError}
         slotProps={{
-          input: {
-            startAdornment: (
-              <NotesOutlinedIcon
-                sx={{
-                  mr: 1,
-                  mt: 1,
-                  color: "text.secondary",
-                  alignSelf: "flex-start",
-                }}
-              />
-            ),
-          },
+          inputLabel: { shrink: true },
         }}
         sx={textFieldSx}
       />

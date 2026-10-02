@@ -602,6 +602,9 @@ export const translations = {
         "Ange vad tillfället gäller och när eleverna kan boka tid.",
       detailsHeading: "Om tillfället",
       scheduleHeading: "Datum och tider",
+      titlePlaceholder: "Exempel: Handledning inför projektinlämning",
+      descriptionPlaceholder: "Vad behöver eleverna veta eller förbereda?",
+      optionalLabel: "valfritt",
     },
     bookSessionDialog: {
       title: "Boka tid",
@@ -1299,6 +1302,9 @@ export const translations = {
         "Set the session details and when students can book a time.",
       detailsHeading: "Session details",
       scheduleHeading: "Date and times",
+      titlePlaceholder: "Example: Project assignment guidance",
+      descriptionPlaceholder: "What should students know or prepare?",
+      optionalLabel: "optional",
     },
     bookSessionDialog: {
       title: "Book time",
