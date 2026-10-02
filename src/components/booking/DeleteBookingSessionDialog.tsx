@@ -8,7 +8,6 @@ import {
   DialogActions,
   DialogContent,
   Stack,
-  Typography,
 } from "@mui/material";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
@@ -16,6 +15,7 @@ import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/useAuth";
 import { useTranslations } from "@/i18n/useTranslations";
+import SessionDialogHeader from "@/components/booking/SessionDialogHeader";
 
 type DeleteBookingSessionDialogProps = {
   open: boolean;
@@ -43,58 +43,23 @@ export default function DeleteBookingSessionDialog({
       slotProps={{
         paper: {
           sx: {
-            borderRadius: 5,
+            borderRadius: 4,
             overflow: "hidden",
             border: 1,
             borderColor: "divider",
+            bgcolor: "background.paper",
+            backgroundImage: "none",
+            maxWidth: 600,
           },
         },
       }}
     >
-      <Box
-        sx={{
-          p: { xs: 3, sm: 4 },
-          pb: 2,
-          background:
-            "linear-gradient(135deg, rgba(211, 47, 47, 0.14), rgba(255, 152, 0, 0.08))",
-          borderBottom: 1,
-          borderColor: "divider",
-        }}
-      >
-        <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
-          <Box
-            sx={{
-              width: 48,
-              height: 48,
-              borderRadius: 4,
-              display: "grid",
-              placeItems: "center",
-              bgcolor: "error.main",
-              color: "error.contrastText",
-              boxShadow: 3,
-              flexShrink: 0,
-            }}
-          >
-            <DeleteOutlineOutlinedIcon />
-          </Box>
-
-          <Box>
-            <Typography
-              variant="h5"
-              component="h2"
-              sx={{ fontWeight: 900, letterSpacing: -0.4 }}
-            >
-              {t.deleteSessionDialog.title}
-            </Typography>
-
-            {sessionTitle && (
-              <Typography color="text.secondary" sx={{ mt: 0.5 }}>
-                {sessionTitle}
-              </Typography>
-            )}
-          </Box>
-        </Stack>
-      </Box>
+      <SessionDialogHeader
+        title={t.deleteSessionDialog.title}
+        description={sessionTitle}
+        icon={<DeleteOutlineOutlinedIcon />}
+        onClose={onClose}
+      />
 
       <DialogContent sx={{ p: { xs: 3, sm: 4 } }}>
         {currentUser && !currentUser.emailVerified ? (
