@@ -674,6 +674,11 @@ export const translations = {
       descriptionEnd: "Alla bokningar för tillfället tas också bort.",
       cancelButton: "Avbryt",
       deleteButton: "Ta bort",
+      eyebrow: "Bokningstillfälle",
+      heading: "Ta bort tillfälle?",
+      consequence:
+        "Alla bokningar för tillfället tas också bort. Detta går inte att ångra.",
+      confirmLabel: "Ta bort tillfälle",
     },
     errors: {
       missingBookingFields: "Namn och email krävs.",
@@ -1381,6 +1386,11 @@ export const translations = {
       descriptionEnd: "All bookings for this session will also be deleted.",
       cancelButton: "Cancel",
       deleteButton: "Delete",
+      eyebrow: "Booking session",
+      heading: "Delete session?",
+      consequence:
+        "All bookings for this session will also be deleted. This cannot be undone.",
+      confirmLabel: "Delete session",
     },
     errors: {
       missingBookingFields: "Name and email are required.",

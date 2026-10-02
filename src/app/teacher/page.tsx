@@ -397,7 +397,7 @@ function TeacherPageContent() {
 
       <DeleteBookingSessionDialog
         open={deleteSessionId !== null}
-        sessionTitle={deleteSession?.title}
+        session={deleteSession ?? null}
         onClose={() => setDeleteSessionId(null)}
         onConfirm={handleConfirmDeleteSession}
       />

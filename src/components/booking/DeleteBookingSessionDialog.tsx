@@ -7,37 +7,109 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
+  IconButton,
   Stack,
+  Typography,
 } from "@mui/material";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
-import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
 import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
+import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
 import { useRouter } from "next/navigation";
+import type { BookingSession } from "@/types/booking";
 import { useAuth } from "@/components/auth/useAuth";
 import { useTranslations } from "@/i18n/useTranslations";
-import SessionDialogHeader from "@/components/booking/SessionDialogHeader";
+
+type DeleteSessionSummary = Pick<
+  BookingSession,
+  "title" | "date" | "startTime" | "endTime"
+>;
 
 type DeleteBookingSessionDialogProps = {
   open: boolean;
-  sessionTitle?: string;
+  session?: DeleteSessionSummary | null;
   onClose: () => void;
   onConfirm: () => void;
 };
 
+const buttonSx = {
+  minHeight: 44,
+  borderRadius: 999,
+  textTransform: "none",
+  fontWeight: 700,
+  px: 2.5,
+} as const;
+
+const cancelButtonSx = {
+  ...buttonSx,
+  color: "text.primary",
+  borderColor: "divider",
+  "&:hover": {
+    borderColor: "text.secondary",
+    bgcolor: "action.hover",
+  },
+} as const;
+
+function parseSessionDate(value?: string): Date | null {
+  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return null;
+  }
+
+  const date = new Date(`${value}T12:00:00Z`);
+
+  if (
+    Number.isNaN(date.getTime()) ||
+    date.toISOString().slice(0, 10) !== value
+  ) {
+    return null;
+  }
+
+  return date;
+}
+
 export default function DeleteBookingSessionDialog({
   open,
-  sessionTitle,
+  session,
   onClose,
   onConfirm,
 }: DeleteBookingSessionDialogProps) {
-  const { t } = useTranslations();
+  const { t, language } = useTranslations();
   const router = useRouter();
   const { user: currentUser } = useAuth();
+
+  const isEmailUnverified = currentUser?.emailVerified === false;
+  const locale = language === "sv" ? "sv-SE" : "en-GB";
+  const sessionDate = parseSessionDate(session?.date);
+
+  const monthLabel = sessionDate
+    ? new Intl.DateTimeFormat(locale, {
+        month: "short",
+        timeZone: "UTC",
+      }).format(sessionDate)
+    : "";
+
+  const dayLabel = sessionDate
+    ? new Intl.DateTimeFormat(locale, {
+        day: "numeric",
+        timeZone: "UTC",
+      }).format(sessionDate)
+    : "";
+
+  const dateLabel = sessionDate
+    ? new Intl.DateTimeFormat(locale, {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+        timeZone: "UTC",
+      }).format(sessionDate)
+    : (session?.date ?? "");
 
   return (
     <Dialog
       open={open}
       onClose={onClose}
+      aria-labelledby="delete-session-heading"
+      aria-describedby="delete-session-description"
       maxWidth="sm"
       fullWidth
       slotProps={{
@@ -54,110 +126,295 @@ export default function DeleteBookingSessionDialog({
         },
       }}
     >
-      <SessionDialogHeader
-        title={t.deleteSessionDialog.title}
-        description={sessionTitle}
-        icon={<DeleteOutlineOutlinedIcon />}
-        onClose={onClose}
-      />
-
-      <DialogContent sx={{ p: { xs: 3, sm: 4 } }}>
-        {currentUser && !currentUser.emailVerified ? (
-          <Stack spacing={3}>
-            <Alert severity="warning" sx={{ borderRadius: 3 }}>
-              {t.auth.teacherEmailVerificationRequired}
-            </Alert>
-
-            <DialogActions
+      <Box
+        sx={{
+          position: "relative",
+          isolation: "isolate",
+          px: { xs: 3, sm: 4 },
+          pt: 3,
+          pb: 2.5,
+          flexShrink: 0,
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            inset: 0,
+            zIndex: -1,
+            background:
+              "linear-gradient(180deg, currentColor 0%, transparent 100%)",
+            color: "primary.main",
+            opacity: 0.045,
+            pointerEvents: "none",
+          },
+        }}
+      >
+        <Stack
+          direction="row"
+          spacing={2}
+          sx={{
+            alignItems: "flex-start",
+            justifyContent: "space-between",
+          }}
+        >
+          <Box sx={{ minWidth: 0 }}>
+            <Typography
+              component="p"
               sx={{
-                px: 0,
-                pt: 1,
-                gap: 1,
-                flexWrap: "wrap",
-                justifyContent: "flex-end",
+                color: "primary.main",
+                fontSize: "0.7rem",
+                fontWeight: 700,
+                textTransform: "uppercase",
+                letterSpacing: 1.1,
+                lineHeight: 1.5,
               }}
             >
-              <Button
-                onClick={onClose}
-                sx={{
-                  borderRadius: 999,
-                  textTransform: "none",
-                  fontWeight: 800,
-                  px: 2.5,
-                }}
-              >
-                {t.deleteSessionDialog.cancelButton}
-              </Button>
+              {t.deleteSessionDialog.eyebrow}
+            </Typography>
 
-              <Button
-                variant="contained"
-                startIcon={<PersonOutlineOutlinedIcon />}
-                onClick={() => router.push("/profile")}
-                sx={{
-                  borderRadius: 999,
-                  textTransform: "none",
-                  fontWeight: 800,
-                  px: 2.5,
-                }}
-              >
-                {t.profile.title}
-              </Button>
-            </DialogActions>
-          </Stack>
+            <Typography
+              id="delete-session-heading"
+              component="h2"
+              sx={{
+                mt: 0.75,
+                fontSize: { xs: "1.4rem", sm: "1.625rem" },
+                fontWeight: 700,
+                letterSpacing: -0.4,
+                lineHeight: 1.3,
+                overflowWrap: "anywhere",
+              }}
+            >
+              {t.deleteSessionDialog.heading}
+            </Typography>
+          </Box>
+
+          <IconButton
+            type="button"
+            onClick={onClose}
+            aria-label={t.common.close}
+            sx={{
+              width: 44,
+              height: 44,
+              flexShrink: 0,
+              color: "text.secondary",
+              "&:hover": {
+                color: "text.primary",
+                bgcolor: "action.hover",
+              },
+            }}
+          >
+            <CloseRoundedIcon />
+          </IconButton>
+        </Stack>
+      </Box>
+
+      <DialogContent
+        sx={{
+          px: { xs: 3, sm: 4 },
+          pt: 0,
+          pb: 3,
+        }}
+      >
+        {isEmailUnverified ? (
+          <Alert
+            id="delete-session-description"
+            severity="warning"
+            sx={{ borderRadius: 3 }}
+          >
+            {t.auth.teacherEmailVerificationRequired}
+          </Alert>
         ) : (
-          <Stack spacing={3}>
-            <Alert
-              severity="warning"
-              icon={<WarningAmberOutlinedIcon />}
-              sx={{ borderRadius: 3 }}
-            >
-              {t.deleteSessionDialog.descriptionStart}{" "}
-              <Box component="span" sx={{ fontWeight: 900 }}>
-                {sessionTitle}
-              </Box>
-              ? {t.deleteSessionDialog.descriptionEnd}
-            </Alert>
+          <Stack spacing={2.5}>
+            {session && (
+              <Box
+                sx={{
+                  p: { xs: 2, sm: 2.5 },
+                  border: 1,
+                  borderColor: "divider",
+                  borderRadius: 3,
+                  position: "relative",
+                  isolation: "isolate",
+                  overflow: "hidden",
+                  "&::before": {
+                    content: '""',
+                    position: "absolute",
+                    inset: 0,
+                    zIndex: -1,
+                    bgcolor: "primary.main",
+                    opacity: 0.035,
+                    pointerEvents: "none",
+                  },
+                }}
+              >
+                <Stack
+                  direction="row"
+                  spacing={2}
+                  sx={{ alignItems: "center" }}
+                >
+                  {sessionDate && (
+                    <Box
+                      aria-hidden="true"
+                      sx={{
+                        width: { xs: 60, sm: 68 },
+                        minHeight: 80,
+                        py: 1.25,
+                        flexShrink: 0,
+                        borderRadius: 2.5,
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: "primary.main",
+                        position: "relative",
+                        isolation: "isolate",
+                        "&::before": {
+                          content: '""',
+                          position: "absolute",
+                          inset: 0,
+                          zIndex: -1,
+                          borderRadius: "inherit",
+                          bgcolor: "primary.main",
+                          opacity: 0.1,
+                        },
+                      }}
+                    >
+                      <Typography
+                        sx={{
+                          fontSize: "0.7rem",
+                          fontWeight: 800,
+                          textTransform: "uppercase",
+                          letterSpacing: 0.7,
+                        }}
+                      >
+                        {monthLabel}
+                      </Typography>
 
-            <DialogActions
+                      <Typography
+                        sx={{
+                          mt: 0.25,
+                          fontSize: "1.8rem",
+                          fontWeight: 800,
+                          lineHeight: 1.1,
+                        }}
+                      >
+                        {dayLabel}
+                      </Typography>
+                    </Box>
+                  )}
+
+                  <Box sx={{ minWidth: 0 }}>
+                    <Typography
+                      component="h3"
+                      sx={{
+                        fontSize: { xs: "1.125rem", sm: "1.25rem" },
+                        fontWeight: 700,
+                        letterSpacing: -0.3,
+                        lineHeight: 1.35,
+                        overflowWrap: "anywhere",
+                      }}
+                    >
+                      {session.title}
+                    </Typography>
+
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ mt: 0.75, overflowWrap: "anywhere" }}
+                    >
+                      {dateLabel}
+                    </Typography>
+
+                    <Stack
+                      direction="row"
+                      spacing={0.75}
+                      sx={{
+                        alignItems: "center",
+                        mt: 0.5,
+                        color: "text.secondary",
+                      }}
+                    >
+                      <AccessTimeOutlinedIcon
+                        sx={{ fontSize: 16, flexShrink: 0 }}
+                      />
+
+                      <Typography
+                        variant="body2"
+                        sx={{ fontVariantNumeric: "tabular-nums" }}
+                      >
+                        {session.startTime}–{session.endTime}
+                      </Typography>
+                    </Stack>
+                  </Box>
+                </Stack>
+              </Box>
+            )}
+
+            <Typography
+              id="delete-session-description"
+              variant="body2"
+              color="text.secondary"
               sx={{
-                px: 0,
-                pt: 1,
-                gap: 1,
-                flexWrap: "wrap",
-                justifyContent: "flex-end",
+                lineHeight: 1.7,
+                overflowWrap: "anywhere",
               }}
             >
-              <Button
-                onClick={onClose}
-                sx={{
-                  borderRadius: 999,
-                  textTransform: "none",
-                  fontWeight: 800,
-                  px: 2.5,
-                }}
-              >
-                {t.deleteSessionDialog.cancelButton}
-              </Button>
-
-              <Button
-                color="error"
-                variant="contained"
-                onClick={onConfirm}
-                startIcon={<DeleteOutlineOutlinedIcon />}
-                sx={{
-                  borderRadius: 999,
-                  textTransform: "none",
-                  fontWeight: 800,
-                  px: 3,
-                  py: 1.1,
-                }}
-              >
-                {t.deleteSessionDialog.deleteButton}
-              </Button>
-            </DialogActions>
+              {t.deleteSessionDialog.consequence}
+            </Typography>
           </Stack>
         )}
       </DialogContent>
+
+      <DialogActions
+        disableSpacing
+        sx={{
+          px: { xs: 3, sm: 4 },
+          pt: 0,
+          pb: 3,
+          gap: 1.5,
+          flexWrap: "wrap",
+          justifyContent: "flex-end",
+        }}
+      >
+        <Button
+          type="button"
+          variant="outlined"
+          onClick={onClose}
+          sx={cancelButtonSx}
+        >
+          {t.deleteSessionDialog.cancelButton}
+        </Button>
+
+        {isEmailUnverified ? (
+          <Button
+            type="button"
+            variant="contained"
+            disableElevation
+            startIcon={<PersonOutlineOutlinedIcon />}
+            onClick={() => router.push("/profile")}
+            sx={buttonSx}
+          >
+            {t.profile.title}
+          </Button>
+        ) : (
+          <Button
+            type="button"
+            color="error"
+            variant="contained"
+            disableElevation
+            disabled={!session}
+            onClick={onConfirm}
+            startIcon={<DeleteOutlineOutlinedIcon />}
+            sx={{
+              ...buttonSx,
+              bgcolor: "#B42318",
+              color: "#FFFFFF",
+              "&:hover": {
+                bgcolor: "#912018",
+              },
+            }}
+          >
+            {t.deleteSessionDialog.confirmLabel}
+          </Button>
+        )}
+      </DialogActions>
     </Dialog>
   );
 }
