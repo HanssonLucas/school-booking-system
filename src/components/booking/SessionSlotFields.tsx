@@ -40,7 +40,7 @@ export default function SessionSlotFields({
     <>
       <TextField
         select
-        label={t.bookingSession.slotDuration}
+        label={t.bookingSession.slotDurationLabel}
         fullWidth
         value={value}
         onChange={(event) => onChange(event.target.value)}
@@ -59,7 +59,7 @@ export default function SessionSlotFields({
       >
         {SLOT_DURATION_OPTIONS.map((duration) => (
           <MenuItem key={duration} value={String(duration)}>
-            {duration} minuter
+            {duration} {t.bookingSession.minutesLabel}
           </MenuItem>
         ))}
       </TextField>

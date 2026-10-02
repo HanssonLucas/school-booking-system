@@ -610,6 +610,8 @@ export const translations = {
       slotsSingular: "bokningsbar tid",
       slotsPlural: "bokningsbara tider",
       minutesPerBooking: "minuter per bokning",
+      slotDurationLabel: "Tid per bokning",
+      minutesLabel: "minuter",
     },
     bookSessionDialog: {
       title: "Boka tid",
@@ -1315,6 +1317,8 @@ export const translations = {
       slotsSingular: "bookable slot",
       slotsPlural: "bookable slots",
       minutesPerBooking: "minutes per booking",
+      slotDurationLabel: "Time per booking",
+      minutesLabel: "minutes",
     },
     bookSessionDialog: {
       title: "Book time",
