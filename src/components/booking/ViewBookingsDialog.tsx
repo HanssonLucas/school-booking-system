@@ -36,7 +36,9 @@ export default function ViewBookingsDialog({
   onClose,
 }: ViewBookingsDialogProps) {
   const [bookings, setBookings] = useState<BookingWithSlotTime[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [loadAttempt, setLoadAttempt] = useState(0);
 
   const router = useRouter();
   const { user: currentUser } = useAuth();
@@ -57,30 +59,59 @@ export default function ViewBookingsDialog({
       return;
     }
 
+    const controller = new AbortController();
+
     const fetchBookings = async () => {
       setIsLoading(true);
+      setLoadFailed(false);
 
       try {
-        const response = await fetch(`/api/bookings?sessionId=${session.id}`);
+        const response = await fetch(`/api/bookings?sessionId=${session.id}`, {
+          cache: "no-store",
+          signal: controller.signal,
+        });
 
         if (!response.ok) {
-          console.error("Kunde inte hämta bokningar");
-          return;
+          throw new Error("Could not load bookings");
         }
 
         const data: BookingWithSlotTime[] = await response.json();
-        setBookings(data);
+
+        if (!Array.isArray(data)) {
+          throw new Error("Invalid bookings response");
+        }
+
+        if (!controller.signal.aborted) {
+          setBookings(data);
+        }
+      } catch {
+        if (!controller.signal.aborted) {
+          setBookings([]);
+          setLoadFailed(true);
+        }
       } finally {
-        setIsLoading(false);
+        if (!controller.signal.aborted) {
+          setIsLoading(false);
+        }
       }
     };
 
     void fetchBookings();
-  }, [open, session, currentUser?.emailVerified]);
+
+    return () => controller.abort();
+  }, [open, session, currentUser?.emailVerified, loadAttempt]);
 
   const handleClose = () => {
     setBookings([]);
+    setLoadFailed(false);
+    setIsLoading(true);
     onClose();
+  };
+
+  const handleRetry = () => {
+    setLoadFailed(false);
+    setIsLoading(true);
+    setLoadAttempt((attempt) => attempt + 1);
   };
 
   const isEmailUnverified = currentUser?.emailVerified === false;
@@ -169,6 +200,26 @@ export default function ViewBookingsDialog({
           <Alert severity="info" sx={{ borderRadius: 3 }}>
             {t.bookingsDialog.loading}
           </Alert>
+        ) : loadFailed ? (
+          <Stack spacing={2} sx={{ alignItems: "flex-start" }}>
+            <Alert severity="error" sx={{ borderRadius: 3, width: "100%" }}>
+              {t.bookingsDialog.loadFailed}
+            </Alert>
+
+            <Button
+              variant="outlined"
+              onClick={handleRetry}
+              sx={{
+                borderRadius: 999,
+                textTransform: "none",
+                fontWeight: 700,
+                minHeight: 44,
+                px: 2.5,
+              }}
+            >
+              {t.bookingsDialog.retry}
+            </Button>
+          </Stack>
         ) : bookings.length === 0 ? (
           <Stack
             spacing={1}

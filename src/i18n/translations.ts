@@ -649,6 +649,8 @@ export const translations = {
       emptyTitle: "Inga bokningar ännu",
       emptyDescription:
         "Här visas deltagare och deras bokade tider när det finns bokningar.",
+      loadFailed: "Det gick inte att hämta bokningarna. Försök igen.",
+      retry: "Försök igen",
     },
     myBookingsDialog: {
       openButton: "Hitta mina bokningar",
@@ -1362,6 +1364,8 @@ export const translations = {
       emptyTitle: "No bookings yet",
       emptyDescription:
         "Participants and their booked times will appear here when bookings are available.",
+      loadFailed: "Could not load the bookings. Please try again.",
+      retry: "Try again",
     },
     myBookingsDialog: {
       openButton: "Find my bookings",
