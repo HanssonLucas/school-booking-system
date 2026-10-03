@@ -1,116 +1,40 @@
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useState } from "react";
 import {
   Alert,
   Box,
   Button,
   CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
   Paper,
   Stack,
-  TextField,
   Typography,
 } from "@mui/material";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
-import ContentCopyOutlinedIcon from "@mui/icons-material/ContentCopyOutlined";
 import ClassOverviewDialog from "@/components/classes/ClassOverviewDialog";
-import ClassDialogHeader, {
-  classButtonSx,
-  classDialogPaperSx,
-} from "./ClassDialogHeader";
+import { classButtonSx } from "./ClassDialogHeader";
 import ClassesHelpDialog from "./ClassesHelpDialog";
 import HelpOutlineRoundedIcon from "@mui/icons-material/HelpOutlineRounded";
-import TeacherClassCard, {
-  type TeacherClassCardData,
-} from "./TeacherClassCard";
+import TeacherClassCard from "./TeacherClassCard";
 import DeleteClassDialog from "./DeleteClassDialog";
 import RenameClassDialog from "./RenameClassDialog";
 import RegenerateClassCodeDialog from "./RegenerateClassCodeDialog";
 import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
 import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
 import { useTranslations } from "@/i18n/useTranslations";
+import CreateClassDialog from "./CreateClassDialog";
+import {
+  getErrorKey,
+  isRecord,
+  isSchoolClass,
+  type ErrorKey,
+  type SchoolClass,
+} from "@/lib/classValidation";
 
-type SchoolClass = TeacherClassCardData & {
-  designation: string | null;
-  description: string | null;
-};
-type ErrorKey =
-  | "loadFailed"
-  | "createFailed"
-  | "invalidName"
-  | "invalidDesignation"
-  | "invalidDescription"
-  | "unauthorized"
-  | "forbidden"
-  | "verificationRequired";
 type LoadState =
   | { status: "loading" }
   | { status: "error"; error: ErrorKey }
   | { status: "ready"; classes: SchoolClass[] };
-type CreatedClass = { schoolClass: SchoolClass; joinCode: string };
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
-
-const isNextSession = (
-  value: unknown,
-): value is NonNullable<SchoolClass["nextSession"]> =>
-  isRecord(value) &&
-  typeof value.id === "number" &&
-  Number.isSafeInteger(value.id) &&
-  value.id > 0 &&
-  typeof value.title === "string" &&
-  typeof value.date === "string" &&
-  /^\d{4}-\d{2}-\d{2}$/.test(value.date) &&
-  typeof value.startTime === "string" &&
-  /^([01]\d|2[0-3]):[0-5]\d$/.test(value.startTime) &&
-  typeof value.endTime === "string" &&
-  /^([01]\d|2[0-3]):[0-5]\d$/.test(value.endTime);
-
-const isSchoolClass = (value: unknown): value is SchoolClass =>
-  isRecord(value) &&
-  typeof value.id === "number" &&
-  Number.isSafeInteger(value.id) &&
-  value.id > 0 &&
-  typeof value.name === "string" &&
-  (value.designation === null ||
-    (typeof value.designation === "string" &&
-      value.designation.length <= 40)) &&
-  (value.description === null ||
-    (typeof value.description === "string" &&
-      value.description.length <= 500)) &&
-  typeof value.studentCount === "number" &&
-  Number.isSafeInteger(value.studentCount) &&
-  value.studentCount >= 0 &&
-  typeof value.upcomingSessionCount === "number" &&
-  Number.isSafeInteger(value.upcomingSessionCount) &&
-  value.upcomingSessionCount >= 0 &&
-  (value.upcomingSessionCount === 0
-    ? value.nextSession === null
-    : isNextSession(value.nextSession));
-
-const getErrorKey = (body: unknown, fallback: ErrorKey): ErrorKey => {
-  const code = isRecord(body) ? body.code : undefined;
-  switch (code) {
-    case "INVALID_CLASS_NAME":
-      return "invalidName";
-    case "INVALID_CLASS_DESIGNATION":
-      return "invalidDesignation";
-    case "INVALID_CLASS_DESCRIPTION":
-      return "invalidDescription";
-    case "UNAUTHORIZED":
-      return "unauthorized";
-    case "FORBIDDEN":
-      return "forbidden";
-    case "EMAIL_NOT_VERIFIED":
-      return "verificationRequired";
-    default:
-      return fallback;
-  }
-};
 
 export default function TeacherClassesSection() {
   const { t, language } = useTranslations();
@@ -124,16 +48,6 @@ export default function TeacherClassesSection() {
   const [selectedClass, setSelectedClass] = useState<SchoolClass | null>(null);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [name, setName] = useState("");
-  const [designation, setDesignation] = useState("");
-  const [description, setDescription] = useState("");
-  const [isCreating, setIsCreating] = useState(false);
-  const submitting = useRef(false);
-  const [error, setError] = useState<ErrorKey | null>(null);
-  const [created, setCreated] = useState<CreatedClass | null>(null);
-  const [copyStatus, setCopyStatus] = useState<"idle" | "copied" | "failed">(
-    "idle",
-  );
 
   useEffect(() => {
     const controller = new AbortController();
@@ -169,90 +83,6 @@ export default function TeacherClassesSection() {
     void loadClasses();
     return () => controller.abort();
   }, [loadAttempt]);
-
-  const openDialog = () => {
-    setName("");
-    setDesignation("");
-    setDescription("");
-    setError(null);
-    setCreated(null);
-    setCopyStatus("idle");
-    setIsOpen(true);
-  };
-
-  const closeDialog = () => {
-    if (submitting.current) return;
-    setIsOpen(false);
-    setCreated(null);
-    setCopyStatus("idle");
-  };
-
-  const handleCreate = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (submitting.current || created || loadState.status !== "ready") return;
-    const trimmedName = name.trim();
-    if (!trimmedName || trimmedName.length > 100) {
-      setError("invalidName");
-      return;
-    }
-    if (designation.trim().length > 40) {
-      setError("invalidDesignation");
-      return;
-    }
-    if (description.trim().length > 500) {
-      setError("invalidDescription");
-      return;
-    }
-    submitting.current = true;
-    setIsCreating(true);
-    setError(null);
-    try {
-      const response = await fetch("/api/classes", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: trimmedName,
-          designation: designation.trim() || null,
-          description: description.trim() || null,
-        }),
-      });
-      const body: unknown = await response.json();
-      if (!response.ok) {
-        setError(getErrorKey(body, "createFailed"));
-        return;
-      }
-      if (
-        !isRecord(body) ||
-        !isSchoolClass(body.schoolClass) ||
-        typeof body.joinCode !== "string" ||
-        !/^[A-F0-9]{16}$/.test(body.joinCode)
-      ) {
-        throw new Error("Invalid create class response");
-      }
-      const schoolClass = body.schoolClass;
-      setCreated({ schoolClass, joinCode: body.joinCode });
-      setLoadState((current) =>
-        current.status === "ready"
-          ? { status: "ready", classes: [...current.classes, schoolClass] }
-          : current,
-      );
-    } catch {
-      setError("createFailed");
-    } finally {
-      submitting.current = false;
-      setIsCreating(false);
-    }
-  };
-
-  const copyCode = async () => {
-    if (!created) return;
-    try {
-      await navigator.clipboard.writeText(created.joinCode);
-      setCopyStatus("copied");
-    } catch {
-      setCopyStatus("failed");
-    }
-  };
 
   const totalStudents =
     loadState.status === "ready"
@@ -402,7 +232,7 @@ export default function TeacherClassesSection() {
               disableElevation
               startIcon={<AddRoundedIcon />}
               disabled={loadState.status !== "ready"}
-              onClick={openDialog}
+              onClick={() => setIsOpen(true)}
               sx={{
                 ...classButtonSx,
                 flexShrink: 0,
@@ -553,162 +383,21 @@ export default function TeacherClassesSection() {
           />
         )}
 
-        <Dialog
-          open={isOpen}
-          maxWidth="sm"
-          fullWidth
-          aria-labelledby="create-class-heading"
-          onClose={() => {
-            if (!created) closeDialog();
-          }}
-          slotProps={{ paper: { sx: classDialogPaperSx } }}
-        >
-          <Box component="form" onSubmit={handleCreate}>
-            <ClassDialogHeader
-              id="create-class-heading"
-              title={created ? text.created : text.create}
-              description={text.description}
-              icon={<SchoolOutlinedIcon />}
-            />
-            <DialogContent sx={{ p: { xs: 3, sm: 4 } }}>
-              <Stack spacing={3} sx={{ pt: 1 }}>
-                {error && (
-                  <Alert sx={{ borderRadius: 3 }} severity="error">
-                    {text[error]}
-                  </Alert>
-                )}
-                {created ? (
-                  <>
-                    <Typography
-                      sx={{ fontWeight: 750, overflowWrap: "anywhere" }}
-                    >
-                      {created.schoolClass.name}
-                    </Typography>
-                    <Alert sx={{ borderRadius: 3 }} severity="info">
-                      {text.codeNotice}
-                    </Alert>
-                    <TextField
-                      label={text.codeLabel}
-                      value={created.joinCode}
-                      fullWidth
-                      slotProps={{ input: { readOnly: true } }}
-                      onFocus={(event) => event.target.select()}
-                    />
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      sx={classButtonSx}
-                      startIcon={<ContentCopyOutlinedIcon />}
-                      onClick={copyCode}
-                    >
-                      {copyStatus === "copied" ? text.copied : text.copy}
-                    </Button>
-                    {copyStatus === "failed" && (
-                      <Alert sx={{ borderRadius: 3 }} severity="warning">
-                        {text.copyFailed}
-                      </Alert>
-                    )}
-                  </>
-                ) : (
-                  <>
-                    <TextField
-                      autoFocus
-                      label={text.nameLabel}
-                      helperText={text.nameHelper}
-                      value={name}
-                      required
-                      fullWidth
-                      disabled={isCreating}
-                      error={error === "invalidName"}
-                      slotProps={{ htmlInput: { maxLength: 100 } }}
-                      onChange={(event) => {
-                        setName(event.target.value);
-                        setError(null);
-                      }}
-                    />
-                    <TextField
-                      label={text.designationLabel}
-                      placeholder="FE25-LINK"
-                      helperText={text.designationHelper}
-                      value={designation}
-                      fullWidth
-                      disabled={isCreating}
-                      error={error === "invalidDesignation"}
-                      slotProps={{ htmlInput: { maxLength: 40 } }}
-                      onChange={(event) => {
-                        setDesignation(event.target.value);
-                        setError(null);
-                      }}
-                    />
-                    <TextField
-                      label={text.detailsDescriptionLabel}
-                      helperText={`${text.detailsDescriptionHelper} ${description.length}/500`}
-                      value={description}
-                      fullWidth
-                      multiline
-                      minRows={3}
-                      maxRows={6}
-                      disabled={isCreating}
-                      error={error === "invalidDescription"}
-                      slotProps={{ htmlInput: { maxLength: 500 } }}
-                      onChange={(event) => {
-                        setDescription(event.target.value);
-                        setError(null);
-                      }}
-                    />
-                  </>
-                )}
-              </Stack>
-            </DialogContent>
-            <DialogActions
-              sx={{
-                px: { xs: 3, sm: 4 },
-                pb: { xs: 3, sm: 4 },
-                pt: 0,
-                gap: 1,
-                flexWrap: "wrap",
-              }}
-            >
-              {created ? (
-                <Button
-                  variant="contained"
-                  color="primary"
-                  sx={classButtonSx}
-                  onClick={closeDialog}
-                >
-                  {text.done}
-                </Button>
-              ) : (
-                <>
-                  <Button
-                    color="primary"
-                    sx={classButtonSx}
-                    disabled={isCreating}
-                    onClick={closeDialog}
-                  >
-                    {text.cancel}
-                  </Button>
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    color="primary"
-                    sx={classButtonSx}
-                    startIcon={<AddRoundedIcon />}
-                    disabled={
-                      isCreating ||
-                      !name.trim() ||
-                      name.trim().length > 100 ||
-                      designation.trim().length > 40 ||
-                      description.trim().length > 500
+        {isOpen && (
+          <CreateClassDialog
+            onClose={() => setIsOpen(false)}
+            onCreated={(schoolClass) => {
+              setLoadState((current) =>
+                current.status === "ready"
+                  ? {
+                      status: "ready",
+                      classes: [...current.classes, schoolClass],
                     }
-                  >
-                    {isCreating ? text.creating : text.create}
-                  </Button>
-                </>
-              )}
-            </DialogActions>
-          </Box>
-        </Dialog>
+                  : current,
+              );
+            }}
+          />
+        )}
       </Box>
     </Box>
   );
