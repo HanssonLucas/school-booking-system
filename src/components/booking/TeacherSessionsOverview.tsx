@@ -7,9 +7,6 @@ import {
   Box,
   Button,
   Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
   InputAdornment,
   IconButton,
   Menu,
@@ -49,9 +46,7 @@ import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
 import RestartAltRoundedIcon from "@mui/icons-material/RestartAltRounded";
 import { alpha } from "@mui/material/styles";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
-import ClassDialogHeader, {
-  classDialogPaperSx,
-} from "@/components/classes/ClassDialogHeader";
+import HowItWorksDialog from "@/components/common/HowItWorksDialog";
 
 const buttonSx = {
   borderRadius: 999,
@@ -931,100 +926,32 @@ export default function TeacherSessionsOverview({
           )}
         </Box>
       </Box>
-      <Dialog
+      <HowItWorksDialog
         open={helpOpen}
         onClose={() => setHelpOpen(false)}
-        fullWidth
-        maxWidth="sm"
-        scroll="paper"
-        aria-labelledby={`${id}-help`}
-        slotProps={{
-          paper: { sx: classDialogPaperSx },
-        }}
-      >
-        <ClassDialogHeader
-          id={`${id}-help`}
-          title={text.helpTitle}
-          icon={<HelpOutlineRoundedIcon />}
-        />
-        <DialogContent sx={{ p: { xs: 3, sm: 4 } }}>
-          <Stack
-            component="ul"
-            spacing={3}
-            sx={{ listStyle: "none", m: 0, p: 0 }}
-          >
-            {[
-              {
-                title: text.helpCreateTitle,
-                description: text.helpCreate,
-                icon: <EventOutlinedIcon />,
-              },
-              {
-                title: text.helpFilterTitle,
-                description: text.helpFilter,
-                icon: <SearchOutlinedIcon />,
-              },
-              {
-                title: text.helpManageTitle,
-                description: text.helpManage,
-                icon: <SettingsOutlinedIcon />,
-              },
-            ].map(({ title, description, icon }) => (
-              <Stack
-                component="li"
-                direction="row"
-                spacing={2}
-                key={title}
-                sx={{ alignItems: "flex-start" }}
-              >
-                <Box
-                  sx={{
-                    width: 40,
-                    height: 40,
-                    flexShrink: 0,
-                    borderRadius: 2.5,
-                    display: "grid",
-                    placeItems: "center",
-                    bgcolor: "action.hover",
-                    color: "primary.main",
-                  }}
-                >
-                  {icon}
-                </Box>
-                <Box sx={{ minWidth: 0 }}>
-                  <Typography
-                    component="h3"
-                    variant="subtitle1"
-                    sx={{ fontWeight: 800, mb: 0.5 }}
-                  >
-                    {title}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{ lineHeight: 1.7 }}
-                  >
-                    {description}
-                  </Typography>
-                </Box>
-              </Stack>
-            ))}
-          </Stack>
-        </DialogContent>
-        <DialogActions
-          sx={{ px: { xs: 3, sm: 4 }, pb: { xs: 3, sm: 4 }, pt: 2 }}
-        >
-          <Button
-            autoFocus
-            onClick={() => setHelpOpen(false)}
-            variant="contained"
-            disableElevation
-            sx={buttonSx}
-          >
-            {t.common.close}
-          </Button>
-        </DialogActions>
-      </Dialog>
+        eyebrow={text.help}
+        title={text.helpTitle}
+        items={[
+          {
+            id: "create",
+            icon: <EventOutlinedIcon />,
+            title: text.helpCreateTitle,
+            description: text.helpCreate,
+          },
+          {
+            id: "filter",
+            icon: <SearchOutlinedIcon />,
+            title: text.helpFilterTitle,
+            description: text.helpFilter,
+          },
+          {
+            id: "manage",
+            icon: <SettingsOutlinedIcon />,
+            title: text.helpManageTitle,
+            description: text.helpManage,
+          },
+        ]}
+      />
     </>
   );
 }
