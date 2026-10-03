@@ -22,6 +22,7 @@ import { useRouter } from "next/navigation";
 import type { BookingSession, BookingWithSlotTime } from "@/types/booking";
 import { useAuth } from "@/components/auth/useAuth";
 import { useTranslations } from "@/i18n/useTranslations";
+import BookingDialogHeader from "@/components/booking/BookingDialogHeader";
 
 type ViewBookingsDialogProps = {
   open: boolean;
@@ -88,6 +89,7 @@ export default function ViewBookingsDialog({
     <Dialog
       open={open}
       onClose={handleClose}
+      aria-labelledby="view-bookings-heading"
       maxWidth={isEmailUnverified ? "sm" : "md"}
       fullWidth
       slotProps={{
@@ -104,130 +106,23 @@ export default function ViewBookingsDialog({
         },
       }}
     >
-      <Box
-        sx={{
-          px: { xs: 2.5, sm: 3 },
-          py: 2.5,
-          position: "relative",
-          isolation: "isolate",
-          borderBottom: 1,
-          borderColor: "divider",
-          "&::before": {
-            content: '""',
-            position: "absolute",
-            inset: 0,
-            zIndex: -1,
-            bgcolor: "primary.main",
-            opacity: 0.06,
-            pointerEvents: "none",
-          },
-        }}
-      >
-        <Stack
-          direction="row"
-          spacing={{ xs: 2, sm: 2.5 }}
-          sx={{ alignItems: "center" }}
-        >
-          {session && (
-            <Box
-              sx={{
-                width: { xs: 64, sm: 72 },
-                flexShrink: 0,
-                py: 1,
-                borderRadius: 3,
-                textAlign: "center",
-                color: "primary.main",
-                position: "relative",
-                isolation: "isolate",
-                "&::before": {
-                  content: '""',
-                  position: "absolute",
-                  inset: 0,
-                  zIndex: -1,
-                  borderRadius: "inherit",
-                  bgcolor: "primary.main",
-                  opacity: 0.1,
-                },
-              }}
-            >
-              <Typography
-                sx={{
-                  fontSize: "0.75rem",
-                  fontWeight: 800,
-                  textTransform: "uppercase",
-                  letterSpacing: 0.8,
-                }}
-              >
-                {formatDatePart({ month: "short" })}
-              </Typography>
+      <BookingDialogHeader
+        id="view-bookings-heading"
+        eyebrow={t.bookingsDialog.title}
+        title={session?.title ?? t.bookingsDialog.title}
+        description={
+          session
+            ? `${formatDatePart({
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })} · ${session.startTime.slice(0, 5)}–${session.endTime.slice(0, 5)}`
+            : undefined
+        }
+        onClose={handleClose}
+      />
 
-              <Typography
-                sx={{
-                  fontSize: { xs: "1.8rem", sm: "2.2rem" },
-                  fontWeight: 900,
-                  lineHeight: 1.15,
-                  my: 0.25,
-                }}
-              >
-                {formatDatePart({ day: "numeric" })}
-              </Typography>
-
-              <Typography variant="caption" color="text.secondary">
-                {formatDatePart({ year: "numeric" })}
-              </Typography>
-            </Box>
-          )}
-
-          <Box sx={{ minWidth: 0 }}>
-            {session && (
-              <Typography
-                sx={{
-                  color: "primary.main",
-                  fontSize: "0.75rem",
-                  fontWeight: 800,
-                  letterSpacing: 1,
-                  textTransform: "uppercase",
-                  mb: 0.75,
-                }}
-              >
-                {t.bookingsDialog.title}
-              </Typography>
-            )}
-
-            <Typography
-              component="h2"
-              sx={{
-                fontSize: { xs: "1.4rem", sm: "1.75rem" },
-                fontWeight: 900,
-                letterSpacing: -0.4,
-                lineHeight: 1.25,
-                overflowWrap: "anywhere",
-              }}
-            >
-              {session?.title ?? t.bookingsDialog.title}
-            </Typography>
-
-            {session && (
-              <Stack
-                direction="row"
-                spacing={0.75}
-                sx={{
-                  alignItems: "center",
-                  color: "text.secondary",
-                  mt: 1,
-                }}
-              >
-                <AccessTimeOutlinedIcon sx={{ fontSize: 18 }} />
-                <Typography variant="body2">
-                  {session.startTime.slice(0, 5)}–{session.endTime.slice(0, 5)}
-                </Typography>
-              </Stack>
-            )}
-          </Box>
-        </Stack>
-      </Box>
-
-      <DialogContent sx={{ px: { xs: 2.5, sm: 3 }, py: 2.5 }}>
+      <DialogContent sx={{ px: { xs: 2.5, sm: 4 }, py: 2.5 }}>
         {isEmailUnverified ? (
           <Stack spacing={3}>
             <Alert severity="warning" sx={{ borderRadius: 3 }}>
@@ -521,8 +416,8 @@ export default function ViewBookingsDialog({
       {!isEmailUnverified && (
         <DialogActions
           sx={{
-            px: { xs: 2.5, sm: 3 },
-            pb: 2,
+            px: { xs: 2.5, sm: 4 },
+            pb: 3,
             pt: 0,
           }}
         >
