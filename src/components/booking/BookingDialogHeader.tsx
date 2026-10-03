@@ -9,7 +9,8 @@ type BookingDialogHeaderProps = {
   eyebrow: string;
   title: string;
   description?: string;
-  onClose: () => void;
+  onClose?: () => void;
+  compact?: boolean;
 };
 
 export default function BookingDialogHeader({
@@ -18,6 +19,7 @@ export default function BookingDialogHeader({
   title,
   description,
   onClose,
+  compact = false,
 }: BookingDialogHeaderProps) {
   const { t } = useTranslations();
 
@@ -26,10 +28,10 @@ export default function BookingDialogHeader({
       sx={{
         position: "relative",
         isolation: "isolate",
-        px: { xs: 3, sm: 4 },
-        pt: 3,
-        pb: 2.5,
         flexShrink: 0,
+        px: { xs: 2.5, sm: 4 },
+        pt: compact ? 3 : { xs: 3, sm: 4 },
+        pb: 1,
         "&::before": {
           content: '""',
           position: "absolute",
@@ -38,14 +40,14 @@ export default function BookingDialogHeader({
           background:
             "linear-gradient(180deg, currentColor 0%, transparent 100%)",
           color: "primary.main",
-          opacity: 0.045,
+          opacity: 0.09,
           pointerEvents: "none",
         },
       }}
     >
       <Stack
         direction="row"
-        spacing={2}
+        spacing={{ xs: 1, sm: 2 }}
         sx={{
           alignItems: "flex-start",
           justifyContent: "space-between",
@@ -56,10 +58,10 @@ export default function BookingDialogHeader({
             component="p"
             sx={{
               color: "primary.main",
-              fontSize: "0.7rem",
-              fontWeight: 700,
+              fontSize: "0.72rem",
+              fontWeight: 800,
               textTransform: "uppercase",
-              letterSpacing: 1.1,
+              letterSpacing: 1.3,
               lineHeight: 1.5,
             }}
           >
@@ -70,11 +72,13 @@ export default function BookingDialogHeader({
             id={id}
             component="h2"
             sx={{
-              mt: 0.75,
-              fontSize: { xs: "1.4rem", sm: "1.625rem" },
-              fontWeight: 700,
-              letterSpacing: -0.4,
-              lineHeight: 1.3,
+              mt: 1,
+              fontSize: compact
+                ? { xs: "1.5rem", sm: "1.75rem" }
+                : { xs: "1.625rem", sm: "2rem" },
+              fontWeight: 800,
+              letterSpacing: -0.6,
+              lineHeight: 1.2,
               overflowWrap: "anywhere",
             }}
           >
@@ -86,8 +90,9 @@ export default function BookingDialogHeader({
               variant="body2"
               color="text.secondary"
               sx={{
-                mt: 1,
-                lineHeight: 1.7,
+                mt: 1.25,
+                maxWidth: "60ch",
+                lineHeight: 1.65,
                 overflowWrap: "anywhere",
               }}
             >
@@ -96,23 +101,25 @@ export default function BookingDialogHeader({
           )}
         </Box>
 
-        <IconButton
-          type="button"
-          onClick={onClose}
-          aria-label={t.common.close}
-          sx={{
-            width: 44,
-            height: 44,
-            flexShrink: 0,
-            color: "text.secondary",
-            "&:hover": {
-              color: "text.primary",
-              bgcolor: "action.hover",
-            },
-          }}
-        >
-          <CloseRoundedIcon />
-        </IconButton>
+        {onClose && (
+          <IconButton
+            type="button"
+            onClick={onClose}
+            aria-label={t.common.close}
+            sx={{
+              width: 44,
+              height: 44,
+              flexShrink: 0,
+              color: "text.secondary",
+              "&:hover": {
+                color: "text.primary",
+                bgcolor: "action.hover",
+              },
+            }}
+          >
+            <CloseRoundedIcon />
+          </IconButton>
+        )}
       </Stack>
     </Box>
   );

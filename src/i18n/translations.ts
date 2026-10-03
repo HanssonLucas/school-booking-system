@@ -612,6 +612,7 @@ export const translations = {
       minutesPerBooking: "minuter per bokning",
       slotDurationLabel: "Tid per bokning",
       minutesLabel: "minuter",
+      dialogEyebrow: "Bokningstillfälle",
     },
     bookSessionDialog: {
       title: "Boka tid",
@@ -1324,6 +1325,7 @@ export const translations = {
       minutesPerBooking: "minutes per booking",
       slotDurationLabel: "Time per booking",
       minutesLabel: "minutes",
+      dialogEyebrow: "Booking session",
     },
     bookSessionDialog: {
       title: "Book time",

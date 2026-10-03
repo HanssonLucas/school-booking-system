@@ -126,6 +126,7 @@ export default function DeleteBookingSessionDialog({
       }}
     >
       <BookingDialogHeader
+        compact
         id="delete-session-heading"
         eyebrow={t.deleteSessionDialog.eyebrow}
         title={t.deleteSessionDialog.heading}

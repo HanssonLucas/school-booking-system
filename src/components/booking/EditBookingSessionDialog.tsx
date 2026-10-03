@@ -18,7 +18,7 @@ import type { BookingSession } from "@/types/booking";
 import { useTranslations } from "@/i18n/useTranslations";
 import { getSlotCount } from "@/lib/bookingSlots";
 import { useAuth } from "@/components/auth/useAuth";
-import SessionDialogHeader from "@/components/booking/SessionDialogHeader";
+import BookingDialogHeader from "@/components/booking/BookingDialogHeader";
 import SessionDetailsFields from "@/components/booking/SessionDetailsField";
 import SessionDateTimeFields from "@/components/booking/SessionDateTimeFields";
 import SessionSlotFields from "@/components/booking/SessionSlotFields";
@@ -122,6 +122,7 @@ function EditBookingSessionDialogContent({
     <Dialog
       open={open}
       onClose={onClose}
+      aria-labelledby="edit-session-heading"
       maxWidth={currentUser?.emailVerified === false ? "sm" : "md"}
       fullWidth
       slotProps={{
@@ -138,10 +139,11 @@ function EditBookingSessionDialogContent({
         },
       }}
     >
-      <SessionDialogHeader
+      <BookingDialogHeader
+        id="edit-session-heading"
+        eyebrow={t.bookingSession.dialogEyebrow}
         title={t.editSessionDialog.title}
         description={t.bookingSession.formDescription}
-        icon={<EditOutlinedIcon />}
         onClose={onClose}
       />
 

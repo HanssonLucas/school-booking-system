@@ -15,7 +15,7 @@ import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import type { CreateBookingSessionInput } from "@/types/booking";
 import { useTranslations } from "@/i18n/useTranslations";
 import { getSlotCount } from "@/lib/bookingSlots";
-import SessionDialogHeader from "@/components/booking/SessionDialogHeader";
+import BookingDialogHeader from "@/components/booking/BookingDialogHeader";
 import SessionDetailsFields from "@/components/booking/SessionDetailsField";
 import SessionDateTimeFields from "@/components/booking/SessionDateTimeFields";
 import SessionSlotFields from "@/components/booking/SessionSlotFields";
@@ -250,10 +250,11 @@ export default function CreateBookingSessionForm({
 
   return (
     <Box>
-      <SessionDialogHeader
+      <BookingDialogHeader
+        id="create-session-heading"
+        eyebrow={t.bookingSession.dialogEyebrow}
         title={t.createSessionForm.title}
         description={t.bookingSession.formDescription}
-        icon={<AddRoundedIcon />}
         onClose={onClose}
       />
 

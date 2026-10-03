@@ -11,7 +11,6 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import AppHeader from "@/components/layout/AppHeader";
 import CreateBookingSessionForm from "@/components/booking/CreateBookingSessionForm";
 import EditBookingSessionDialog, {
@@ -29,7 +28,7 @@ import type {
 import ViewBookingsDialog from "@/components/booking/ViewBookingsDialog";
 import DeleteBookingSessionDialog from "@/components/booking/DeleteBookingSessionDialog";
 import TeacherRouteGuard from "@/components/auth/TeacherRouteGuard";
-import SessionDialogHeader from "@/components/booking/SessionDialogHeader";
+import BookingDialogHeader from "@/components/booking/BookingDialogHeader";
 
 type TeacherSession = BookingSession & { classId: number };
 
@@ -303,6 +302,7 @@ function TeacherPageContent() {
       <Dialog
         open={isCreateDialogOpen}
         onClose={closeCreateDialog}
+        aria-labelledby="create-session-heading"
         maxWidth={currentUser?.emailVerified === false ? "sm" : "md"}
         fullWidth
         slotProps={{
@@ -321,9 +321,10 @@ function TeacherPageContent() {
       >
         {currentUser && !currentUser.emailVerified ? (
           <>
-            <SessionDialogHeader
+            <BookingDialogHeader
+              id="create-session-heading"
+              eyebrow={t.bookingSession.dialogEyebrow}
               title={t.teacher.createSessionButton}
-              icon={<AddRoundedIcon />}
               onClose={closeCreateDialog}
             />
 
