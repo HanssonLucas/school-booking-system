@@ -415,6 +415,7 @@ export const translations = {
         deleteTitle: "Ta bort en tom klass",
         deleteDescription:
           "Välj Ta bort klass i trepunktsmenyn och bekräfta. Klassen måste sakna både elever och bokningstillfällen. Borttagningen kan inte ångras.",
+        eyebrow: "Så fungerar det",
       },
 
       classSingular: "klass",
@@ -1129,6 +1130,7 @@ export const translations = {
         deleteTitle: "Delete an empty class",
         deleteDescription:
           "Choose Delete class in the three-dot menu and confirm. The class must have no students or booking sessions. Deletion cannot be undone.",
+        eyebrow: "How it works",
       },
 
       classSingular: "class",
